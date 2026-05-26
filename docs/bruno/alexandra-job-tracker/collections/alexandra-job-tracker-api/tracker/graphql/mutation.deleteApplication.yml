@@ -1,0 +1,32 @@
+info:
+  name: mutation.deleteApplication
+  type: graphql
+  seq: 6
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      mutation($id: ID!) { 
+        deleteApplication(id: $id)
+      }
+    variables: |-
+      {
+         "id": "{{randomId}}"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: randomId
+      value: 94a9f56d-6457-446e-9614-b9981e2aa761
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

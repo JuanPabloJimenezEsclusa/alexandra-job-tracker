@@ -1,0 +1,7 @@
+info:
+  name: beans
+  type: folder
+  seq: 14
+
+request:
+  auth: inherit

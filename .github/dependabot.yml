@@ -1,0 +1,22 @@
+version: 2
+updates:
+  - package-ecosystem: maven
+    directory: "/"
+    schedule: { interval: weekly, day: monday }
+    open-pull-requests-limit: 10
+    labels: [ dependencies, automated ]
+    groups:
+      spring:
+        patterns: [ "org.springframework.*", "org.springframework.boot*" ]
+      testing:
+        patterns: [ "org.junit.*", "org.mockito*", "org.testcontainers*" ]
+      otel:
+        patterns: [ "io.opentelemetry*", "io.micrometer*" ]
+  - package-ecosystem: docker
+    directory: "/deploy/compose"
+    schedule: { interval: weekly }
+    labels: [ dependencies, automated ]
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule: { interval: weekly }
+    labels: [ ci, automated ]

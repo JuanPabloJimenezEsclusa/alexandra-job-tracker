@@ -1,0 +1,35 @@
+info:
+  name: query.resumes
+  type: graphql
+  seq: 14
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      query {
+        resumes {
+          id, fileName, content, isBaseVersion, tailoredForJobId, createdAt
+        }
+      }
+    variables: |-
+      {
+      }
+  auth: inherit
+
+runtime:
+  scripts:
+    - type: before-request
+      code: |-
+        const randomId = Math.floor(Math.random() * 100) + 1;
+        bru.setVar("randomProductId", randomId);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

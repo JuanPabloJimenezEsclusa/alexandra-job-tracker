@@ -1,0 +1,10 @@
+FROM ghcr.io/graalvm/graalvm-ce:latest AS native-build
+WORKDIR /app
+COPY . .
+RUN ./mvnw -Pnative native:compile -pl bootstrap-server -am -DskipTests
+
+# Use a minimal base image for the runtime
+FROM gcr.io/distroless/base:latest
+COPY --from=native-build /app/bootstrap-server/target/job-tracker-server /app/
+EXPOSE 8880
+ENTRYPOINT ["/app/job-tracker-server"]

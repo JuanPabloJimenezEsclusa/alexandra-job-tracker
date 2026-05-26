@@ -1,0 +1,42 @@
+info:
+  name: query.me
+  type: graphql
+  seq: 10
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      query {
+        me {
+          id, username, createdAt
+        }
+      }
+    variables: |-
+      {
+        "resumeId": "{{randomResumeId}}",
+        "jobId": "{{randomJobId}}"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: randomResumeId
+      value: "1"
+    - name: randomJobId
+      value: "1"
+  scripts:
+    - type: before-request
+      code: |-
+        const randomId = Math.floor(Math.random() * 100) + 1;
+        bru.setVar("randomProductId", randomId);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

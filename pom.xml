@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>4.0.6</version>
+    <relativePath/>
+  </parent>
+
+  <groupId>com.jobtracker</groupId>
+  <artifactId>alexandra-job-tracker</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <name>alexandra-job-tracker</name>
+  <description>PoC to test Java high throughput</description>
+  <url/>
+
+  <licenses>
+    <license>
+      <name>GPL-3.0-only</name>
+      <url>https://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+
+  <developers>
+    <developer>
+      <id>juan.pablo.jimenez.esclusa</id>
+      <name>Juan Pablo Jimenez Esclusa</name>
+      <email>juan.pablo.jimenez.esclusa@gmail.com</email>
+      <roles>
+        <role>Developer</role>
+        <role>Architect</role>
+      </roles>
+    </developer>
+  </developers>
+
+  <modules>
+    <module>domain</module>
+    <module>application</module>
+    <module>infrastructure-persistence</module>
+    <module>infrastructure-auth</module>
+    <module>infrastructure-scraping</module>
+    <module>infrastructure-ai</module>
+    <module>infrastructure-observability</module>
+    <module>adapter-api</module>
+    <module>adapter-cli</module>
+    <module>bootstrap-server</module>
+    <module>infrastructure-cache</module>
+    <module>bootstrap-cli</module>
+  </modules>
+
+  <properties>
+    <java.version>25</java.version>
+    <spring-ai.version>2.0.0-M7</spring-ai.version>
+    <archunit.version>1.4.2</archunit.version>
+    <jjwt.version>0.12.6</jjwt.version>
+    <spring-shell.version>3.4.0</spring-shell.version>
+    <graphql-java-extended-scalars.version>22.0</graphql-java-extended-scalars.version>
+    <opentelemetry-exporter-otlp.version>1.44.1</opentelemetry-exporter-otlp.version>
+    <caffeine.version>3.2.0</caffeine.version>
+    <jsoup.version>1.18.1</jsoup.version>
+    <jspecify.version>1.0.0</jspecify.version>
+
+    <!-- Sonar -->
+    <sonar.organization>juanpablojimenezesclusa</sonar.organization>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+    <sonar.projectKey>JuanPabloJimenezEsclusa_alexandra-job-tracker</sonar.projectKey>
+    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/coverage-jacoco/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
+    <sonar.branch.name>develop</sonar.branch.name>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>org.springframework.ai</groupId>
+        <artifactId>spring-ai-bom</artifactId>
+        <version>${spring-ai.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.shell</groupId>
+        <artifactId>spring-shell-starter</artifactId>
+        <version>${spring-shell.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-api</artifactId>
+        <version>${jjwt.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-impl</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.jsonwebtoken</groupId>
+        <artifactId>jjwt-jackson</artifactId>
+        <version>${jjwt.version}</version>
+        <scope>runtime</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>1.20.0</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-test</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.testcontainers</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.assertj</groupId>
+      <artifactId>assertj-core</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.jspecify</groupId>
+      <artifactId>jspecify</artifactId>
+      <version>${jspecify.version}</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.graalvm.buildtools</groupId>
+          <artifactId>native-maven-plugin</artifactId>
+        </plugin>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>4.0.0.4121</version>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.14</version>
+        </plugin>
+        <plugin>
+          <groupId>org.openrewrite.maven</groupId>
+          <artifactId>rewrite-maven-plugin</artifactId>
+          <version>5.48.0</version>
+        </plugin>
+        <plugin>
+          <groupId>se.bjurr.gitchangelog</groupId>
+          <artifactId>git-changelog-maven-plugin</artifactId>
+          <version>2.3.1</version>
+        </plugin>
+        <plugin>
+          <groupId>io.github.git-commit-id</groupId>
+          <artifactId>git-commit-id-maven-plugin</artifactId>
+          <version>9.0.1</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

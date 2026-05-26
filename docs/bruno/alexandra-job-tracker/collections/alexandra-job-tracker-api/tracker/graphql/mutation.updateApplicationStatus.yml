@@ -1,0 +1,56 @@
+info:
+  name: mutation.updateApplicationStatus
+  type: graphql
+  seq: 5
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      mutation($id: ID!, $status: ApplicationStatus!, $notes: String) { 
+        updateApplicationStatus(id: $id, status: $status, notes: $notes) {
+          id, company, role, source, postingUrl, notes, status, dateApplied, lastUpdated, resume { id }
+        }
+      }
+    variables: |-
+      {
+        "id": "{{randomId}}",
+        "status": "{{randomStatus}}",
+        "notes": "{{randomNotes}}"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: randomId
+      value: 94a9f56d-6457-446e-9614-b9981e2aa761
+    - name: randomStatus
+      value: OFFER
+    - name: randomNotes
+      value: Status changed
+  scripts:
+    - type: before-request
+      code: |-
+        const states = [
+          "SAVED", 
+          "APPLIED", 
+          "INTERVIEWING", 
+          "OFFER", 
+          "ACCEPTED", 
+          "REJECTED", 
+          "WITHDRAWN"
+        ];
+
+        const randomStatus = states[Math.floor(Math.random() * states.length)];
+        bru.setVar("randomStatus", randomStatus);
+        bru.setVar("randomNotes", "Status changed: " + randomStatus);
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

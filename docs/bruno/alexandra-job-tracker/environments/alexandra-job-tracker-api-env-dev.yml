@@ -1,0 +1,10 @@
+name: alexandra-job-tracker-api-env-dev
+variables:
+  - name: baseUrl
+    value: http://localhost:{{basePort}}/{{basePath}}
+  - name: basePort
+    value: "8880"
+  - name: basePath
+    value: api
+  - name: authToken
+    value: ""
