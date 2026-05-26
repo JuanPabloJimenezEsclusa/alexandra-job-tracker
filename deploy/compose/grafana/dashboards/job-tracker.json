@@ -1,0 +1,15 @@
+{
+  "title": "Job Tracker",
+  "panels": [
+    {
+      "title": "Applications Created",
+      "type": "graph",
+      "targets": [
+        {
+          "expr": "rate(jobtracker_applications_created_total[5m])",
+          "legendFormat": "apps/sec"
+        }
+      ]
+    }
+  ]
+}

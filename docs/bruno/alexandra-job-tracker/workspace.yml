@@ -1,0 +1,14 @@
+opencollection: 1.0.0
+info:
+  name: "alexandra-job-tracker"
+  type: workspace
+
+collections:
+  - name: "alexandra-job-tracker-api"
+    path: "collections/alexandra-job-tracker-api"
+
+specs:
+
+docs: ''
+
+activeEnvironmentUid: 4632dk000000000000000

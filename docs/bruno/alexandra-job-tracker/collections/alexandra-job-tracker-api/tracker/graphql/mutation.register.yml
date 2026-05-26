@@ -1,0 +1,35 @@
+info:
+  name: mutation.register
+  type: graphql
+  seq: 1
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      mutation($username: String!, $password: String!) { 
+        register(username: $username, password: $password) { token } 
+      }
+    variables: |-
+      {
+        "username": "{{randomUsername}}",
+        "password": "{{randomPassword}}"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: randomUsername
+      value: JPJE
+    - name: randomPassword
+      value: JPJE
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

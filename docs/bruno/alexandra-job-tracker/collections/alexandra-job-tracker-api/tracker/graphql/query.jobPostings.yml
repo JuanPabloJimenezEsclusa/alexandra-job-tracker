@@ -1,0 +1,28 @@
+info:
+  name: query.jobPostings
+  type: graphql
+  seq: 15
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      query($source: Source) {
+        jobPostings(source: $source) {
+          id, url, source, title, company, description, postedAt
+        }
+      }
+    variables: |-
+      {
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

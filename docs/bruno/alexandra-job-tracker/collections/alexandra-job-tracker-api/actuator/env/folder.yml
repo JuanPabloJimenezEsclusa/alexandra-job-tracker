@@ -1,0 +1,7 @@
+info:
+  name: env
+  type: folder
+  seq: 10
+
+request:
+  auth: inherit

@@ -1,0 +1,25 @@
+info:
+  name: mutation.logout
+  type: graphql
+  seq: 3
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      mutation { logout }
+    variables: |-
+      {
+         
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

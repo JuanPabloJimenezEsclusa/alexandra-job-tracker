@@ -1,0 +1,47 @@
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/jobtracker;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  jpa:
+    open-in-view: false
+    hibernate.ddl-auto: validate
+    database-platform: org.hibernate.dialect.H2Dialect
+  flyway:
+    enabled: true
+  ai:
+    openai:
+      api-key: ${DEEPSEEK_API_KEY:sk-placeholder}
+      base-url: https://api.deepseek.com
+      chat:
+        model: deepseek-chat
+
+server:
+  port: 8880
+  servlet:
+    context-path: /api
+
+jwt:
+  secret: ${JWT_SECRET:change-me-in-production-at-least-32-chars-long!!}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,env,beans,mappings,loggers,heapdump,threaddump,conditions,configprops,cache
+  endpoint:
+    health:
+      show-details: always
+  metrics:
+    tags:
+      application: alexandra-job-tracker
+
+otel:
+  exporter:
+    otlp:
+      endpoint: http://localhost:4318
