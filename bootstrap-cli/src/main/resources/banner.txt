@@ -1,0 +1,6 @@
+${AnsiColor.GREEN}..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..
+  ${AnsiColor.BRIGHT_GREEN}:: ${spring.application.name} :: ${spring.application.version}
+  ${AnsiColor.GREEN}:: Spring-boot: ${spring-boot.formatted-version}
+  :: Follow the white rabbit...
+${AnsiColor.GREEN}..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..--..
+${AnsiColor.DEFAULT}

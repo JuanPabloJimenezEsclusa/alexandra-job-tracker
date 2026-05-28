@@ -6,17 +6,51 @@ updates:
     open-pull-requests-limit: 10
     labels: [ dependencies, automated ]
     groups:
-      spring:
-        patterns: [ "org.springframework.*", "org.springframework.boot*" ]
-      testing:
-        patterns: [ "org.junit.*", "org.mockito*", "org.testcontainers*" ]
-      otel:
-        patterns: [ "io.opentelemetry*", "io.micrometer*" ]
+      maven-dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: docker
     directory: "/deploy/compose"
     schedule: { interval: weekly }
-    labels: [ dependencies, automated ]
+    labels: [ infrastructure, automated ]
+    groups:
+      infrastructure-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directory: "/deploy/aws"
+    schedule: { interval: weekly }
+    labels: [ infrastructure, automated ]
+    groups:
+      infrastructure-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker-compose
+    directory: "/deploy/compose"
+    schedule: { interval: weekly }
+    labels: [ infrastructure, automated ]
+    groups:
+      infrastructure-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "terraform"
+    directory: "/deploy/aws/terraform/templates"
+    schedule: { interval: weekly }
+    labels: [ infrastructure, automated ]
+    groups:
+      infrastructure-dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule: { interval: weekly }
     labels: [ ci, automated ]
+    groups:
+      github-actions-dependencies:
+        patterns:
+          - "*"

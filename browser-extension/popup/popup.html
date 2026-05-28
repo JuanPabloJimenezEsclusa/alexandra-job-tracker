@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alexandra Job Tracker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div id="app">
+    <div id="state-not-on-job" class="state hidden">
+      <div class="icon">&#128269;</div>
+      <p>Navigate to a job posting on <strong>LinkedIn</strong> or <strong>Indeed</strong> to capture it.</p>
+    </div>
+
+    <div id="state-not-authed" class="state hidden">
+      <div class="icon">&#128274;</div>
+      <p>You need to configure your login in <a href="#" id="openOptions">Extension Options</a>.</p>
+    </div>
+
+    <div id="state-ready" class="state hidden">
+      <div class="header">
+        <h2>Job Details</h2>
+        <span id="sourceBadge" class="badge"></span>
+      </div>
+
+      <div class="field">
+        <label for="editUrl">URL</label>
+        <input type="url" id="editUrl" readonly>
+      </div>
+
+      <div class="field">
+        <label for="editTitle">Title</label>
+        <input type="text" id="editTitle">
+      </div>
+
+      <div class="field">
+        <label for="editCompany">Company</label>
+        <input type="text" id="editCompany">
+      </div>
+
+      <div class="field">
+        <label for="editDescription">Description</label>
+        <textarea id="editDescription" rows="5"></textarea>
+      </div>
+
+      <button id="submitBtn">Submit</button>
+    </div>
+
+    <div id="state-submitting" class="state hidden">
+      <div class="spinner"></div>
+      <p>Submitting job posting...</p>
+    </div>
+
+    <div id="state-success" class="state hidden">
+      <div class="icon success-icon">&#10003;</div>
+      <p>Submitted successfully!</p>
+      <p class="id-display" id="successId"></p>
+    </div>
+
+    <div id="state-error" class="state hidden">
+      <div class="icon error-icon">&#10007;</div>
+      <p id="errorMessage" class="error-text"></p>
+    </div>
+
+    <div id="footer">
+      <a href="#" id="openOptionsLink">Options</a>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
