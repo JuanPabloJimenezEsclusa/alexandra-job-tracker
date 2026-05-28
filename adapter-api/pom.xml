@@ -5,22 +5,24 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.jobtracker</groupId>
+    <groupId>dev.jpje.jobtracker</groupId>
     <artifactId>alexandra-job-tracker</artifactId>
     <version>1.0.0</version>
   </parent>
 
   <artifactId>adapter-api</artifactId>
+  <name>Adapter Graphql API</name>
+  <description>API layer exposing GraphQL endpoints for the Job Tracker application.</description>
 
   <dependencies>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>application</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>domain</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-auth</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-auth</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -37,4 +39,21 @@
       <version>${graphql-java-extended-scalars.version}</version>
     </dependency>
   </dependencies>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>index</report>
+              <report>summary</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

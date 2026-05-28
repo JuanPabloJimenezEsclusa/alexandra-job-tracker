@@ -1,0 +1,25 @@
+# App builder layer. Build the native image using GraalVM.
+FROM ghcr.io/graalvm/native-image-community:25 AS graalvm-builder
+WORKDIR /app
+COPY . .
+RUN ./mvnw install -DskipTests -B -ntp -e \
+    && ./mvnw -Pnative native:compile -pl bootstrap-server -DskipTests -B -ntp -e
+
+# Lambda adapter layer. Install the AWS Lambda adapter to allow the native image to run in AWS Lambda.
+FROM public.ecr.aws/awsguru/aws-lambda-adapter:1.1.0 AS adapter
+
+# Runtime layer. Install the minimal language pack to support UTF-8 encoding, and install CA certificates for HTTPS support.
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023
+RUN dnf install -y glibc-minimal-langpack ca-certificates && dnf clean all
+
+COPY --from=adapter /lambda-adapter /opt/extensions/lambda-adapter
+COPY --from=graalvm-builder /app/bootstrap-server/target/job-tracker-server /opt/job-tracker-server
+
+ENV READINESS_CHECK_PATH=/api/actuator/health
+ENV AWS_LAMBDA_WEB_ADAPTER_INITIALIZATION_TIMEOUT=20000
+ENV AWS_LAMBDA_SERVER_PORT=8080
+
+EXPOSE 8080
+EXPOSE 8880
+
+ENTRYPOINT ["/opt/job-tracker-server"]

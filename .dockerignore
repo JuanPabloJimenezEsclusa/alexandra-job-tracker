@@ -1,0 +1,17 @@
+.git
+.gitignore
+.editorconfig
+.idea/
+.vscode/
+*.iml
+**/target
+**/*.md
+.venv
+node_modules
+browser-extension
+deploy
+docs
+sonar-project.properties
+.github
+.mvn/repository
+*.log

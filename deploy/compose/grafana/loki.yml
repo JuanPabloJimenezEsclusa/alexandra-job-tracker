@@ -1,0 +1,68 @@
+# Loki runs without multi-tenant auth
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+
+# Single-binary ring: avoids cluster health checks by using local in-memory KV store
+common:
+  ring:
+    instance_addr: 127.0.0.1
+    kvstore:
+      store: inmemory
+    replication_factor: 1
+
+# No other Loki instances to join
+memberlist:
+  abort_if_cluster_join_fails: false
+
+# Distributor uses its own ring — inmemory for single-binary
+distributor:
+  ring:
+    kvstore:
+      store: inmemory
+
+ingester:
+  lifecycler:
+    ring:
+      kvstore:
+        store: inmemory
+      replication_factor: 1
+    join_after: 0
+    min_ready_duration: 0s
+  # Flush idle chunks after 5min, retain for 30s on shutdown
+  chunk_idle_period: 5m
+  chunk_retain_period: 30s
+  wal:
+    dir: /tmp/loki/wal
+
+# TSDB index schema (v13) — filesystem object store for single-binary dev
+schema_config:
+  configs:
+    - from: 2020-10-24
+      store: tsdb
+      object_store: filesystem
+      schema: v13
+      index:
+        prefix: index_
+        period: 24h
+
+storage_config:
+  tsdb_shipper:
+    active_index_directory: /tmp/loki/index
+    cache_location: /tmp/loki/cache
+  filesystem:
+    directory: /tmp/loki/chunks
+
+# Merges and deduplicates TSDB index files periodically
+compactor:
+  working_directory: /tmp/loki/compactor
+
+limits_config:
+  volume_enabled: true
+  # Reject log samples older than 7 days
+  reject_old_samples: true
+  reject_old_samples_max_age: 168h
+  # Dev limits: 50MB/s ingest with 100MB burst
+  ingestion_rate_mb: 50
+  ingestion_burst_size_mb: 100

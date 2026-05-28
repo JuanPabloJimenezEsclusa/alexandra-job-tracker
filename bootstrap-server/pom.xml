@@ -5,42 +5,73 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.jobtracker</groupId>
+    <groupId>dev.jpje.jobtracker</groupId>
     <artifactId>alexandra-job-tracker</artifactId>
     <version>1.0.0</version>
   </parent>
 
   <artifactId>bootstrap-server</artifactId>
+  <name>Bootstrap Server</name>
+  <description>Bootstrap server responsible for initializing and orchestrating the various
+    components of the Job Tracker application.
+  </description>
 
   <dependencies>
     <dependency>
-      <groupId>com.jobtracker</groupId>
+      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>adapter-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-persistence</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>application</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-scraping</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-persistence</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-ai</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-ai</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-observability</artifactId>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-actuator</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-registry-prometheus</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.micrometer</groupId>
+      <artifactId>micrometer-tracing-bridge-otel</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.latencyutils</groupId>
+      <artifactId>LatencyUtils</artifactId>
+      <version>${LatencyUtils.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>org.hdrhistogram</groupId>
+          <artifactId>HdrHistogram</artifactId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-exporter-otlp</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-cache</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-cache</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-auth</artifactId>
       <version>${project.version}</version>
     </dependency>
 
@@ -64,17 +95,139 @@
     </dependency>
   </dependencies>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>index</report>
+              <report>summary</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <build>
     <plugins>
       <plugin>
+        <groupId>io.github.git-commit-id</groupId>
+        <artifactId>git-commit-id-maven-plugin</artifactId>
+        <version>${git-commit-id-maven-plugin.version}</version>
+        <configuration>
+          <generateGitPropertiesFile>true</generateGitPropertiesFile>
+          <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
+          </generateGitPropertiesFilename>
+          <includeOnlyProperties>
+            <includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
+            <includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
+            <includeOnlyProperty>^git.commit.user.(name|email)$</includeOnlyProperty>
+            <includeOnlyProperty>^git.commit.message.(short|full)$</includeOnlyProperty>
+          </includeOnlyProperties>
+          <commitIdGenerationMode>full</commitIdGenerationMode>
+          <failOnNoGitDirectory>false</failOnNoGitDirectory>
+        </configuration>
+        <executions>
+          <execution>
+            <id>get-the-git-infos</id>
+            <goals>
+              <goal>revision</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
+        </executions>
+      </plugin>
+      <plugin>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-maven-plugin</artifactId>
+        <configuration>
+          <layers>
+            <enabled>true</enabled>
+          </layers>
+          <image>
+            <!-- https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-3.4-Release-Notes#paketo-tiny-builder-for-building-oci-images -->
+            <builder>paketobuildpacks/builder-jammy-base</builder>
+            <classifier>exec</classifier>
+            <excludeDockerCompose>true</excludeDockerCompose>
+            <excludeDevtools>true</excludeDevtools>
+            <image>
+              <name>alexandra-job-tracker:${project.version}</name>
+            </image>
+            <env>
+              <BP_JVM_VERSION>25</BP_JVM_VERSION>
+              <BP_HEALTH_CHECKER>curl</BP_HEALTH_CHECKER>
+              <BP_JVM_TYPE>JRE</BP_JVM_TYPE>
+              <BP_JVM_JMXREMOTE>true</BP_JVM_JMXREMOTE>
+              <BP_JVM_HEAD_ROOM>5</BP_JVM_HEAD_ROOM>
+              <BPL_JVM_THREAD_COUNT>50</BPL_JVM_THREAD_COUNT>
+              <BP_JVM_JAVA_OPTS>-XX:+UseG1GC -XX:+UseStringDeduplication -Dfile.encoding=UTF-8
+                -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true
+              </BP_JVM_JAVA_OPTS>
+              <BP_OCI_SOURCE>true</BP_OCI_SOURCE>
+              <BP_MAVEN_BUILT_ARTIFACT>target/*.jar</BP_MAVEN_BUILT_ARTIFACT>
+              <BP_MAVEN_BUILD_ARGUMENTS>package -DskipTests=true --no-transfer-progress --also-make
+                --batch-mode
+              </BP_MAVEN_BUILD_ARGUMENTS>
+
+              <!-- https://blog.paketo.io/posts/spring-boot-performance/ -->
+              <JAVA_TOOL_OPTIONS>-XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true
+                -XX:+UseContainerSupport --enable-native-access=ALL-UNNAMED
+              </JAVA_TOOL_OPTIONS>
+              <BPE_DELIM_JAVA_TOOL_OPTIONS xml:space="preserve"> </BPE_DELIM_JAVA_TOOL_OPTIONS>
+              <BPE_APPEND_JAVA_TOOL_OPTIONS>-XX:+UseCompactObjectHeaders
+                -Dspring.threads.virtual.enabled=true
+              </BPE_APPEND_JAVA_TOOL_OPTIONS>
+            </env>
+          </image>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.graalvm.buildtools</groupId>
+        <artifactId>native-maven-plugin</artifactId>
+        <configuration>
+          <imageName>job-tracker-server</imageName>
+          <mainClass>dev.jpje.jobtracker.server.JobTrackerServerApplication</mainClass>
+          <buildArgs combine.children="append">
+            <!--
+            (compile) Recommendations:
+            G1GC: Use the G1 GC ('-gc=G1') for improved latency and throughput.
+            PGO:  Use Profile-Guided Optimizations ('-pgo') for improved throughput.
+            HEAP: Set max heap for improved and more predictable memory usage.
+            CPU:  Enable more CPU features with '-march=native' for improved performance.
+            QBM:  Use the quick build mode ('-Ob') to speed up builds during development.
+            -->
+            <buildArg>--gc=epsilon</buildArg>
+            <buildArg>-R:MaxHeapSize=2g</buildArg>
+            <buildArg>-march=x86-64-v2</buildArg>
+            <buildArg>-Ob</buildArg>
+            <!-- extras -->
+            <buildArg>--no-fallback</buildArg>
+            <buildArg>-J-Xmx12g</buildArg>
+            <buildArg>--enable-url-protocols=http,https</buildArg>
+            <buildArg>--install-exit-handlers</buildArg>
+          </buildArgs>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
+        </configuration>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
         <configuration>
-          <groups>E2ETest</groups>
+          <includes>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
         </configuration>
         <executions>
           <execution>
@@ -87,4 +240,15 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>tracing</id>
+      <properties>
+        <spring-boot.run.jvmArguments>
+          -agentlib:native-image-agent=config-output-dir=${project.basedir}/src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}/
+        </spring-boot.run.jvmArguments>
+      </properties>
+    </profile>
+  </profiles>
 </project>

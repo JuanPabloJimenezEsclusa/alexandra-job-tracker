@@ -4,6 +4,22 @@ x-resources: &default-resources
       limits: { cpus: "1", memory: "512M" }
       reservations: { cpus: "0.25", memory: "256M" }
 
+x-k6-base: &k6-base
+  image: grafana/k6:latest
+  user: ${K6_UID:-12345}
+  hostname: k6
+  depends_on:
+    job-tracker-server:
+      condition: service_healthy
+  entrypoint: ["/bin/sh", "/scripts/k6-run.sh"]
+  volumes:
+    - ../../testing-pentest/src/test/k6:/scripts
+    - ../../testing-pentest/src/test/k6/reports:/reports
+  environment:
+    TARGET_URL: http://job-tracker-server:8880/api/graphql
+  networks: [ jobtracker ]
+  <<: *default-resources
+
 services:
   job-tracker-server:
     container_name: alexandra-job-tracker-server
@@ -11,22 +27,36 @@ services:
     restart: unless-stopped
     build:
       context: ../..
-      dockerfile: deploy/compose/Dockerfile
+      dockerfile: ${DOCKERFILE:-deploy/compose/Dockerfile}
     ports: [ "8880:8880" ]
-    volumes: [ "h2data:/app/data" ]
+    volumes:
+      - "../data:/app/deploy/data"
     environment:
+      SPRING_PROFILES_ACTIVE: "dev"
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-NOT_SET}
+      APP_OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_SERVICE_NAME: job-tracker-server
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
+      JVM_OPTIONS: "-Xms1024m -Xmx2048m"
+      JAVA_OPTS: "-XX:+UseCompactObjectHeaders -XX:+UseContainerSupport --enable-native-access=ALL-UNNAMED -Djava.security.egd=file:/dev/./urandom"
     networks: [ jobtracker ]
-    <<: *default-resources
+    deploy:
+      resources:
+        limits: { cpus: "2", memory: "2048M" }
+        reservations: { cpus: "1", memory: "1024M" }
     healthcheck:
-      test: ["CMD", "curl", "-f", "-o", "/dev/null", "http://localhost:8880/api/actuator/health"]
-      interval: 30s
+      test: [ "CMD", "curl", "-f", "-o", "/dev/null", "http://localhost:8880/api/actuator/health/readinessState" ]
+      interval: 10s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 30s
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.152.0-nightly.286fff0
+    image: otel/opentelemetry-collector-contrib:0.157.0
     container_name: alexandra-otel-collector
     hostname: otel-collector
     restart: unless-stopped
@@ -37,7 +67,7 @@ services:
     <<: *default-resources
 
   prometheus:
-    image: prom/prometheus:v3.11.3
+    image: prom/prometheus:v3.13.1
     container_name: alexandra-prometheus
     hostname: prometheus
     restart: unless-stopped
@@ -47,31 +77,49 @@ services:
     networks: [ jobtracker ]
     <<: *default-resources
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9090/-/healthy"]
+      test: [ "CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9090/-/healthy" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
 
   tempo:
-    image: grafana/tempo:1.5.0
+    image: grafana/tempo:3.0.2
     container_name: alexandra-tempo
     hostname: tempo
     restart: unless-stopped
     ports: [ "3200:3200" ]
-    volumes: [ "./tempo.yml:/etc/tempo.yaml" ]
+    volumes: [ "./grafana/tempo.yml:/etc/tempo.yaml" ]
     command: [ "-config.file=/etc/tempo.yaml" ]
     networks: [ jobtracker ]
     <<: *default-resources
-    healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3200/ready"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
+
+  loki:
+    image: grafana/loki:3.7.4
+    container_name: alexandra-loki
+    hostname: loki
+    restart: unless-stopped
+    ports: [ "3100:3100" ]
+    volumes: [ "./grafana/loki.yml:/etc/loki/config.yaml" ]
+    command: [ "-config.file=/etc/loki/config.yaml" ]
+    networks: [ jobtracker ]
+    <<: *default-resources
+
+  promtail:
+    image: grafana/promtail:3.6.11
+    container_name: alexandra-promtail
+    hostname: promtail
+    restart: unless-stopped
+    volumes:
+      - "./grafana/promtail.yml:/etc/promtail/config.yaml"
+      - "/var/log:/var/log:ro"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+    command: [ "-config.file=/etc/promtail/config.yaml" ]
+    networks: [ jobtracker ]
+    <<: *default-resources
 
   grafana:
-    image: grafana/grafana:13.0.1
+    image: grafana/grafana:13.1.1
     container_name: alexandra-grafana
     hostname: grafana
     restart: unless-stopped
@@ -79,11 +127,11 @@ services:
     volumes:
       - "./grafana/dashboards:/etc/grafana/provisioning/dashboards"
       - "./grafana/datasources:/etc/grafana/provisioning/datasources"
-    depends_on: [ prometheus, tempo ]
+    depends_on: [ prometheus, tempo, loki ]
     networks: [ jobtracker ]
     <<: *default-resources
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/api/health"]
+      test: [ "CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/api/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -104,8 +152,45 @@ services:
       - /dev/disk/:/dev/disk:ro
     ports: [ "8080:8080" ]
 
-volumes:
-  h2data:
+  # Performance and Penetration Testing Services
+  k6-pen:
+    <<: *k6-base
+    profiles: [pen-test]
+    container_name: alexandra-k6-pen
+    environment:
+      K6_TEST_TYPE: pen
+      TARGET_URL: http://job-tracker-server:8880/api/graphql
+
+  k6-perf:
+    <<: *k6-base
+    profiles: [perf-test]
+    container_name: alexandra-k6-perf
+    environment:
+      K6_TEST_TYPE: perf
+      TARGET_URL: http://job-tracker-server:8880/api/graphql
+
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    profiles: [pen-test]
+    container_name: alexandra-zap
+    hostname: zap
+    depends_on:
+      job-tracker-server:
+        condition: service_healthy
+    command:
+      - /zap/zap.sh
+      - -cmd
+      - -loglevel
+      - debug
+      - -autorun
+      - /zap/wrk/plan.yaml
+    volumes:
+      - ../../testing-pentest/src/test/zap:/zap/wrk
+    networks: [ jobtracker ]
+    deploy:
+      resources:
+        limits: { cpus: "1", memory: "1024M" }
+        reservations: { cpus: "1", memory: "1024M" }
 
 networks:
   jobtracker:

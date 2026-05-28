@@ -1,0 +1,12 @@
+<FindBugsFilter>
+  <!-- Exclude generated code and configuration -->
+  <Match>
+    <Package name="~.*generated.*|~.*generated-sources.*"/>
+  </Match>
+
+  <!-- Common Spring-specific issues -->
+  <Match>
+    <Class name="~.*"/>
+    <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+  </Match>
+</FindBugsFilter>
