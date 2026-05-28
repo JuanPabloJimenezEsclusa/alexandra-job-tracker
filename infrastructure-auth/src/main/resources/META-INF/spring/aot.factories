@@ -1,0 +1,1 @@
+com.jobtracker.auth.JjwtRuntimeHints=org.springframework.aot.hint.RuntimeHintsRegistrar

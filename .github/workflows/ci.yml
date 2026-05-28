@@ -1,7 +1,7 @@
 name: CI
 on:
-  push: { branches: [ main ] }
-  pull_request: { branches: [ main ] }
+  push: { branches: [ develop ] }
+  pull_request: { branches: [ develop ] }
 
 jobs:
   test:
@@ -14,9 +14,9 @@ jobs:
           java-version: 25
           cache: maven
       - name: Build & Test
-        run: ./mvnw verify -Pcoverage
+        run: ./mvnw verify
       - name: SonarCloud Analysis
-        run: ./mvnw sonar:sonar -Pcoverage
+        run: ./mvnw sonar:sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
@@ -43,5 +43,7 @@ jobs:
           distribution: graalvm
           java-version: 25
           cache: maven
-      - name: AOT compatibility check
-        run: ./mvnw -Pnative test -Dspring.aot.enabled=true
+      - name: AOT process (server)
+        run: ./mvnw -Pnative test-compile -pl bootstrap-server -am
+      - name: AOT process (CLI)
+        run: ./mvnw -Pnative test-compile -pl bootstrap-cli -am

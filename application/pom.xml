@@ -11,6 +11,8 @@
   </parent>
 
   <artifactId>application</artifactId>
+  <description>Application layer containing service implementations and application logic.
+  </description>
 
   <dependencies>
     <dependency>

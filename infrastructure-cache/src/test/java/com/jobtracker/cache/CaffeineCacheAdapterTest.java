@@ -1,6 +1,8 @@
 package com.jobtracker.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.time.Duration;
 import java.util.stream.Stream;
@@ -14,6 +16,13 @@ import org.junit.jupiter.params.provider.MethodSource;
 class CaffeineCacheAdapterTest {
   private CaffeineCacheAdapter cache;
 
+  private static Stream<Arguments> evictionScenarios() {
+    return Stream.of(
+      arguments("key1", "value1", "evict"),
+      arguments("key2", "value2", "clear")
+    );
+  }
+
   @BeforeEach
   void setUp() {
     cache = new CaffeineCacheAdapter(100, Duration.ofMinutes(5));
@@ -25,7 +34,7 @@ class CaffeineCacheAdapterTest {
     "empty, ''",
     "unicode, café"
   })
-  void shouldStoreAndRetrieveValue(String key, String value) {
+  void shouldStoreAndRetrieveValue(final String key, final String value) {
     // Given
     cache.put(key, value);
 
@@ -37,8 +46,8 @@ class CaffeineCacheAdapterTest {
   }
 
   @ParameterizedTest(name = "get({0}) → empty for missing key")
-  @CsvSource({ "missing", "unknown", "nonexistent" })
-  void shouldReturnEmptyForMissingKey(String key) {
+  @CsvSource({"missing", "unknown", "nonexistent"})
+  void shouldReturnEmptyForMissingKey(final String key) {
     // When
     var result = cache.get(key, String.class);
 
@@ -46,16 +55,9 @@ class CaffeineCacheAdapterTest {
     assertThat(result).isEmpty();
   }
 
-  static Stream<Arguments> evictionScenarios() {
-    return Stream.of(
-      Arguments.of("key1", "value1", "evict"),
-      Arguments.of("key2", "value2", "clear")
-    );
-  }
-
   @ParameterizedTest(name = "{2} → get({0}) empty")
   @MethodSource("evictionScenarios")
-  void shouldEvictOrClearKeys(String key, String value, String action) {
+  void shouldEvictOrClearKeys(final String key, final String value, final String action) {
     // Given
     cache.put(key, value);
 
@@ -71,8 +73,8 @@ class CaffeineCacheAdapterTest {
   }
 
   @ParameterizedTest(name = "overwrite {0}: old→new")
-  @CsvSource({ "key, old, new" })
-  void shouldOverwriteExistingKey(String key, String oldVal, String newVal) {
+  @CsvSource({"key, old, new"})
+  void shouldOverwriteExistingKey(final String key, final String oldVal, final String newVal) {
     // Given
     cache.put(key, oldVal);
 
@@ -84,22 +86,22 @@ class CaffeineCacheAdapterTest {
   }
 
   @ParameterizedTest(name = "expiry after {1}ms")
-  @CsvSource({ "10, 20" })
-  void shouldHandleExpiration(long ttlMs, long sleepMs) throws Exception {
+  @CsvSource({"10, 20"})
+  void shouldHandleExpiration(final long ttlMs, final long sleepMs) {
     // Given
     var shortCache = new CaffeineCacheAdapter(100, Duration.ofMillis(ttlMs));
     shortCache.put("key", "value");
 
     // When
-    Thread.sleep(sleepMs);
+    await().during(Duration.ofMillis(sleepMs));
 
     // Then
     assertThat(shortCache.get("key", String.class)).isEmpty();
   }
 
   @ParameterizedTest(name = "stats: {1} hit, {2} miss")
-  @CsvSource({ "hit, 1, 0" })
-  void shouldRecordStats(String key, int _expectedHits, int _expectedMisses) {
+  @CsvSource({"hit, 1, 0"})
+  void shouldRecordStats(final String key, final int _expectedHits, final int _expectedMisses) {
     // Given
     cache.put(key, "x");
 

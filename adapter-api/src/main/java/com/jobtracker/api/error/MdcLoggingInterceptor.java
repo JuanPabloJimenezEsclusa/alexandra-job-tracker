@@ -9,6 +9,9 @@ import org.springframework.graphql.server.WebGraphQlResponse;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+/**
+ * Intercepts GraphQL requests to populate MDC context for logging.
+ */
 @Component
 public class MdcLoggingInterceptor implements WebGraphQlInterceptor {
 

@@ -14,11 +14,17 @@ import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * Implementation of TrackJobApplicationUseCase with create, update, list, and delete operations.
+ */
 public class TrackJobApplicationUseCaseImpl implements TrackJobApplicationUseCase {
   private final SaveJobApplicationPort savePort;
   private final LoadJobApplicationPort loadPort;
   private final ApplicationTrackerService tracker;
 
+  /**
+   * Constructor.
+   */
   public TrackJobApplicationUseCaseImpl(final SaveJobApplicationPort savePort,
                                         final LoadJobApplicationPort loadPort) {
     this.savePort = savePort;
@@ -27,20 +33,25 @@ public class TrackJobApplicationUseCaseImpl implements TrackJobApplicationUseCas
   }
 
   @Override
-  public JobApplication create(final UserId userId, final String company, final String role,
-                               final Source source, final String postingUrl, final String notes) {
+  public JobApplication create(final UserId userId,
+                               final String company,
+                               final String role,
+                               final Source source,
+                               @Nullable final String postingUrl,
+                               @Nullable final String notes) {
     final var now = Instant.now();
     final var app = new JobApplication(UUID.randomUUID(), userId, company, role, source, postingUrl,
-        ApplicationStatus.SAVED, now, now, notes);
+      ApplicationStatus.SAVED, now, now, notes);
     savePort.save(app);
     return app;
   }
 
   @Override
-  public JobApplication updateStatus(final UUID applicationId, final ApplicationStatus newStatus,
-                                     final String notes) {
+  public JobApplication updateStatus(final UUID applicationId,
+                                     final ApplicationStatus newStatus,
+                                     @Nullable final String notes) {
     final var app = loadPort.findById(applicationId)
-        .orElseThrow(() -> new IllegalArgumentException("Application not found"));
+      .orElseThrow(() -> new IllegalArgumentException("Application not found"));
     var updated = tracker.transitionStatus(app, newStatus);
     updated = updated.withNotes(notes);
     savePort.save(updated);

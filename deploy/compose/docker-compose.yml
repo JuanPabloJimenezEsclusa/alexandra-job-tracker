@@ -15,11 +15,17 @@ services:
     ports: [ "8880:8880" ]
     volumes: [ "h2data:/app/data" ]
     environment:
+      SPRING_PROFILES_ACTIVE: "dev"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      JVM_OPTIONS: "-Xms1024m -Xmx2048m"
+      JAVA_OPTS: "-XX:+UseCompactObjectHeaders -XX:+UseContainerSupport --enable-native-access=ALL-UNNAMED -Djava.security.egd=file:/dev/./urandom"
     networks: [ jobtracker ]
-    <<: *default-resources
+    deploy:
+      resources:
+        limits: { cpus: "2", memory: "2048M" }
+        reservations: { cpus: "1", memory: "1024M" }
     healthcheck:
-      test: ["CMD", "curl", "-f", "-o", "/dev/null", "http://localhost:8880/api/actuator/health"]
+      test: [ "CMD", "curl", "-f", "-o", "/dev/null", "http://localhost:8880/api/actuator/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -47,7 +53,7 @@ services:
     networks: [ jobtracker ]
     <<: *default-resources
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9090/-/healthy"]
+      test: [ "CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9090/-/healthy" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -64,7 +70,7 @@ services:
     networks: [ jobtracker ]
     <<: *default-resources
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3200/ready"]
+      test: [ "CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3200/ready" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -83,7 +89,7 @@ services:
     networks: [ jobtracker ]
     <<: *default-resources
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/api/health"]
+      test: [ "CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3000/api/health" ]
       interval: 30s
       timeout: 10s
       retries: 3

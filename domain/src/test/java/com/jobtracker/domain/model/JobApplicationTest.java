@@ -2,6 +2,8 @@ package com.jobtracker.domain.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -16,55 +18,53 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class JobApplicationTest {
 
-  static Stream<Arguments> validTransitions() {
+  private static Stream<Arguments> validTransitions() {
     return Stream.of(
-      Arguments.of(ApplicationStatus.SAVED,       ApplicationStatus.APPLIED,       "SAVED → APPLIED"),
-      Arguments.of(ApplicationStatus.APPLIED,     ApplicationStatus.INTERVIEWING,  "APPLIED → INTERVIEWING"),
-      Arguments.of(ApplicationStatus.INTERVIEWING, ApplicationStatus.OFFER,        "INTERVIEWING → OFFER"),
-      Arguments.of(ApplicationStatus.OFFER,        ApplicationStatus.ACCEPTED,     "OFFER → ACCEPTED"),
-      Arguments.of(ApplicationStatus.OFFER,        ApplicationStatus.REJECTED,     "OFFER → REJECTED"),
-      Arguments.of(ApplicationStatus.INTERVIEWING, ApplicationStatus.REJECTED,     "INTERVIEWING → REJECTED"),
-      Arguments.of(ApplicationStatus.APPLIED,      ApplicationStatus.REJECTED,     "APPLIED → REJECTED"),
-      Arguments.of(ApplicationStatus.SAVED,        ApplicationStatus.WITHDRAWN,    "SAVED → WITHDRAWN")
+      arguments(named("SAVED → APPLIED", ApplicationStatus.SAVED), ApplicationStatus.APPLIED),
+      arguments(named("APPLIED → INTERVIEWING", ApplicationStatus.APPLIED), ApplicationStatus.INTERVIEWING),
+      arguments(named("INTERVIEWING → OFFER", ApplicationStatus.INTERVIEWING), ApplicationStatus.OFFER),
+      arguments(named("OFFER → ACCEPTED", ApplicationStatus.OFFER), ApplicationStatus.ACCEPTED),
+      arguments(named("OFFER → REJECTED", ApplicationStatus.OFFER), ApplicationStatus.REJECTED),
+      arguments(named("INTERVIEWING → REJECTED", ApplicationStatus.INTERVIEWING), ApplicationStatus.REJECTED),
+      arguments(named("APPLIED → REJECTED", ApplicationStatus.APPLIED), ApplicationStatus.REJECTED),
+      arguments(named("SAVED → WITHDRAWN", ApplicationStatus.SAVED), ApplicationStatus.WITHDRAWN)
     );
   }
 
-  static Stream<Arguments> invalidTransitions() {
+  private static Stream<Arguments> invalidTransitions() {
     return Stream.of(
-      Arguments.of(ApplicationStatus.ACCEPTED,     ApplicationStatus.APPLIED,       "ACCEPTED → APPLIED"),
-      Arguments.of(ApplicationStatus.REJECTED,      ApplicationStatus.INTERVIEWING,  "REJECTED → INTERVIEWING"),
-      Arguments.of(ApplicationStatus.WITHDRAWN,     ApplicationStatus.SAVED,         "WITHDRAWN → SAVED"),
-      Arguments.of(ApplicationStatus.INTERVIEWING,  ApplicationStatus.SAVED,         "INTERVIEWING → SAVED")
+      arguments(named("ACCEPTED → APPLIED", ApplicationStatus.ACCEPTED), ApplicationStatus.APPLIED),
+      arguments(named("REJECTED → INTERVIEWING", ApplicationStatus.REJECTED), ApplicationStatus.INTERVIEWING),
+      arguments(named("WITHDRAWN → SAVED", ApplicationStatus.WITHDRAWN), ApplicationStatus.SAVED),
+      arguments(named("INTERVIEWING → SAVED", ApplicationStatus.INTERVIEWING), ApplicationStatus.SAVED)
     );
   }
 
-  private JobApplication app(ApplicationStatus status) {
-    return new JobApplication(UUID.randomUUID(), UserId.generate(), "Acme", "SWE",
-        Source.LINKEDIN, "https://linkedin.com/jobs/1", status,
-        Instant.now(), Instant.now(), null);
-  }
-
-  @ParameterizedTest(name = "{2}")
+  @ParameterizedTest(name = "{0}")
   @MethodSource("validTransitions")
-  void shouldTransitionToValidStatus(ApplicationStatus from, ApplicationStatus to, String _name) {
+  void shouldTransitionToValidStatus(final ApplicationStatus from, final ApplicationStatus to) {
     // Given
-    var app = app(from);
+    final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), "Acme", "SWE",
+      Source.LINKEDIN, "https://linkedin.com/jobs/1", from,
+      Instant.now(), Instant.now(), null);
 
     // When
-    var updated = app.withStatus(to);
+    final var updated = app.withStatus(to);
 
     // Then
     assertThat(updated.status()).isEqualTo(to);
   }
 
-  @ParameterizedTest(name = "{2}")
+  @ParameterizedTest(name = "{0}")
   @MethodSource("invalidTransitions")
-  void shouldNotTransitionToInvalidStatus(ApplicationStatus from, ApplicationStatus to, String _name) {
+  void shouldNotTransitionToInvalidStatus(final ApplicationStatus from, final ApplicationStatus to) {
     // Given
-    var app = app(from);
+    final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), "Acme", "SWE",
+      Source.LINKEDIN, "https://linkedin.com/jobs/1", from,
+      Instant.now(), Instant.now(), null);
 
-    // When / Then
+    // When, Then
     assertThatThrownBy(() -> app.withStatus(to))
-        .isInstanceOf(IllegalStateException.class);
+      .isInstanceOf(IllegalStateException.class);
   }
 }

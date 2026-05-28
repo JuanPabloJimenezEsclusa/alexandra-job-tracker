@@ -11,6 +11,7 @@
   </parent>
 
   <artifactId>infrastructure-ai</artifactId>
+  <description>Infrastructure layer responsible for AI-related functionalities.</description>
 
   <dependencies>
     <dependency>

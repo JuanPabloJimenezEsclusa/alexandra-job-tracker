@@ -13,11 +13,17 @@ import com.jobtracker.domain.vo.ApplicationStatus;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
 
+/**
+ * Implementation of ScrapeJobUseCase that scrapes, saves posting, and creates an application.
+ */
 public class ScrapeJobUseCaseImpl implements ScrapeJobUseCase {
   private final JobScraperPort scraper;
   private final SaveJobPostingPort savePostingPort;
   private final SaveJobApplicationPort saveAppPort;
 
+  /**
+   * Constructor.
+   */
   public ScrapeJobUseCaseImpl(final JobScraperPort scraper,
                               final SaveJobPostingPort savePostingPort,
                               final SaveJobApplicationPort saveAppPort) {
@@ -30,12 +36,12 @@ public class ScrapeJobUseCaseImpl implements ScrapeJobUseCase {
   public JobPosting scrape(final UserId userId, final String url) {
     final var raw = scraper.scrape(userId, url);
     final var posting = new JobPosting(UUID.randomUUID(), userId, raw.url(), Source.valueOf(raw.source().toUpperCase()),
-        raw.title(), raw.company(), raw.description(), Instant.now());
+      raw.title(), raw.company(), raw.description(), Instant.now());
     savePostingPort.save(posting);
 
     final var app = new JobApplication(UUID.randomUUID(), userId, raw.company(), raw.title(),
-        Source.valueOf(raw.source().toUpperCase()), raw.url(),
-        ApplicationStatus.SAVED, Instant.now(), Instant.now(), "Auto-created from scrape");
+      Source.valueOf(raw.source().toUpperCase()), raw.url(),
+      ApplicationStatus.SAVED, Instant.now(), Instant.now(), "Auto-created from scrape");
     saveAppPort.save(app);
     return posting;
   }

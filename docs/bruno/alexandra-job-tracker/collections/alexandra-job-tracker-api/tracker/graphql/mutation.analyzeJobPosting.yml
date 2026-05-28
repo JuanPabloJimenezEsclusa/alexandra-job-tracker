@@ -1,7 +1,7 @@
 info:
-  name: query.resumes
+  name: mutation.analyzeJobPosting
   type: graphql
-  seq: 14
+  seq: 8
 
 graphql:
   method: POST
@@ -11,17 +11,24 @@ graphql:
       value: application/json
   body:
     query: |
-      query {
-        resumes {
-          id, fileName, content, isBaseVersion, tailoredForJobId, createdAt
+      mutation($jobPostingId: ID!) { 
+        analyzeJobPosting(jobPostingId: $jobPostingId) {
+          summary, skills, fitScore
         }
       }
     variables: |-
       {
+        "resumeId": "{{randomResumeId}}",
+        "jobId": "{{randomJobId}}"
       }
   auth: inherit
 
 runtime:
+  variables:
+    - name: randomResumeId
+      value: "1"
+    - name: randomJobId
+      value: "1"
   scripts:
     - type: before-request
       code: |-

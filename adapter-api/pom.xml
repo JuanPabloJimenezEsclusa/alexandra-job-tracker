@@ -11,6 +11,7 @@
   </parent>
 
   <artifactId>adapter-api</artifactId>
+  <description>API layer exposing GraphQL endpoints for the Job Tracker application.</description>
 
   <dependencies>
     <dependency>

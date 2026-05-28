@@ -4,9 +4,14 @@ import java.time.Duration;
 
 import com.jobtracker.domain.port.out.CachePort;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configures cache port and cache manager beans.
+ */
 @Configuration(proxyBeanMethods = false)
 public class CacheConfig {
 
@@ -16,5 +21,10 @@ public class CacheConfig {
     @Value("${cache.default-ttl-seconds:300}") final int defaultTtlSeconds
   ) {
     return new CaffeineCacheAdapter(maxSize, Duration.ofSeconds(defaultTtlSeconds));
+  }
+
+  @Bean
+  CacheManager cacheManager() {
+    return new CaffeineCacheManager();
   }
 }

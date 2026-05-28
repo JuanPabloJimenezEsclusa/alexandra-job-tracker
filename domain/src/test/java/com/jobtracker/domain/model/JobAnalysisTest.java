@@ -1,6 +1,8 @@
 package com.jobtracker.domain.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -11,19 +13,27 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class JobAnalysisTest {
 
-  static Stream<Arguments> validAnalysis() {
+  private static Stream<Arguments> validAnalysis() {
     return Stream.of(
-      Arguments.of("Great role", List.of("Java", "Spring"), 85.0, "full analysis"),
-      Arguments.of("", List.of(), 0.0, "empty analysis"),
-      Arguments.of("Needs experience", List.of("Kubernetes"), 100.0, "single skill")
+      arguments(named("full analysis", "Great role"), List.of("Java", "Spring"), 85.0),
+      arguments(named("empty analysis", ""), List.of(), 0.0),
+      arguments(named("single skill", "Needs experience"), List.of("Kubernetes"), 100.0)
     );
   }
 
-  @ParameterizedTest(name = "{3}")
+  private static Stream<Arguments> fitScoreBoundaries() {
+    return Stream.of(
+      arguments(named("minimum", 0.0)),
+      arguments(named("midpoint", 50.0)),
+      arguments(named("maximum", 100.0))
+    );
+  }
+
+  @ParameterizedTest(name = "{0}")
   @MethodSource("validAnalysis")
-  void shouldCreateJobAnalysis(String summary, List<String> skills, double fitScore, String _name) {
-    // Given / When
-    var analysis = new JobAnalysis(summary, skills, fitScore);
+  void shouldCreateJobAnalysis(final String summary, final List<String> skills, final double fitScore) {
+    // Given, When
+    final var analysis = new JobAnalysis(summary, skills, fitScore);
 
     // Then
     assertThat(analysis.summary()).isEqualTo(summary);
@@ -31,19 +41,11 @@ class JobAnalysisTest {
     assertThat(analysis.fitScore()).isEqualTo(fitScore);
   }
 
-  static Stream<Arguments> fitScoreBoundaries() {
-    return Stream.of(
-      Arguments.of(0.0,   "minimum"),
-      Arguments.of(50.0,  "midpoint"),
-      Arguments.of(100.0, "maximum")
-    );
-  }
-
-  @ParameterizedTest(name = "fitScore={0} ({1})")
+  @ParameterizedTest(name = "{0}")
   @MethodSource("fitScoreBoundaries")
-  void shouldAcceptAllFitScoreValues(double fitScore, String _name) {
-    // Given / When
-    var analysis = new JobAnalysis("test", List.of(), fitScore);
+  void shouldAcceptAllFitScoreValues(final double fitScore) {
+    // Given, When
+    final var analysis = new JobAnalysis("test", List.of(), fitScore);
 
     // Then
     assertThat(analysis.fitScore()).isEqualTo(fitScore);

@@ -6,7 +6,7 @@ jobs:
   native-build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
     steps:
       - uses: actions/checkout@v4
@@ -15,13 +15,23 @@ jobs:
           distribution: graalvm
           java-version: 25
           cache: maven
-      - run: ./mvnw -Pnative native:compile -DskipTests
+
+      - name: Install all modules (no tests)
+        run: ./mvnw install -DskipTests
+
+      - name: Build native server image
+        run: ./mvnw -Pnative native:compile -pl bootstrap-server -DskipTests
+
+      - name: Build native CLI binary
+        run: ./mvnw -Pnative native:compile -pl bootstrap-cli -DskipTests
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Build & push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -29,3 +39,8 @@ jobs:
           file: deploy/compose/Dockerfile.native
           push: true
           tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }},ghcr.io/${{ github.repository }}:latest
+
+      - name: Upload CLI binary to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bootstrap-cli/target/job-tracker-cli

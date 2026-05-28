@@ -1,6 +1,16 @@
 spring:
+  application:
+    group: com.alexandra
+    name: alexandra-job-tracker
+    version: 1.0.0
+    admin:
+      enabled: true
+      jmx-name: "com.alexandra:type=Admin,name=SpringApplication"
+  threads:
+    virtual:
+      enabled: true
   datasource:
-    url: jdbc:h2:file:./data/jobtracker;AUTO_SERVER=TRUE
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
     username: sa
     password:
@@ -9,22 +19,44 @@ spring:
       enabled: true
       path: /h2-console
   jpa:
+    show-sql: true
     open-in-view: false
     hibernate.ddl-auto: validate
     database-platform: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: true
+    encoding: UTF-8
+    validate-on-migrate: false
   ai:
     openai:
       api-key: ${DEEPSEEK_API_KEY:sk-placeholder}
       base-url: https://api.deepseek.com
       chat:
         model: deepseek-chat
+  graphql:
+    cors:
+      allowed-origin-patterns:
+      - "*"
+      allowed-methods:
+      - "*"
+      allowed-headers:
+      - "*"
+      allow-credentials: true
+      max-age: 3600
+    graphiql:
+      enabled: true
 
 server:
   port: 8880
   servlet:
+    application-display-name: application
     context-path: /api
+
+info:
+  app:
+    name: ${spring.application.name}
+    title: ${spring.application.title}
+    version: ${spring.application.version}
 
 jwt:
   secret: ${JWT_SECRET:change-me-in-production-at-least-32-chars-long!!}
@@ -33,10 +65,13 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metrics,env,beans,mappings,loggers,heapdump,threaddump,conditions,configprops,cache
+        include: health,info,prometheus,metrics,env,beans,mappings,loggers,heapdump,threaddump,conditions,configprops,caches
   endpoint:
     health:
       show-details: always
+  info:
+    env:
+      enabled: true
   metrics:
     tags:
       application: alexandra-job-tracker
@@ -45,3 +80,15 @@ otel:
   exporter:
     otlp:
       endpoint: http://localhost:4318
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "dev|loc"
+  datasource:
+    url: jdbc:h2:file:./data/jobtracker;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:

@@ -5,15 +5,32 @@ import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
 import com.jobtracker.persistence.entity.JobPostingEntity;
 
+/**
+ * Maps between JobPostingEntity and JobPosting domain model.
+ */
 public class JobPostingMapper {
+  /**
+   * Maps entity to domain model.
+   */
   public JobPosting toDomain(final JobPostingEntity entity) {
     return new JobPosting(entity.getId(), new UserId(entity.getUserId()),
-        entity.getUrl(), Source.valueOf(entity.getSource()), entity.getTitle(),
-        entity.getCompany(), entity.getDescription(), entity.getPostedAt());
+      entity.getUrl(), Source.valueOf(entity.getSource()), entity.getTitle(),
+      entity.getCompany(), entity.getDescription(), entity.getPostedAt());
   }
+
+  /**
+   * Maps domain model to entity.
+   */
   public JobPostingEntity toEntity(final JobPosting domain) {
-    return new JobPostingEntity(domain.id(), domain.userId().value(),
-        domain.url(), domain.source().name(), domain.title(),
-        domain.company(), domain.description(), domain.postedAt());
+    final var entity = new JobPostingEntity();
+    entity.setId(domain.id());
+    entity.setUserId(domain.userId().value());
+    entity.setUrl(domain.url());
+    entity.setSource(domain.source().name());
+    entity.setTitle(domain.title());
+    entity.setCompany(domain.company());
+    entity.setDescription(domain.description());
+    entity.setPostedAt(domain.postedAt());
+    return entity;
   }
 }

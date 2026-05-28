@@ -11,6 +11,7 @@
   </parent>
 
   <artifactId>infrastructure-scraping</artifactId>
+  <description>Infrastructure layer responsible for web scraping and data extraction.</description>
 
   <dependencies>
     <dependency>

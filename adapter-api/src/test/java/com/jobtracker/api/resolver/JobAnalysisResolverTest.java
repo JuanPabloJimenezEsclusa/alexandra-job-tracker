@@ -2,9 +2,12 @@ package com.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -22,43 +25,43 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class JobAnalysisResolverTest {
 
-  static Stream<Arguments> resolverScenarios() {
-    var jobId = UUID.randomUUID();
-    var analysis = new JobAnalysis("Java role", List.of("Spring", "SQL"), 85.0);
+  private static Stream<Arguments> resolverScenarios() {
+    final var jobId = UUID.randomUUID();
+    final var analysis = new JobAnalysis("Java role", List.of("Spring", "SQL"), 85.0);
     return Stream.of(
-      Arguments.of(jobId, analysis, null,           "successful analysis"),
-      Arguments.of(jobId, null,    "not found",     "posting not found")
+      arguments(named("successful analysis", jobId), analysis, null),
+      arguments(named("posting not found", jobId), null, "not found")
     );
   }
 
-  @ParameterizedTest(name = "{3}")
+  @ParameterizedTest(name = "{0}")
   @MethodSource("resolverScenarios")
-  void shouldResolveOrThrow(UUID jobPostingId, JobAnalysis analysis, String errorMessage, String _name) {
+  void shouldResolveOrThrow(final UUID jobPostingId, final JobAnalysis analysis, final String errorMessage) {
     // Given
-    var loadPort = mock(LoadJobPostingPort.class);
-    var analysisPort = mock(JobAnalysisPort.class);
-    var resolver = new JobAnalysisResolver(loadPort, analysisPort);
+    final var loadPort = mock(LoadJobPostingPort.class);
+    final var analysisPort = mock(JobAnalysisPort.class);
+    final var resolver = new JobAnalysisResolver(loadPort, analysisPort);
 
     if (analysis != null) {
-      var userId = UserId.generate();
+      final var userId = UserId.generate();
       when(loadPort.findById(jobPostingId)).thenReturn(Optional.of(
-          new JobPosting(jobPostingId, userId, "url", Source.LINKEDIN,
-              "SWE", "Acme", "Java role description", null)));
+        new JobPosting(jobPostingId, userId, "url", Source.LINKEDIN,
+          "SWE", "Acme", "Java role description", Instant.now())));
       when(analysisPort.analyze("Java role description")).thenReturn(analysis);
     } else {
       when(loadPort.findById(jobPostingId)).thenReturn(Optional.empty());
     }
 
     if (errorMessage != null) {
-      // When / Then
+      // When, Then
       assertThatThrownBy(() -> resolver.analyzeJobPosting(jobPostingId))
-          .isInstanceOf(IllegalArgumentException.class)
-          .hasMessage("Job posting not found");
+        .isInstanceOf(IllegalArgumentException.class)
+        .hasMessage("Job posting not found");
       return;
     }
 
     // When
-    var result = resolver.analyzeJobPosting(jobPostingId);
+    final var result = resolver.analyzeJobPosting(jobPostingId);
 
     // Then
     assertThat(result.summary()).isEqualTo("Java role");

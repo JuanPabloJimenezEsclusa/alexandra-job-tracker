@@ -8,6 +8,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
+/**
+ * JPA entity for users.
+ */
 @Entity
 @Table(name = "users")
 public class UserEntity {
@@ -20,10 +23,20 @@ public class UserEntity {
   @Column(nullable = false)
   private Instant createdAt;
 
+  /**
+   * UserEntity.
+   */
   public UserEntity() {
   }
 
-  public UserEntity(UUID id, String username, String passwordHash, Instant createdAt) {
+  /**
+   * UserEntity.
+   */
+  public UserEntity(
+    final UUID id,
+    final String username,
+    final String passwordHash,
+    final Instant createdAt) {
     this.id = id;
     this.username = username;
     this.passwordHash = passwordHash;

@@ -16,8 +16,19 @@
   <version>1.0.0</version>
   <packaging>pom</packaging>
   <name>alexandra-job-tracker</name>
-  <description>PoC to test Java high throughput</description>
+  <description>Job application tracking system</description>
   <url/>
+
+  <organization>
+    <name>JPJE Innovation Inc</name>
+  </organization>
+
+  <distributionManagement>
+    <site>
+      <id>github-pages</id>
+      <url>file:./target/site-staging</url>
+    </site>
+  </distributionManagement>
 
   <licenses>
     <license>
@@ -32,6 +43,7 @@
       <id>juan.pablo.jimenez.esclusa</id>
       <name>Juan Pablo Jimenez Esclusa</name>
       <email>juan.pablo.jimenez.esclusa@gmail.com</email>
+      <organization>${project.organization.name}</organization>
       <roles>
         <role>Developer</role>
         <role>Architect</role>
@@ -51,11 +63,15 @@
     <module>adapter-cli</module>
     <module>bootstrap-server</module>
     <module>infrastructure-cache</module>
+    <module>coverage-jacoco</module>
     <module>bootstrap-cli</module>
   </modules>
 
   <properties>
     <java.version>25</java.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
     <spring-ai.version>2.0.0-M7</spring-ai.version>
     <archunit.version>1.4.2</archunit.version>
     <jjwt.version>0.12.6</jjwt.version>
@@ -65,12 +81,30 @@
     <caffeine.version>3.2.0</caffeine.version>
     <jsoup.version>1.18.1</jsoup.version>
     <jspecify.version>1.0.0</jspecify.version>
+    <checkstyle.version>10.23.0</checkstyle.version>
+
+    <!-- Site reports -->
+    <inceptionYear>2023</inceptionYear>
+    <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
+    <currentYear>${maven.build.timestamp}</currentYear>
+
+    <!-- plugin versions -->
+    <git-commit-id-maven-plugin.version>10.0.0</git-commit-id-maven-plugin.version>
+    <git-changelog-maven-plugin.version>2.2.11</git-changelog-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
+    <rewrite-maven-plugin.version>6.39.0</rewrite-maven-plugin.version>
+    <pitest-maven.version>1.24.0</pitest-maven.version>
+    <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
+    <sonar-maven-plugin.version>5.6.0.6792</sonar-maven-plugin.version>
+    <maven-site-plugin.version>3.21.0</maven-site-plugin.version>
 
     <!-- Sonar -->
     <sonar.organization>juanpablojimenezesclusa</sonar.organization>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>JuanPabloJimenezEsclusa_alexandra-job-tracker</sonar.projectKey>
-    <sonar.coverage.jacoco.xmlReportPaths>${project.basedir}/coverage-jacoco/target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.jacoco.xmlReportPaths>
+      ${project.basedir}/coverage-jacoco/target/site/jacoco-aggregate/jacoco.xml
+    </sonar.coverage.jacoco.xmlReportPaths>
     <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
     <sonar.branch.name>develop</sonar.branch.name>
   </properties>
@@ -98,7 +132,6 @@
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt-impl</artifactId>
         <version>${jjwt.version}</version>
-        <scope>runtime</scope>
       </dependency>
       <dependency>
         <groupId>io.jsonwebtoken</groupId>
@@ -123,11 +156,6 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.testcontainers</groupId>
-      <artifactId>junit-jupiter</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
       <groupId>org.assertj</groupId>
       <artifactId>assertj-core</artifactId>
       <scope>test</scope>
@@ -143,35 +171,353 @@
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>org.graalvm.buildtools</groupId>
-          <artifactId>native-maven-plugin</artifactId>
-        </plugin>
-        <plugin>
-          <groupId>org.sonarsource.scanner.maven</groupId>
-          <artifactId>sonar-maven-plugin</artifactId>
-          <version>4.0.0.4121</version>
-        </plugin>
-        <plugin>
-          <groupId>org.jacoco</groupId>
-          <artifactId>jacoco-maven-plugin</artifactId>
-          <version>0.8.14</version>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>${maven-checkstyle-plugin.version}</version>
+          <configuration>
+            <configLocation>${session.executionRootDirectory}/src/main/resources/checkstyle.xml
+            </configLocation>
+            <consoleOutput>true</consoleOutput>
+            <failsOnError>false</failsOnError>
+            <includeTestSourceDirectory>true</includeTestSourceDirectory>
+          </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>com.puppycrawl.tools</groupId>
+              <artifactId>checkstyle</artifactId>
+              <version>${checkstyle.version}</version>
+            </dependency>
+          </dependencies>
+          <executions>
+            <execution>
+              <id>checkstyle-check</id>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <phase>validate</phase>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>org.openrewrite.maven</groupId>
           <artifactId>rewrite-maven-plugin</artifactId>
-          <version>5.48.0</version>
+          <version>${rewrite-maven-plugin.version}</version>
+          <configuration>
+            <activeRecipes>
+              <recipe>org.openrewrite.maven.BestPractices</recipe>
+              <recipe>org.openrewrite.maven.ModernizeObsoletePoms</recipe>
+              <recipe>org.openrewrite.maven.OrderPomElements</recipe>
+              <recipe>org.openrewrite.yaml.format.Indents</recipe>
+              <recipe>org.openrewrite.java.format.EmptyNewlineAtEndOfFile</recipe>
+              <recipe>org.openrewrite.java.format.MethodParamPad</recipe>
+              <recipe>org.openrewrite.java.format.NormalizeFormat</recipe>
+              <recipe>org.openrewrite.java.format.NoWhitespaceAfter</recipe>
+              <recipe>org.openrewrite.java.format.NoWhitespaceBefore</recipe>
+              <recipe>org.openrewrite.java.format.OperatorWrap</recipe>
+              <recipe>org.openrewrite.java.format.PadEmptyForLoopComponents</recipe>
+              <recipe>org.openrewrite.java.format.RemoveTrailingWhitespace</recipe>
+              <recipe>org.openrewrite.java.format.Spaces</recipe>
+              <recipe>org.openrewrite.java.OrderImports</recipe>
+              <recipe>org.openrewrite.java.RemoveUnusedImports</recipe>
+            </activeRecipes>
+            <activeStyles>
+              <style>org.openrewrite.java.IntelliJ</style>
+              <style>org.openrewrite.java.SpringFormat</style>
+            </activeStyles>
+            <failOnDryRunResults>false</failOnDryRunResults>
+            <sizeThresholdMb>20</sizeThresholdMb>
+            <plainTextMasks>
+              <plainTextMask>**/.txt</plainTextMask>
+            </plainTextMasks>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>${sonar-maven-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco-maven-plugin.version}</version>
+          <configuration>
+            <excludes>
+            </excludes>
+          </configuration>
+          <executions>
+            <execution>
+              <id>default-prepare-agent</id>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>default-prepare-agent-integration</id>
+              <goals>
+                <goal>prepare-agent-integration</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>merge-results</id>
+              <goals>
+                <goal>merge</goal>
+              </goals>
+              <phase>verify</phase>
+              <configuration>
+                <fileSets>
+                  <fileSet>
+                    <directory>${project.build.directory}</directory>
+                    <includes>
+                      <include>*.exec</include>
+                    </includes>
+                  </fileSet>
+                </fileSets>
+                <destFile>${project.build.directory}/jacoco-aggregate.exec</destFile>
+              </configuration>
+            </execution>
+            <execution>
+              <id>report</id>
+              <goals>
+                <goal>report</goal>
+              </goals>
+              <phase>verify</phase>
+              <configuration>
+                <dataFile>${project.build.directory}/jacoco-aggregate.exec</dataFile>
+                <excludes>
+                </excludes>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <executions>
+            <execution>
+              <id>enforce</id>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <banDuplicatePomDependencyVersions/>
+                  <requireReleaseDeps/>
+                  <requireUpperBoundDeps>
+                    <excludes>
+                      <exclude>org.springframework.boot:spring-boot-starter</exclude>
+                      <exclude>org.springframework.boot:spring-boot-starter-restclient</exclude>
+                      <exclude>org.springframework.boot:spring-boot-starter-webclient</exclude>
+                      <exclude>com.fasterxml.jackson.module:jackson-module-kotlin</exclude>
+                      <exclude>io.micrometer:micrometer-core</exclude>
+                      <exclude>io.micrometer:micrometer-observation</exclude>
+                      <exclude>org.jetbrains.kotlin:kotlin-reflect</exclude>
+                    </excludes>
+                  </requireUpperBoundDeps>
+                  <requireMavenVersion>
+                    <version>[3.9.4,4.0.0)</version>
+                  </requireMavenVersion>
+                  <requireJavaVersion>
+                    <version>[25,30)</version>
+                  </requireJavaVersion>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>${maven-site-plugin.version}</version>
+          <configuration>
+            <generateSitemap>true</generateSitemap>
+            <stagingDirectory>${project.build.directory}/site-staging</stagingDirectory>
+            <attributes>
+              <reporting.outputEncoding>${project.reporting.outputEncoding}
+              </reporting.outputEncoding>
+              <project.build.sourceEncoding>${project.build.sourceEncoding}
+              </project.build.sourceEncoding>
+              <currentYear>${currentYear}</currentYear>
+              <inceptionYear>${inceptionYear}</inceptionYear>
+            </attributes>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+          <configuration>
+            <source>${java.version}</source>
+            <encoding>${project.reporting.outputEncoding}</encoding>
+            <additionalJOptions>-Xdoclint:none</additionalJOptions>
+            <useStandardDocletOptions>true</useStandardDocletOptions>
+            <failOnError>false</failOnError>
+            <show>package</show>
+            <doclint>none</doclint>
+            <windowtitle>${project.name} ${project.version} API</windowtitle>
+            <doctitle>
+              <![CDATA[<h1>${project.name} API Documentation</h1><h3>${project.description}</h3>]]></doctitle>
+            <header><![CDATA[<b>${project.name}</b> v${project.version}]]></header>
+            <bottom>
+              <![CDATA[Copyright &#169; ${inceptionYear}–${currentYear} | ${project.organization.name}. | All rights reserved.]]></bottom>
+          </configuration>
+          <executions>
+            <execution>
+              <id>aggregate-javadocs</id>
+              <goals>
+                <goal>aggregate</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <groupId>se.bjurr.gitchangelog</groupId>
           <artifactId>git-changelog-maven-plugin</artifactId>
-          <version>2.3.1</version>
-        </plugin>
-        <plugin>
-          <groupId>io.github.git-commit-id</groupId>
-          <artifactId>git-commit-id-maven-plugin</artifactId>
-          <version>9.0.1</version>
+          <version>${git-changelog-maven-plugin.version}</version>
+          <inherited>false</inherited>
+          <executions>
+            <execution>
+              <id>GenerateGitChangelog</id>
+              <phase>generate-sources</phase>
+              <goals>
+                <goal>git-changelog</goal>
+              </goals>
+              <configuration>
+                <templateFile>${project.basedir}/src/main/resources/changelog.mustache
+                </templateFile>
+                <file>CHANGELOG.md</file>
+                <readableTagName>-([^-]+?)$</readableTagName>
+                <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
+                <ignoreCommitsIfMessageMatches>^\[maven-release-plugin\].*
+                </ignoreCommitsIfMessageMatches>
+                <timeZone>UTC</timeZone>
+                <removeIssueFromMessage>true</removeIssueFromMessage>
+              </configuration>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
+
+    <plugins>
+      <plugin>
+        <groupId>org.openrewrite.maven</groupId>
+        <artifactId>rewrite-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>se.bjurr.gitchangelog</groupId>
+        <artifactId>git-changelog-maven-plugin</artifactId>
+      </plugin>
+    </plugins>
+
+    <extensions>
+      <extension>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.7.1</version>
+      </extension>
+    </extensions>
   </build>
+
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <id>aggregate-javadocs</id>
+            <reports>
+              <report>aggregate</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <id>checkstyle-report</id>
+            <reports>
+              <report>checkstyle</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+
+  <profiles>
+    <profile>
+      <id>pitest</id>
+      <build>
+        <pluginManagement>
+          <plugins>
+            <plugin>
+              <groupId>org.pitest</groupId>
+              <artifactId>pitest-maven</artifactId>
+              <version>${pitest-maven.version}</version>
+              <dependencies>
+                <dependency>
+                  <groupId>org.pitest</groupId>
+                  <artifactId>pitest-junit5-plugin</artifactId>
+                  <version>1.2.3</version>
+                </dependency>
+              </dependencies>
+              <configuration>
+                <verbose>true</verbose>
+                <threads>6</threads>
+                <timeoutFactor>1.50</timeoutFactor>
+                <timeoutConstant>5000</timeoutConstant>
+                <failWhenNoMutations>false</failWhenNoMutations>
+                <timestampedReports>false</timestampedReports>
+                <exportLineCoverage>true</exportLineCoverage>
+                <outputFormats>
+                  <value>XML</value>
+                </outputFormats>
+                <excludedClasses>
+                  <param>**.config.*</param>
+                  <param>**.*Config</param>
+                </excludedClasses>
+                <excludedTestClasses>
+                  <param>**.architecture.*</param>
+                </excludedTestClasses>
+              </configuration>
+            </plugin>
+          </plugins>
+        </pluginManagement>
+        <plugins>
+          <plugin>
+            <groupId>org.pitest</groupId>
+            <artifactId>pitest-maven</artifactId>
+            <executions>
+              <execution>
+                <id>pitest</id>
+                <goals>
+                  <goal>mutationCoverage</goal>
+                </goals>
+                <phase>test-compile</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>

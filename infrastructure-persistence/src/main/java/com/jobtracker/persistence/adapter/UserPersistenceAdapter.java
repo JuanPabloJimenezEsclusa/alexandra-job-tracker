@@ -9,17 +9,26 @@ import com.jobtracker.domain.vo.UserId;
 import com.jobtracker.persistence.mapper.UserMapper;
 import com.jobtracker.persistence.repository.UserJpaRepository;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
+/**
+ * JPA adapter for user persistence.
+ */
 @Component
+@Transactional(readOnly = true)
 public class UserPersistenceAdapter implements SaveUserPort, LoadUserPort {
   private final UserJpaRepository repository;
   private final UserMapper mapper = new UserMapper();
 
+  /**
+   * Creates an adapter backed by the given JPA repository.
+   */
   public UserPersistenceAdapter(UserJpaRepository repository) {
     this.repository = repository;
   }
 
   @Override
+  @Transactional
   public void save(User user) {
     repository.save(mapper.toEntity(user));
   }

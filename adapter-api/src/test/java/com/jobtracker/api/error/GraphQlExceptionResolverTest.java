@@ -5,13 +5,14 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.stream.Stream;
+
 import graphql.ErrorType;
 import graphql.execution.ResultPath;
 import graphql.language.Field;
 import graphql.language.OperationDefinition;
 import graphql.language.SourceLocation;
 import graphql.schema.DataFetchingEnvironment;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -22,12 +23,12 @@ class GraphQlExceptionResolverTest {
   private GraphQlExceptionResolver resolver;
   private DataFetchingEnvironment env;
 
-  static Stream<Arguments> exceptionMapping() {
+  private static Stream<Arguments> exceptionMapping() {
     return Stream.of(
-      arguments(new IllegalArgumentException("Invalid input"),         ErrorType.ValidationError,       "BAD_REQUEST",   "VALIDATION"),
-      arguments(new IllegalStateException("Invalid state transition"), ErrorType.DataFetchingException, "INVALID_STATE", "STATE_ERROR"),
-      arguments(new RuntimeException("Unexpected failure"),            ErrorType.DataFetchingException, "INTERNAL_ERROR", "UNEXPECTED"),
-      arguments(new IllegalArgumentException("test"),                  ErrorType.ValidationError,       "BAD_REQUEST",   "VALIDATION")
+      arguments(new IllegalArgumentException("Invalid input"), ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION"),
+      arguments(new IllegalStateException("Invalid state transition"), ErrorType.InvalidSyntax, "INVALID_STATE", "STATE_ERROR"),
+      arguments(new RuntimeException("Unexpected failure"), ErrorType.DataFetchingException, "INTERNAL_ERROR", "UNEXPECTED"),
+      arguments(new IllegalArgumentException("test"), ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION")
     );
   }
 
@@ -77,6 +78,6 @@ class GraphQlExceptionResolverTest {
 
     // Then
     assertThat(error.getMessage()).isEqualTo("Internal server error");
-    assertThat(error.getExtensions().get("errorCode")).isEqualTo("INTERNAL_ERROR");
+    assertThat(error.getExtensions()).containsEntry("errorCode", "INTERNAL_ERROR");
   }
 }

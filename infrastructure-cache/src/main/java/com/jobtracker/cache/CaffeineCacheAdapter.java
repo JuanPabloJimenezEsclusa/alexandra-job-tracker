@@ -8,10 +8,16 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.jobtracker.domain.port.out.CachePort;
 
+/**
+ * Caffeine-backed implementation of {@link CachePort}.
+ */
 public class CaffeineCacheAdapter implements CachePort {
 
   private final Cache<String, Object> cache;
 
+  /**
+   * Creates an adapter with the given maximum size and default TTL.
+   */
   public CaffeineCacheAdapter(final int maxSize, final Duration defaultTtl) {
     this.cache = Caffeine.newBuilder()
       .maximumSize(maxSize)
@@ -23,10 +29,12 @@ public class CaffeineCacheAdapter implements CachePort {
   @Override
   public <T> Optional<T> get(final String key, final Class<T> type) {
     final var value = cache.getIfPresent(key);
-    if (value == null) return Optional.empty();
+    if (value == null) {
+      return Optional.empty();
+    }
     try {
       return Optional.of(type.cast(value));
-    } catch (ClassCastException e) {
+    } catch (ClassCastException _) {
       evict(key);
       return Optional.empty();
     }
@@ -47,6 +55,9 @@ public class CaffeineCacheAdapter implements CachePort {
     cache.invalidateAll();
   }
 
+  /**
+   * Returns the underlying Caffeine cache as a concurrent map.
+   */
   public ConcurrentMap<String, Object> asMap() {
     return cache.asMap();
   }

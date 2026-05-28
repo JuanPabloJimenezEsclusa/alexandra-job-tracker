@@ -27,7 +27,7 @@ class MdcLoggingInterceptorTest {
 
   private MdcLoggingInterceptor interceptor;
 
-  static Stream<Arguments> mdcScenarios() {
+  private static Stream<Arguments> mdcScenarios() {
     final var shortDoc = "{ me }";
     final var longDoc = "mutation { createApplication(company: \"VeryLongCompanyNameThatExceedsTheMaxLength\", role: \"Engineer\", source: LINKEDIN) { id } }";
     final var headersWithAuth = new HttpHeaders();
@@ -41,7 +41,7 @@ class MdcLoggingInterceptorTest {
     );
   }
 
-  static Stream<Arguments> clearMdcScenarios() {
+  private static Stream<Arguments> clearMdcScenarios() {
     return Stream.of(arguments("preExisting", "value"));
   }
 

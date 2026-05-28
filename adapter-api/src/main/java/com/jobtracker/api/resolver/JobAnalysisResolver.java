@@ -10,14 +10,23 @@ import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
 
+/**
+ * Resolves job analysis-related GraphQL mutations.
+ */
 @Controller
 public class JobAnalysisResolver {
   private final AnalyzeJobPostingUseCaseImpl useCase;
 
+  /**
+   * Constructor.
+   */
   public JobAnalysisResolver(final LoadJobPostingPort loadJobPostingPort, final JobAnalysisPort analysisPort) {
     this.useCase = new AnalyzeJobPostingUseCaseImpl(loadJobPostingPort, analysisPort);
   }
 
+  /**
+   * Triggers AI analysis of a job posting.
+   */
   @MutationMapping
   public JobAnalysis analyzeJobPosting(@Argument final UUID jobPostingId) {
     return useCase.analyze(jobPostingId);

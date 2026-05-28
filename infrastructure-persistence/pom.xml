@@ -11,6 +11,8 @@
   </parent>
 
   <artifactId>infrastructure-persistence</artifactId>
+  <description>Infrastructure layer responsible for data persistence and database interactions.
+  </description>
 
   <dependencies>
     <dependency>

@@ -7,10 +7,16 @@ import com.jobtracker.domain.port.in.AnalyzeJobPostingUseCase;
 import com.jobtracker.domain.port.out.JobAnalysisPort;
 import com.jobtracker.domain.port.out.LoadJobPostingPort;
 
+/**
+ * Implementation of AnalyzeJobPostingUseCase using domain ports.
+ */
 public class AnalyzeJobPostingUseCaseImpl implements AnalyzeJobPostingUseCase {
   private final LoadJobPostingPort loadJobPostingPort;
   private final JobAnalysisPort analysisPort;
 
+  /**
+   * Constructor.
+   */
   public AnalyzeJobPostingUseCaseImpl(final LoadJobPostingPort loadJobPostingPort, final JobAnalysisPort analysisPort) {
     this.loadJobPostingPort = loadJobPostingPort;
     this.analysisPort = analysisPort;
@@ -19,7 +25,7 @@ public class AnalyzeJobPostingUseCaseImpl implements AnalyzeJobPostingUseCase {
   @Override
   public JobAnalysis analyze(final UUID jobPostingId) {
     final var posting = loadJobPostingPort.findById(jobPostingId)
-        .orElseThrow(() -> new IllegalArgumentException("Job posting not found"));
+      .orElseThrow(() -> new IllegalArgumentException("Job posting not found"));
     return analysisPort.analyze(posting.description());
   }
 }

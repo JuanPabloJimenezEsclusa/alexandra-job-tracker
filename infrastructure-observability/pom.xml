@@ -11,6 +11,8 @@
   </parent>
 
   <artifactId>infrastructure-observability</artifactId>
+  <description>Infrastructure layer responsible for observability, including metrics and tracing.
+  </description>
 
   <dependencies>
     <dependency>

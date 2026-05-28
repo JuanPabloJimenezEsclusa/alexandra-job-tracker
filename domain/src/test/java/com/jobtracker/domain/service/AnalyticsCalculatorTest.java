@@ -24,21 +24,21 @@ class AnalyticsCalculatorTest {
     var uid = UserId.generate();
     return Stream.of(
       arguments(named("multiple statuses", List.of(
-          app(uid, ApplicationStatus.ACCEPTED),
-          app(uid, ApplicationStatus.REJECTED),
-          app(uid, ApplicationStatus.INTERVIEWING),
-          app(uid, ApplicationStatus.APPLIED))
-        ), 4, 25.0),
+        app(uid, ApplicationStatus.ACCEPTED),
+        app(uid, ApplicationStatus.REJECTED),
+        app(uid, ApplicationStatus.INTERVIEWING),
+        app(uid, ApplicationStatus.APPLIED))
+      ), 4, 25.0),
       arguments(named("empty list", List.of()), 0, 0.0),
       arguments(named("only saved", List.of(app(uid, ApplicationStatus.SAVED))), 1, 0.0),
       arguments(named("all accepted", List.of(
-          app(uid, ApplicationStatus.ACCEPTED),
-          app(uid, ApplicationStatus.ACCEPTED)
-        )), 2, 100.0),
+        app(uid, ApplicationStatus.ACCEPTED),
+        app(uid, ApplicationStatus.ACCEPTED)
+      )), 2, 100.0),
       arguments(named("half accepted", List.of(
-          app(uid, ApplicationStatus.ACCEPTED),
-          app(uid, ApplicationStatus.OFFER)
-        )), 2, 50.0)
+        app(uid, ApplicationStatus.ACCEPTED),
+        app(uid, ApplicationStatus.OFFER)
+      )), 2, 50.0)
     );
   }
 

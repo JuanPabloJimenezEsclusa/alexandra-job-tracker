@@ -6,10 +6,16 @@ import org.springframework.graphql.server.WebGraphQlResponse;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
+/**
+ * Intercepts GraphQL requests to resolve JWT authentication.
+ */
 @Component
 public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
   private final JwtProvider jwtProvider;
 
+  /**
+   * Constructs an interceptor with the given JWT provider.
+   */
   public GraphQlAuthInterceptor(final JwtProvider jwtProvider) {
     this.jwtProvider = jwtProvider;
   }

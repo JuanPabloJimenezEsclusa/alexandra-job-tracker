@@ -5,12 +5,16 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
+/**
+ * Spring Boot application entry point.
+ */
 @SpringBootApplication(scanBasePackages = {
   "com.jobtracker.api",
   "com.jobtracker.auth",
   "com.jobtracker.persistence",
   "com.jobtracker.scraping",
   "com.jobtracker.ai",
+  "com.jobtracker.cache",
   "com.jobtracker.observability"
 })
 @EnableJpaRepositories("com.jobtracker.persistence.repository")

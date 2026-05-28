@@ -12,6 +12,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.stereotype.Component;
 
+/**
+ * Resolves data-fetcher exceptions into structured GraphQL error responses.
+ */
 @Component
 public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapter {
 
@@ -48,7 +51,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
   private ErrorType resolveErrorType(final Throwable ex) {
     return switch (ex) {
       case IllegalArgumentException _ -> ErrorType.ValidationError;
-      case IllegalStateException _ -> ErrorType.DataFetchingException;
+      case IllegalStateException _ -> ErrorType.InvalidSyntax;
       default -> ErrorType.DataFetchingException;
     };
   }

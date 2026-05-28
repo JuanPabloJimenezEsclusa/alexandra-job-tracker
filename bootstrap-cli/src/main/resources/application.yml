@@ -1,5 +1,35 @@
 spring:
+  application:
+    group: com.alexandra
+    name: alexandra-job-tracker
+    version: 1.0.0
+    admin:
+      enabled: true
+      jmx-name: "com.alexandra:type=Admin,name=SpringApplication"
+    
   shell:
+    command:
+      version:
+        enabled: true
+        show-build-artifact: true
+        show-build-group: true
+        show-build-name: true
+        show-build-time: true
+        show-build-version: true
+        show-git-branch: true
+        show-git-commit-id: true
+        show-git-commit-time: true
+        show-git-short-commit-id: true
+      completion:
+        enabled: true
+      quit:
+        enabled: true
+      clear:
+        enabled: true
+    history:
+      enabled: true
+    help:
+      enabled: true
     interactive:
       enabled: true
 

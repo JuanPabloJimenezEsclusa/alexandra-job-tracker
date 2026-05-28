@@ -53,6 +53,6 @@ class AnalyticsTest {
   void shouldRejectNegativeCounts(final EnumMap<ApplicationStatus, Integer> perStatus) {
     // When, Then
     assertThatThrownBy(() -> new Analytics(perStatus))
-        .isInstanceOf(IllegalArgumentException.class);
+      .isInstanceOf(IllegalArgumentException.class);
   }
 }

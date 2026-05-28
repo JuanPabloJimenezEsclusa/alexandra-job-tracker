@@ -11,6 +11,9 @@
   </parent>
 
   <artifactId>adapter-cli</artifactId>
+  <description>Command-line interface for the Job Tracker application, allowing users to interact
+    with the system via terminal commands.
+  </description>
 
   <dependencies>
     <dependency>

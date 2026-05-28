@@ -8,6 +8,9 @@ import org.jsoup.nodes.Document;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * HTTP client with human-like request patterns.
+ */
 @Component
 public class HumanizedHttpClient {
   private static final List<String> USER_AGENTS = List.of(
@@ -24,6 +27,9 @@ public class HumanizedHttpClient {
   private final long minDelayMs;
   private final long maxDelayMs;
 
+  /**
+   * Constructor.
+   */
   public HumanizedHttpClient(
     @Value("${scraper.delay.min:1000}") long minDelayMs,
     @Value("${scraper.delay.max:3000}") long maxDelayMs
@@ -32,16 +38,22 @@ public class HumanizedHttpClient {
     this.maxDelayMs = maxDelayMs;
   }
 
+  /**
+   * Fetches a URL with human-like delays and headers.
+   */
   public Document fetch(String url) {
     try {
-      Thread.sleep(minDelayMs + (long) (random.nextDouble() * (maxDelayMs - minDelayMs)));
+      Thread.sleep(minDelayMs + (random.nextLong() * (maxDelayMs - minDelayMs)));
       return Jsoup.connect(url)
         .userAgent(USER_AGENTS.get(random.nextInt(USER_AGENTS.size())))
         .referrer(REFERRERS.get(random.nextInt(REFERRERS.size())))
         .timeout(10000)
         .get();
-    } catch (Exception e) {
-      throw new RuntimeException("Failed to fetch " + url, e);
+    } catch (final InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new ScrapingException("Interrupted while waiting for request", e);
+    } catch (final Exception e) {
+      throw new ScrapingException("Failed to fetch " + url, e);
     }
   }
 }

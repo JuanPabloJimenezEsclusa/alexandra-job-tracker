@@ -15,6 +15,9 @@ import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * A job application tracked by a user.
+ */
 public record JobApplication(
   UUID id,
   UserId userId,
@@ -27,17 +30,6 @@ public record JobApplication(
   Instant lastUpdated,
   @Nullable String notes) {
 
-  public JobApplication withStatus(final ApplicationStatus newStatus) {
-    if (!canTransitionTo(status, newStatus)) {
-      throw new IllegalStateException("Cannot transition from " + status + " to " + newStatus);
-    }
-    return new JobApplication(id, userId, company, role, source, postingUrl, newStatus, dateApplied, Instant.now(), notes);
-  }
-
-  public JobApplication withNotes(final String notes) {
-    return new JobApplication(id, userId, company, role, source, postingUrl, status, dateApplied, Instant.now(), notes);
-  }
-
   private static boolean canTransitionTo(final ApplicationStatus current, final ApplicationStatus target) {
     return switch (current) {
       case SAVED -> target == APPLIED || target == WITHDRAWN;
@@ -46,5 +38,22 @@ public record JobApplication(
       case OFFER -> target == ACCEPTED || target == REJECTED || target == WITHDRAWN;
       case ACCEPTED, REJECTED, WITHDRAWN -> false;
     };
+  }
+
+  /**
+   * Returns a new JobApplication with the given status after validating the transition.
+   */
+  public JobApplication withStatus(final ApplicationStatus newStatus) {
+    if (!canTransitionTo(status, newStatus)) {
+      throw new IllegalStateException("Cannot transition from " + status + " to " + newStatus);
+    }
+    return new JobApplication(id, userId, company, role, source, postingUrl, newStatus, dateApplied, Instant.now(), notes);
+  }
+
+  /**
+   * Returns a new JobApplication with updated notes.
+   */
+  public JobApplication withNotes(@Nullable final String notes) {
+    return new JobApplication(id, userId, company, role, source, postingUrl, status, dateApplied, Instant.now(), notes);
   }
 }

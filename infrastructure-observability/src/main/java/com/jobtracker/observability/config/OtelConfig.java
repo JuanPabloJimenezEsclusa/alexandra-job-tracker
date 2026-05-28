@@ -12,9 +12,15 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configures OpenTelemetry for distributed tracing.
+ */
 @Configuration
 public class OtelConfig {
 
+  /**
+   * Creates the OpenTelemetry SDK with OTLP span exporter.
+   */
   @Bean
   public OpenTelemetry openTelemetry(
     @Value("${otel.exporter.otlp.endpoint:http://localhost:4318}") final String endpoint) {

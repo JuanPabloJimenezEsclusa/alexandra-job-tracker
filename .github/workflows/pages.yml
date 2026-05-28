@@ -1,6 +1,6 @@
 name: Pages
 on:
-  push: { branches: [ main ] }
+  push: { branches: [ develop ] }
   workflow_dispatch:
 
 permissions:
@@ -22,8 +22,8 @@ jobs:
           distribution: graalvm
           java-version: 25
           cache: maven
-      - run: ./mvnw site -Pcoverage
+      - run: ./mvnw site site:stage-deploy
       - uses: actions/configure-pages@v4
       - uses: actions/upload-pages-artifact@v3
-        with: { path: "target/site" }
+        with: { path: "target/site-staging/staging" }
       - uses: actions/deploy-pages@v4

@@ -11,14 +11,23 @@ import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.stereotype.Controller;
 
+/**
+ * Resolves job scraping-related GraphQL mutations.
+ */
 @Controller
 public class ScrapeResolver {
   private final ScrapeJobUseCaseImpl useCase;
 
+  /**
+   * Constructor.
+   */
   public ScrapeResolver(JobScraperPort scraper, SaveJobPostingPort spp, SaveJobApplicationPort sap) {
     this.useCase = new ScrapeJobUseCaseImpl(scraper, spp, sap);
   }
 
+  /**
+   * Scrapes a job posting from the given URL for the authenticated user.
+   */
   @MutationMapping
   public JobPosting scrapeJobPosting(@ContextValue UserId userId, @Argument String url) {
     return useCase.scrape(userId, url);

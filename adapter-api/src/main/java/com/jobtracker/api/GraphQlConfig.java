@@ -1,9 +1,13 @@
 package com.jobtracker.api;
 
 import java.time.Instant;
+import java.util.Locale;
 
-import graphql.language.StringValue;
+import graphql.GraphQLContext;
+import graphql.execution.CoercedVariables;
+import graphql.language.Value;
 import graphql.schema.Coercing;
+import graphql.schema.CoercingParseLiteralException;
 import graphql.schema.CoercingParseValueException;
 import graphql.schema.CoercingSerializeException;
 import graphql.schema.GraphQLScalarType;
@@ -11,6 +15,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 
+/**
+ * Configures GraphQL scalars and runtime wiring.
+ */
 @Configuration
 public class GraphQlConfig {
 
@@ -19,27 +26,41 @@ public class GraphQlConfig {
     .description("java.time.Instant as epoch millis")
     .coercing(new Coercing<Instant, Long>() {
       @Override
-      public Long serialize(Object dataFetcherResult) {
-        if (dataFetcherResult instanceof Instant i) return i.toEpochMilli();
+      public Long serialize(final Object dataFetcherResult, final GraphQLContext context, final Locale locale) {
+        if (dataFetcherResult instanceof Instant i) {
+          return i.toEpochMilli();
+        }
         throw new CoercingSerializeException("Expected Instant");
       }
 
       @Override
-      public Instant parseValue(Object input) {
-        if (input instanceof Number n) return Instant.ofEpochMilli(n.longValue());
-        if (input instanceof String s) return Instant.parse(s);
+      public Instant parseValue(final Object input, final GraphQLContext context, final Locale locale) {
+        if (input instanceof Number n) {
+          return Instant.ofEpochMilli(n.longValue());
+        }
+        if (input instanceof String s) {
+          return Instant.parse(s);
+        }
         throw new CoercingParseValueException("Expected number or string");
       }
 
       @Override
-      public Instant parseLiteral(Object input) {
-        if (input instanceof Number n) return Instant.ofEpochMilli(n.longValue());
-        if (input instanceof StringValue sv) return Instant.parse(sv.getValue());
-        return null;
+      public Instant parseLiteral(final Value<?> input, final CoercedVariables variables,
+                                  final GraphQLContext context, final Locale locale) {
+        if (input instanceof graphql.language.IntValue n) {
+          return Instant.ofEpochMilli(n.getValue().longValue());
+        }
+        if (input instanceof graphql.language.StringValue sv) {
+          return Instant.parse(sv.getValue());
+        }
+        throw new CoercingParseLiteralException("Expected number or string");
       }
     })
     .build();
 
+  /**
+   * Registers custom scalar types with the GraphQL runtime wiring.
+   */
   @Bean
   public RuntimeWiringConfigurer runtimeWiringConfigurer() {
     return wiring -> wiring.scalar(INSTANT);

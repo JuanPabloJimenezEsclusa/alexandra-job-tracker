@@ -10,6 +10,9 @@
   </parent>
 
   <artifactId>infrastructure-auth</artifactId>
+  <description>Infrastructure layer responsible for authentication and authorization
+    functionalities.
+  </description>
 
   <dependencies>
     <dependency>
@@ -28,7 +31,6 @@
     <dependency>
       <groupId>io.jsonwebtoken</groupId>
       <artifactId>jjwt-impl</artifactId>
-      <scope>runtime</scope>
     </dependency>
     <dependency>
       <groupId>io.jsonwebtoken</groupId>

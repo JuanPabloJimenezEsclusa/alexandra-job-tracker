@@ -10,6 +10,9 @@
   </parent>
 
   <artifactId>infrastructure-cache</artifactId>
+  <description>Infrastructure layer responsible for caching mechanisms in the Job Tracker
+    application.
+  </description>
 
   <dependencies>
     <dependency>
@@ -20,6 +23,10 @@
     <dependency>
       <groupId>org.springframework</groupId>
       <artifactId>spring-context</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-cache</artifactId>
     </dependency>
     <dependency>
       <groupId>com.github.ben-manes.caffeine</groupId>

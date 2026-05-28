@@ -11,10 +11,16 @@ import com.jobtracker.domain.port.out.LoadUserPort;
 import com.jobtracker.domain.port.out.SaveUserPort;
 import com.jobtracker.domain.vo.UserId;
 
+/**
+ * Implementation of AuthenticationUseCase with SHA-512 password hashing.
+ */
 public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
   private final SaveUserPort saveUserPort;
   private final LoadUserPort loadUserPort;
 
+  /**
+   * Constructor.
+   */
   public AuthenticationUseCaseImpl(final SaveUserPort saveUserPort, final LoadUserPort loadUserPort) {
     this.saveUserPort = saveUserPort;
     this.loadUserPort = loadUserPort;
@@ -33,7 +39,7 @@ public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
   @Override
   public User login(final String username, final String password) {
     final var user = loadUserPort.findByUsername(username)
-        .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+      .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
     if (!user.passwordHash().equals(hashPassword(password))) {
       throw new IllegalArgumentException("Invalid credentials");
     }
@@ -44,8 +50,8 @@ public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
     try {
       final var digest = MessageDigest.getInstance("SHA-512");
       return HexFormat.of().formatHex(digest.digest(password.getBytes()));
-    } catch (NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
+    } catch (final NoSuchAlgorithmException e) {
+      throw new UnsupportedOperationException("SHA-512 not supported", e);
     }
   }
 }
