@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Alexandra Job Tracker — Options</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Alexandra Job Tracker</h1>
+    <p class="subtitle">Configure connection to your local API server</p>
+
+    <form id="configForm">
+      <div class="field">
+        <label for="serverUrl">Server URL</label>
+        <input type="url" id="serverUrl"
+               value="http://localhost:8880/api/graphql"
+               placeholder="http://localhost:8880/api/graphql">
+      </div>
+
+      <hr>
+
+      <div class="field">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Your Alexandra username">
+      </div>
+
+      <div class="field">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Your Alexandra password">
+      </div>
+
+      <button type="submit" id="loginBtn">Login</button>
+    </form>
+
+    <div id="status" class="status hidden"></div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+info:
+  name: query.analysis
+  type: graphql
+  seq: 14
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      query($id: ID!) {
+        analysis(id: $id) {
+          id, jobPostingId, summary, seniority, softSkills, technicalSkills,
+          fitScore, companyRating, companyType, salaryMin, salaryMax, salaryCurrency, createdAt
+        }
+      }
+    variables: |-
+      {
+        "id": "{{analysisId}}"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: analysisId
+      value: "00000000-0000-0000-0000-000000000000"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

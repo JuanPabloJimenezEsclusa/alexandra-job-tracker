@@ -1,7 +1,7 @@
 info:
   name: query.analytics
   type: graphql
-  seq: 13
+  seq: 11
 
 graphql:
   method: POST
@@ -13,7 +13,7 @@ graphql:
     query: |
       query($since: Instant) {
         analytics(since: $since) {
-          totalApplications, perStatus { saved }, conversionRate
+          totalApplications, perStatus { saved, applied, interviewing, offer, accepted, rejected, withdrawn }, conversionRate
         }
       }
     variables: |-

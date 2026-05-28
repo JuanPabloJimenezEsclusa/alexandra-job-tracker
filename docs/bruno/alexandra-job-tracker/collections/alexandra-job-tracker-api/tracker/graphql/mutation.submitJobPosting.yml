@@ -1,0 +1,35 @@
+info:
+  name: mutation.submitJobPosting
+  type: graphql
+  seq: 7
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      mutation($input: SubmitJobInput!) {
+        submitJobPosting(input: $input) {
+          id, url, source, title, company, description, postedAt
+        }
+      }
+    variables: |-
+      {
+        "input": {
+          "url": "https://linkedin.com/jobs/123",
+          "title": "Software Engineer",
+          "company": "Acme Corp",
+          "source": "LINKEDIN",
+          "description": "Full-stack engineer with Java and React experience"
+        }
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

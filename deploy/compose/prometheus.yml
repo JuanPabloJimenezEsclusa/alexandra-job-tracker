@@ -4,3 +4,8 @@ scrape_configs:
     metrics_path: /api/actuator/prometheus
     static_configs:
       - targets: [ "job-tracker-server:8880" ]
+    metric_relabel_configs:
+      # Drop http_server_requests* series for actuator endpoints (uri=/actuator/...)
+      - source_labels: [ __name__, uri ]
+        regex: 'http_server_requests.*;/actuator.*'
+        action: drop

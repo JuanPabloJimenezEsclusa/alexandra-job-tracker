@@ -14,7 +14,7 @@ graphql:
       mutation { logout }
     variables: |-
       {
-         
+      
       }
   auth: inherit
 

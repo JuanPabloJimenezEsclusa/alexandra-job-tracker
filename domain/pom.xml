@@ -5,19 +5,29 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.jobtracker</groupId>
+    <groupId>dev.jpje.jobtracker</groupId>
     <artifactId>alexandra-job-tracker</artifactId>
     <version>1.0.0</version>
   </parent>
 
   <artifactId>domain</artifactId>
+  <name>Domain</name>
+  <description>Domain layer containing core business logic and entities.</description>
 
-  <dependencies>
-    <dependency>
-      <groupId>com.tngtech.archunit</groupId>
-      <artifactId>archunit-junit5</artifactId>
-      <version>${archunit.version}</version>
-      <scope>test</scope>
-    </dependency>
-  </dependencies>
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>index</report>
+              <report>summary</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>

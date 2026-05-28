@@ -1,0 +1,350 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CloudFormation template for AJT serverless stack (Lambda + API Gateway + S3)
+
+Parameters:
+  ImageUri:
+    Type: String
+    Description: ECR image URI for the Lambda function
+  NeonPass:
+    Type: String
+    NoEcho: true
+    Description: Neon PostgreSQL password
+    Default: placeholder_will_be_updated_by_init_script
+  JwtSecret:
+    Type: String
+    NoEcho: true
+    Description: JWT signing secret (min 32 chars)
+    Default: placeholder_will_be_updated_by_init_script
+  LLMApiKey:
+    Type: String
+    NoEcho: true
+    Description: LLM API key for AI analysis
+    Default: placeholder_will_be_updated_by_init_script
+  HostedZoneId:
+    Type: String
+    Description: Route53 hosted zone ID for jpje.net
+  DomainName:
+    Type: String
+    Description: Custom domain for the API
+    Default: ajt.jpje.net
+
+Resources:
+  #################################################################################################
+  ###################################### IAM ######################################################
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ajt-lambda-execution-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ecr-pull-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:GetAuthorizationToken
+                Resource: "*"
+        - PolicyName: events-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref JobEventsTopic
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt JobAnalysisQueue.Arn
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: !GetAtt JobEventsKmsKey.Arn
+
+  #################################################################################################
+  ###################################### Events (SNS + SQS) #######################################
+  JobEventsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ajt-job-events
+      DisplayName: AJT Job Events
+      KmsMasterKeyId: alias/aws/sns
+
+  JobEventsKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for the AJT SQS queues (grants SNS delivery)
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Id: ajt-job-analysis-key
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: kms:*
+            Resource: "*"
+          - Sid: Allow SNS to encrypt messages delivered to the queue
+            Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+              - kms:GenerateDataKeyWithoutPlaintext
+            Resource: "*"
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref JobEventsTopic
+
+  JobEventsKmsAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: alias/ajt-job-analysis-kms
+      TargetKeyId: !Ref JobEventsKmsKey
+
+  JobAnalysisQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ajt-job-analysis
+      VisibilityTimeout: 120
+      KmsMasterKeyId: !Ref JobEventsKmsKey
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt JobAnalysisDlq.Arn
+        maxReceiveCount: 3
+
+  JobAnalysisDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ajt-job-analysis-dlq
+      KmsMasterKeyId: !Ref JobEventsKmsKey
+
+  JobEventsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref JobEventsTopic
+      Protocol: sqs
+      Endpoint: !GetAtt JobAnalysisQueue.Arn
+      RawMessageDelivery: true
+      FilterPolicyScope: MessageAttributes
+      FilterPolicy:
+        eventType:
+          - JobPostingCreated
+
+  JobAnalysisQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref JobAnalysisQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt JobAnalysisQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref JobEventsTopic
+
+  #################################################################################################
+  ###################################### Lambda ###################################################
+  LambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ajt-serverless
+      Description: Spring Boot native-image job tracker (GraalVM)
+      PackageType: Image
+      Code:
+        ImageUri: !Ref ImageUri
+      Role: !GetAtt LambdaExecutionRole.Arn
+      MemorySize: 1024
+      Timeout: 60
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          NEON_PASSWORD: !Ref NeonPass
+          JWT_SECRET: !Ref JwtSecret
+          LLM_API_KEY: !Ref LLMApiKey
+          SNS_TOPIC_ARN: !Ref JobEventsTopic
+          SQS_QUEUE_URL: !Ref JobAnalysisQueue
+          SPRING_PROFILES_ACTIVE: "aws"
+          LOGGING_LEVEL_ROOT: WARN
+          LOGGING_LEVEL_COM_JOBTRACKER: INFO
+          AWS_LAMBDA_SERVER_PORT: "8080"
+          SERVER_PORT: "8080"
+      Tags:
+        - Key: Name
+          Value: ajt-serverless
+
+  LambdaVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref LambdaFunction
+
+  LambdaLiveAlias:
+    Type: AWS::Lambda::Alias
+    DependsOn: LambdaVersion
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      FunctionVersion: !GetAtt LambdaVersion.Version
+      Name: live
+
+  LambdaFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !GetAtt LambdaFunction.Arn
+      AuthType: NONE
+      Cors:
+        AllowOrigins: ["*"]
+        AllowMethods: ["*"]
+        AllowHeaders: ["*"]
+        MaxAge: 3600
+
+  LambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+  #################################################################################################
+  ###################################### API Gateway ##############################################
+  ApiGatewayHttpApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: ajt-serverless-api
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowOrigins: ["*"]
+        AllowMethods: ["*"]
+        AllowHeaders: ["*"]
+
+  ApiGatewayIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref ApiGatewayHttpApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaLiveAlias}/invocations"
+      PayloadFormatVersion: "2.0"
+
+  ApiGatewayRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref ApiGatewayHttpApi
+      RouteKey: $default
+      Target: !Join ["/", ["integrations", !Ref ApiGatewayIntegration]]
+
+  ApiGatewayStage:
+    Type: AWS::ApiGatewayV2::Stage
+    DependsOn: ApiGatewayAccessLogGroup
+    Properties:
+      StageName: $default
+      ApiId: !Ref ApiGatewayHttpApi
+      AutoDeploy: true
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 20
+        ThrottlingRateLimit: 5.0
+      AccessLogSettings:
+        DestinationArn: !GetAtt ApiGatewayAccessLogGroup.Arn
+        Format: "$context.requestId $context.httpMethod $context.routeKey $context.status $context.protocol $context.responseLength"
+
+  ApiGatewayAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/apigateway/${ApiGatewayHttpApi}"
+      RetentionInDays: 1
+
+  ApiGatewayLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref LambdaLiveAlias
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayHttpApi}/*"
+
+  #################################################################################################
+  ###################################### Custom Domain ############################################
+  AcmCertificate:
+    Type: AWS::CertificateManager::Certificate
+    Properties:
+      DomainName: !Ref DomainName
+      ValidationMethod: DNS
+      DomainValidationOptions:
+        - DomainName: !Ref DomainName
+          HostedZoneId: !Ref HostedZoneId
+
+  ApiGatewayDomainName:
+    Type: AWS::ApiGatewayV2::DomainName
+    DependsOn: AcmCertificate
+    Properties:
+      DomainName: !Ref DomainName
+      DomainNameConfigurations:
+        - EndpointType: REGIONAL
+          CertificateArn: !Ref AcmCertificate
+
+  ApiGatewayMapping:
+    Type: AWS::ApiGatewayV2::ApiMapping
+    Properties:
+      DomainName: !Ref ApiGatewayDomainName
+      ApiId: !Ref ApiGatewayHttpApi
+      Stage: !Ref ApiGatewayStage
+
+  RecordSet:
+    Type: AWS::Route53::RecordSet
+    DependsOn: ApiGatewayDomainName
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref DomainName
+      Type: A
+      AliasTarget:
+        DNSName: !GetAtt ApiGatewayDomainName.RegionalDomainName
+        HostedZoneId: !GetAtt ApiGatewayDomainName.RegionalHostedZoneId
+
+  #################################################################################################
+  ###################################### CloudWatch ###############################################
+  LogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${LambdaFunction}"
+      RetentionInDays: 1
+
+Outputs:
+  LambdaFunctionName:
+    Description: Lambda function name
+    Value: !Ref LambdaFunction
+  LambdaUrl:
+    Description: Direct Lambda function URL
+    Value: !GetAtt LambdaFunctionUrl.FunctionUrl
+  ApiGatewayUrl:
+    Description: API Gateway URL
+    Value: !Sub "https://${ApiGatewayHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+  CustomDomainUrl:
+    Description: Custom domain URL
+    Value: !Sub "https://${DomainName}"
+  LogGroupName:
+    Description: CloudWatch Log Group
+    Value: !Ref LogGroup
+  JobEventsTopicArn:
+    Description: SNS topic for job events
+    Value: !Ref JobEventsTopic
+  JobAnalysisQueueUrl:
+    Description: SQS queue for async job analysis
+    Value: !Ref JobAnalysisQueue

@@ -1,0 +1,32 @@
+info:
+  name: mutation.deleteAnalysis
+  type: graphql
+  seq: 15
+
+graphql:
+  method: POST
+  url: "{{baseUrl}}/graphql"
+  headers:
+    - name: Accept
+      value: application/json
+  body:
+    query: |
+      mutation($id: ID!) {
+        deleteAnalysis(id: $id)
+      }
+    variables: |-
+      {
+        "id": "{{analysisId}}"
+      }
+  auth: inherit
+
+runtime:
+  variables:
+    - name: analysisId
+      value: "00000000-0000-0000-0000-000000000000"
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5

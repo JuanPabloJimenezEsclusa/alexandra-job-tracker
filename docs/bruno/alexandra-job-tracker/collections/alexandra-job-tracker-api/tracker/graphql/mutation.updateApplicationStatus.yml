@@ -13,7 +13,7 @@ graphql:
     query: |
       mutation($id: ID!, $status: ApplicationStatus!, $notes: String) { 
         updateApplicationStatus(id: $id, status: $status, notes: $notes) {
-          id, company, role, source, postingUrl, notes, status, dateApplied, lastUpdated, resume { id }
+          id, company, role, source, postingUrl, notes, status, dateApplied, lastUpdated
         }
       }
     variables: |-
@@ -27,7 +27,7 @@ graphql:
 runtime:
   variables:
     - name: randomId
-      value: 94a9f56d-6457-446e-9614-b9981e2aa761
+      value: 4169083b-35d7-4dcd-8471-ccda0d8d4c6e
     - name: randomStatus
       value: OFFER
     - name: randomNotes

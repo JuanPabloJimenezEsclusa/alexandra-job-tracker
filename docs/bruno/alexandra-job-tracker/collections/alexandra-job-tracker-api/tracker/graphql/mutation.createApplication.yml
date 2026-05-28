@@ -13,7 +13,7 @@ graphql:
     query: |
       mutation($company: String!, $role: String!, $source: Source!, $postingUrl: String, $notes: String) { 
         createApplication(company: $company, role: $role, source: $source, postingUrl: $postingUrl, notes: $notes) { 
-          id, company, role, source, postingUrl, notes, status, dateApplied, lastUpdated, resume { id }
+          id, company, role, source, postingUrl, notes, status, dateApplied, lastUpdated
         } 
       }
     variables: |-
