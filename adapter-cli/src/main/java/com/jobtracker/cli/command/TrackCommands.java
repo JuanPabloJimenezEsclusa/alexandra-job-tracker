@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jobtracker.cli.client.GraphqlClient;
+import com.jobtracker.cli.format.JqProcessor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -15,12 +16,14 @@ import org.springframework.shell.standard.ShellOption;
 @ShellComponent
 public class TrackCommands {
   private final GraphqlClient client;
+  private final JqProcessor jqProcessor;
 
   /**
    * Constructs track commands with the given GraphQL client.
    */
-  public TrackCommands(final GraphqlClient client) {
+  public TrackCommands(final GraphqlClient client, final JqProcessor jqProcessor) {
     this.client = client;
+    this.jqProcessor = jqProcessor;
   }
 
   /**
@@ -59,7 +62,8 @@ public class TrackCommands {
   @ShellMethod(key = {"list", "l"}, value = "List applications", group = "Tracking")
   public String list(
     @ShellOption(value = {"--status", "-s"}, defaultValue = ShellOption.NULL) @Nullable final String status,
-    @ShellOption(value = {"--source"}, defaultValue = ShellOption.NULL) @Nullable final String source) {
+    @ShellOption(value = {"--source"}, defaultValue = ShellOption.NULL) @Nullable final String source,
+    @ShellOption(value = {"--jq", "-j"}, defaultValue = ShellOption.NULL) @Nullable final String jq) {
 
     final var variables = new HashMap<String, Object>();
     if (status != null) {
@@ -77,7 +81,7 @@ public class TrackCommands {
         }""",
       variables);
 
-    return result.get("data").get("applications").toPrettyString();
+    return jqProcessor.process(result.get("data").get("applications"), jq);
   }
 
   /**

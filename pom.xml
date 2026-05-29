@@ -82,6 +82,7 @@
     <jsoup.version>1.18.1</jsoup.version>
     <jspecify.version>1.0.0</jspecify.version>
     <checkstyle.version>10.23.0</checkstyle.version>
+    <jackson-jq.version>1.6.2</jackson-jq.version>
 
     <!-- Site reports -->
     <inceptionYear>2023</inceptionYear>
@@ -145,6 +146,11 @@
         <version>1.20.0</version>
         <type>pom</type>
         <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>net.thisptr</groupId>
+        <artifactId>jackson-jq</artifactId>
+        <version>${jackson-jq.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

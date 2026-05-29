@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.jobtracker.cli.client.GraphqlClient;
+import com.jobtracker.cli.format.JqProcessor;
 import org.jspecify.annotations.Nullable;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
@@ -15,12 +16,14 @@ import org.springframework.shell.standard.ShellOption;
 @ShellComponent
 public class ScrapeCommands {
   private final GraphqlClient client;
+  private final JqProcessor jqProcessor;
 
   /**
    * Constructs scrape commands with the given GraphQL client.
    */
-  public ScrapeCommands(final GraphqlClient client) {
+  public ScrapeCommands(final GraphqlClient client, final JqProcessor jqProcessor) {
     this.client = client;
+    this.jqProcessor = jqProcessor;
   }
 
   /**
@@ -42,7 +45,8 @@ public class ScrapeCommands {
    */
   @ShellMethod(key = {"postings", "po"}, value = "List job postings", group = "Scraping")
   public String postings(
-    @ShellOption(value = {"--source", "-s"}, defaultValue = ShellOption.NULL) @Nullable final String source) {
+    @ShellOption(value = {"--source", "-s"}, defaultValue = ShellOption.NULL) @Nullable final String source,
+    @ShellOption(value = {"--jq", "-j"}, defaultValue = ShellOption.NULL) @Nullable final String jq) {
     final var variables = new HashMap<String, Object>();
     if (source != null) variables.put("s", source);
     final var result = client.execute("""
@@ -50,6 +54,6 @@ public class ScrapeCommands {
           jobPostings(source: $s) { id title company source url postedAt }
         }""",
       variables);
-    return result.get("data").get("jobPostings").toPrettyString();
+    return jqProcessor.process(result.get("data").get("jobPostings"), jq);
   }
 }
