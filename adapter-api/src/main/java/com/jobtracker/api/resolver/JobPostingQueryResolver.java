@@ -16,13 +16,13 @@ import org.springframework.stereotype.Controller;
  * Resolves job posting-related GraphQL queries.
  */
 @Controller
-public class JobPostingResolver {
+public class JobPostingQueryResolver {
   private final ListJobPostingsUseCase useCase;
 
   /**
    * Constructor.
    */
-  public JobPostingResolver(final ListJobPostingsUseCase useCase) {
+  public JobPostingQueryResolver(final ListJobPostingsUseCase useCase) {
     this.useCase = useCase;
   }
 
@@ -31,7 +31,7 @@ public class JobPostingResolver {
    */
   @QueryMapping
   public List<JobPosting> jobPostings(@ContextValue final UserId userId,
-                                      @Argument @Nullable final Source source) {
+                                       @Argument @Nullable final Source source) {
     return useCase.listJobPostings(userId, source);
   }
 }

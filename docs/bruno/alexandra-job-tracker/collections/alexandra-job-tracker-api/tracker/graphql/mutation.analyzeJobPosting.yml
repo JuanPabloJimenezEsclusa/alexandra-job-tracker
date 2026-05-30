@@ -18,22 +18,14 @@ graphql:
       }
     variables: |-
       {
-        "resumeId": "{{randomResumeId}}",
-        "jobId": "{{randomJobId}}"
+        "jobPostingId": "{{jobPostingId}}"
       }
   auth: inherit
 
 runtime:
   variables:
-    - name: randomResumeId
-      value: "1"
-    - name: randomJobId
-      value: "1"
-  scripts:
-    - type: before-request
-      code: |-
-        const randomId = Math.floor(Math.random() * 100) + 1;
-        bru.setVar("randomProductId", randomId);
+    - name: jobPostingId
+      value: "00000000-0000-0000-0000-000000000000"
 
 settings:
   encodeUrl: true

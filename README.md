@@ -46,12 +46,32 @@ domain  →  application  →  infrastructure-*  +  adapter-*
 - `adapter-*` and `infrastructure-*` depend on `domain` and `application`.
 - `bootstrap-*` is the composition root — depends on everything, wires adapters.
 
+### CQRS Resolver Architecture
+
+Resolvers follow **Command Query Responsibility Segregation** — every endpoint is either a
+`*QueryResolver` (read) or a `*MutationResolver` (write), never both.
+
+| Query Resolver            | Endpoints                               |
+|---------------------------|-----------------------------------------|
+| `UserQueryResolver`       | `me`                                    |
+| `ApplicationQueryResolver`| `applications`                          |
+| `JobPostingQueryResolver` | `jobPostings`                           |
+| `AnalyticsQueryResolver`  | `analytics`, `perStatus`                |
+
+| Mutation Resolver              | Endpoints                                               |
+|--------------------------------|---------------------------------------------------------|
+| `UserMutationResolver`         | `register`, `login`, `logout`                           |
+| `ApplicationMutationResolver`  | `createApplication`, `updateApplicationStatus`, `delete` |
+| `JobPostingMutationResolver`   | `submitJobPosting`, `analyzeJobPosting`                 |
+
 ### Data Flow
 
 ```
-CLI (Spring Shell)  ──HTTP──►  GraphQL API  ──►  Resolver  ──►  Use Case  ──►  Port
-                                                                                   │
-                                             H2  ◄──  JPA Adapter  ◄───────────────┘
+CLI (Spring Shell)  ──HTTP──►  GraphQL API  ──►  *QueryResolver / *MutationResolver
+                                                              │
+                                                         Use Case  ──►  Port
+                                                                          │
+                                                H2  ◄──  JPA Adapter  ◄──┘
 ```
 
 ---
@@ -118,17 +138,18 @@ The server exposes a GraphQL endpoint at `POST /api/graphql` with the following 
 
 | Operation                                       | Description                                      |
 |-------------------------------------------------|--------------------------------------------------|
-| `register(username, password)`                  | Create account, returns JWT                      |
-| `login(username, password)`                     | Authenticate, returns JWT                        |
-| `me`                                            | Current user info                                |
-| `applications(status, source)`                  | List job applications with optional filters      |
-| `createApplication(company, role, source, ...)` | Track a new application                          |
-| `updateApplicationStatus(id, status)`           | Move through pipeline                            |
-| `deleteApplication(id)`                         | Remove an application                            |
-| `analytics(since)`                              | Aggregated per-status counts and conversion rate |
-| `jobPostings(source)`                           | List scraped job postings                        |
-| `scrapeJobPosting(url)`                         | Scrape a job posting from LinkedIn               |
-| `analyzeJobPosting(id)`                         | AI-powered job description analysis              |
+| `register(username, password)`                    | Create account, returns JWT                        |
+| `login(username, password)`                       | Authenticate, returns JWT                          |
+| `logout`                                          | Invalidate current session                         |
+| `me`                                              | Current user info                                  |
+| `applications(status, source)`                    | List job applications with optional filters        |
+| `createApplication(company, role, source, ...)`   | Track a new application                            |
+| `updateApplicationStatus(id, status)`             | Move through pipeline                              |
+| `deleteApplication(id)`                           | Remove an application                              |
+| `analytics(since)`                                | Aggregated per-status counts and conversion rate   |
+| `jobPostings(source)`                             | List scraped job postings                          |
+| `submitJobPosting(input)`                         | Submit a job posting from raw data                 |
+| `analyzeJobPosting(jobPostingId)`                 | AI-powered job description analysis                |
 
 ### Status Pipeline
 
@@ -140,14 +161,45 @@ SAVED → APPLIED → INTERVIEWING → OFFER → ACCEPTED
 
 ---
 
+## CLI Commands
+
+The CLI client connects to the GraphQL API via HTTP. Available commands:
+
+| Command              | Keys          | Description                                   |
+|----------------------|---------------|-----------------------------------------------|
+| `register`           | `reg`         | Create account                                |
+| `login`              | `li`          | Authenticate, stores session token            |
+| `logout`             | `lo`          | Invalidate session                            |
+| `whoami`             | `who`         | Show current user                             |
+| `add`                | `a`           | Track a new job application                   |
+| `list`               | `l`           | List job applications                         |
+| `update`             | `u`           | Update application status                     |
+| `delete`             | `d`           | Remove an application                         |
+| `analytics`          | `an`          | Per-status counts and conversion rate         |
+| `submit-job`         | `sj`          | Submit a job posting from URL or manual entry |
+| `postings`           | `po`          | List scraped job postings                     |
+| `analyze`            | `anlz`        | AI analysis of a job posting                  |
+
+```bash
+# Examples
+java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost:8080
+register --username alice --password secret
+login --username alice --password secret
+submit-job --url https://linkedin.com/jobs/123 --title "SWE" --company Acme --source LINKEDIN
+postings -s LINKEDIN -j '.[].title'
+analyze -i <posting-id> -j '.fitScore'
+```
+
+---
+
 ## Testing
 
 | Type              | Tool                            | Command                                                                        |
 |-------------------|---------------------------------|--------------------------------------------------------------------------------|
 | Unit              | JUnit 5 + Mockito               | `mvn clean test`                                                               |
-| Mutation testing  | PIT                             | `mvn -Ppitest test`                                                            |
+| Mutation          | PIT                             | `mvn -Ppitest test`                                                            |
 | Architecture      | ArchUnit                        | `mvn clean test -pl domain`                                                    |
-| E2E               | Spring Boot Test + RestTemplate | `mvn clean verify` → `coverage-jacoco/target/site/jacoco-aggregate/index.html` |
+| Integration       | Spring Boot Test + RestTemplate | `mvn clean verify` → `coverage-jacoco/target/site/jacoco-aggregate/index.html` |
 | AOT compatibility | Spring AOT                      | `mvn -Pnative test -pl bootstrap-server -am`                                   |
 
 ---

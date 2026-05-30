@@ -7,8 +7,8 @@ COPY pom.xml ./
 COPY domain/pom.xml domain/
 COPY application/pom.xml application/
 COPY infrastructure-persistence/pom.xml infrastructure-persistence/
+COPY infrastructure-cache/pom.xml infrastructure-cache/
 COPY infrastructure-auth/pom.xml infrastructure-auth/
-COPY infrastructure-scraping/pom.xml infrastructure-scraping/
 COPY infrastructure-ai/pom.xml infrastructure-ai/
 COPY infrastructure-observability/pom.xml infrastructure-observability/
 COPY adapter-api/pom.xml adapter-api/

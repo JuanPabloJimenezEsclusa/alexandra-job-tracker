@@ -1,6 +1,5 @@
 package com.jobtracker.api.resolver;
 
-import java.util.List;
 import java.util.UUID;
 
 import com.jobtracker.domain.model.JobApplication;
@@ -12,31 +11,20 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 /**
- * Resolves job application-related GraphQL queries and mutations.
+ * Resolves job application-related GraphQL mutations.
  */
 @Controller
-public class ApplicationResolver {
+public class ApplicationMutationResolver {
   private final TrackJobApplicationUseCase useCase;
 
   /**
    * Constructor.
    */
-  public ApplicationResolver(final TrackJobApplicationUseCase useCase) {
+  public ApplicationMutationResolver(final TrackJobApplicationUseCase useCase) {
     this.useCase = useCase;
-  }
-
-  /**
-   * Lists job applications for the authenticated user, optionally filtered.
-   */
-  @QueryMapping
-  public List<JobApplication> applications(@ContextValue final UserId userId,
-                                           @Argument @Nullable final ApplicationStatus status,
-                                           @Argument @Nullable final Source source) {
-    return useCase.list(userId, status, source);
   }
 
   /**

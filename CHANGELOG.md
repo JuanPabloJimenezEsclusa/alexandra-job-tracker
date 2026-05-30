@@ -5,6 +5,11 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**refactor: remove scrapping**
+
+
+[6253f961c675627](https://github.com///commit/6253f961c675627) juan.pablo.jimenez.esclusa *2026-05-30 16:13:33*
+
 **feat: add analyzeJobPosting into cli commands**
 
 

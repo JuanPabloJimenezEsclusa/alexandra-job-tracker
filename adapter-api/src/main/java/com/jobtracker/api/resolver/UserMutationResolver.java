@@ -1,27 +1,22 @@
 package com.jobtracker.api.resolver;
 
 import com.jobtracker.domain.model.AuthPayload;
-import com.jobtracker.domain.model.User;
 import com.jobtracker.domain.port.in.AuthenticationUseCase;
-import com.jobtracker.domain.vo.UserId;
-import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
-import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 
 /**
- * Resolves user authentication and profile GraphQL queries and mutations.
+ * Resolves user authentication GraphQL mutations.
  */
 @Controller
-public class UserResolver {
+public class UserMutationResolver {
   private final AuthenticationUseCase authUseCase;
 
   /**
    * Constructor.
    */
-  public UserResolver(final AuthenticationUseCase authUseCase) {
+  public UserMutationResolver(final AuthenticationUseCase authUseCase) {
     this.authUseCase = authUseCase;
   }
 
@@ -41,15 +36,6 @@ public class UserResolver {
   public AuthPayload login(@Argument final String username,
                            @Argument final String password) {
     return authUseCase.login(username, password);
-  }
-
-  /**
-   * Returns the currently authenticated user.
-   */
-  @QueryMapping
-  @Nullable
-  public User me(@ContextValue final UserId userId) {
-    return authUseCase.getCurrentUser(userId).orElse(null);
   }
 
   /**

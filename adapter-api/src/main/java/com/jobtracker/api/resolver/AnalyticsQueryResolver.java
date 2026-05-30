@@ -17,13 +17,13 @@ import org.springframework.stereotype.Controller;
  * Resolves analytics-related GraphQL queries.
  */
 @Controller
-public class AnalyticsResolver {
+public class AnalyticsQueryResolver {
   private final GetAnalyticsUseCase useCase;
 
   /**
    * Constructor.
    */
-  public AnalyticsResolver(final GetAnalyticsUseCase useCase) {
+  public AnalyticsQueryResolver(final GetAnalyticsUseCase useCase) {
     this.useCase = useCase;
   }
 
