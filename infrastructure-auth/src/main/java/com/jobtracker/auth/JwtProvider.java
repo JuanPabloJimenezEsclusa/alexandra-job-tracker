@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import javax.crypto.SecretKey;
 
+import com.jobtracker.domain.port.out.TokenGeneratorPort;
 import com.jobtracker.domain.vo.UserId;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Component;
  * Provides JWT token generation and validation.
  */
 @Component
-public class JwtProvider {
+public class JwtProvider implements TokenGeneratorPort {
   private final SecretKey key;
   private final long expirationMs;
 
@@ -27,9 +28,7 @@ public class JwtProvider {
     this.expirationMs = expirationMs;
   }
 
-  /**
-   * Generates a JWT for the given user ID.
-   */
+  @Override
   public String generateToken(final UserId userId) {
     return Jwts.builder()
       .subject(userId.value().toString())

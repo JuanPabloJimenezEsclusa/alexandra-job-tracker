@@ -1,10 +1,8 @@
 package com.jobtracker.api.resolver;
 
-import com.jobtracker.api.dto.AuthPayload;
-import com.jobtracker.auth.JwtProvider;
+import com.jobtracker.domain.model.AuthPayload;
 import com.jobtracker.domain.model.User;
 import com.jobtracker.domain.port.in.AuthenticationUseCase;
-import com.jobtracker.domain.port.out.LoadUserPort;
 import com.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -19,18 +17,12 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class UserResolver {
   private final AuthenticationUseCase authUseCase;
-  private final JwtProvider jwtProvider;
-  private final LoadUserPort loadUserPort;
 
   /**
    * Constructor.
    */
-  public UserResolver(final AuthenticationUseCase authUseCase,
-                      final JwtProvider jwtProvider,
-                      final LoadUserPort loadUserPort) {
+  public UserResolver(final AuthenticationUseCase authUseCase) {
     this.authUseCase = authUseCase;
-    this.jwtProvider = jwtProvider;
-    this.loadUserPort = loadUserPort;
   }
 
   /**
@@ -39,9 +31,7 @@ public class UserResolver {
   @MutationMapping
   public AuthPayload register(@Argument final String username,
                               @Argument final String password) {
-    final var user = authUseCase.register(username, password);
-    final var token = jwtProvider.generateToken(user.id());
-    return new AuthPayload(token, user);
+    return authUseCase.register(username, password);
   }
 
   /**
@@ -50,9 +40,7 @@ public class UserResolver {
   @MutationMapping
   public AuthPayload login(@Argument final String username,
                            @Argument final String password) {
-    final var user = authUseCase.login(username, password);
-    final var token = jwtProvider.generateToken(user.id());
-    return new AuthPayload(token, user);
+    return authUseCase.login(username, password);
   }
 
   /**
@@ -61,7 +49,7 @@ public class UserResolver {
   @QueryMapping
   @Nullable
   public User me(@ContextValue final UserId userId) {
-    return loadUserPort.findById(userId).orElse(null);
+    return authUseCase.getCurrentUser(userId).orElse(null);
   }
 
   /**

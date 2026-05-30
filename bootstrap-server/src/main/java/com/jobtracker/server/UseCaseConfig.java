@@ -20,6 +20,7 @@ import com.jobtracker.domain.port.out.LoadUserPort;
 import com.jobtracker.domain.port.out.SaveJobApplicationPort;
 import com.jobtracker.domain.port.out.SaveJobPostingPort;
 import com.jobtracker.domain.port.out.SaveUserPort;
+import com.jobtracker.domain.port.out.TokenGeneratorPort;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -61,7 +62,8 @@ public class UseCaseConfig {
 
   @Bean
   AuthenticationUseCase authenticationUseCase(final SaveUserPort saveUserPort,
-                                              final LoadUserPort loadUserPort) {
-    return new AuthenticationUseCaseImpl(saveUserPort, loadUserPort);
+                                              final LoadUserPort loadUserPort,
+                                              final TokenGeneratorPort tokenGenerator) {
+    return new AuthenticationUseCaseImpl(saveUserPort, loadUserPort, tokenGenerator);
   }
 }

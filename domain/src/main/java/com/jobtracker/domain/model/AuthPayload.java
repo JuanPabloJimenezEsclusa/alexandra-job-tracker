@@ -1,6 +1,4 @@
-package com.jobtracker.api.dto;
-
-import com.jobtracker.domain.model.User;
+package com.jobtracker.domain.model;
 
 /**
  * Authentication payload containing JWT token and user details.

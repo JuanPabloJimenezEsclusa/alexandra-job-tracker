@@ -5,6 +5,11 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**refactor: remove visivility of application module over infrastructure**
+
+
+[b44620572a2bc1a](https://github.com///commit/b44620572a2bc1a) juan.pablo.jimenez.esclusa *2026-05-30 10:21:19*
+
 **feat: improve cli commands**
 
 

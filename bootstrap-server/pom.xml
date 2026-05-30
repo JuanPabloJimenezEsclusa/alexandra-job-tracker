@@ -51,6 +51,11 @@
       <artifactId>infrastructure-cache</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>com.jobtracker</groupId>
+      <artifactId>infrastructure-auth</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
