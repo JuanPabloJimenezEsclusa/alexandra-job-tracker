@@ -5,6 +5,11 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**test: remove e2e and include it**
+
+
+[6e8c71c04db3d9b](https://github.com///commit/6e8c71c04db3d9b) juan.pablo.jimenez.esclusa *2026-05-30 12:17:21*
+
 **refactor: decouple JwtProvider from UserResolver**
 
 

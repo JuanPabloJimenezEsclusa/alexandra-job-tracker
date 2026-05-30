@@ -48,6 +48,34 @@ public class ScrapeCommands {
   }
 
   /**
+   * Analyzes a job posting using AI.
+   */
+  @ShellMethod(
+    key = {"analyze", "anlz"},
+    value = """
+      Analyze a job posting.
+      
+      EXAMPLES
+        - analyze -i 123e4567-e89b-12d3-a456-426614174000
+        - anlz -i 123 -j '.summary'""",
+    group = "Scraping")
+  public String analyze(
+    @ShellOption(
+      value = {"--id", "-i"},
+      help = "Job posting ID to analyze") final String id,
+    @ShellOption(
+      value = {"--jq", "-j"},
+      defaultValue = ShellOption.NULL,
+      help = "jq expression to filter output") @Nullable final String jq) {
+    final var result = client.execute("""
+        mutation($id: ID!) {
+          analyzeJobPosting(jobPostingId: $id) { summary skills fitScore }
+        }""",
+      Map.of("id", id));
+    return jqProcessor.process(result.get("data").get("analyzeJobPosting"), jq);
+  }
+
+  /**
    * Lists scraped job postings, optionally filtered by source.
    */
   @ShellMethod(
