@@ -27,27 +27,6 @@ public class ScrapeCommands {
   }
 
   /**
-   * Scrapes a job posting from the given URL.
-   */
-  @ShellMethod(
-    key = {"scrape", "sc"},
-    value = """
-      Scrape a job posting URL.
-      
-      EXAMPLES
-        - scrape -u https://linkedin.com/jobs/123""",
-    group = "Scraping")
-  public String scrape(@ShellOption(value = {"--url", "-u"}, help = "Job posting URL to scrape") final String url) {
-    var result = client.execute("""
-        mutation($url: String!) {
-          scrapeJobPosting(url: $url) { id title company source }
-        }
-        """,
-      Map.of("url", url));
-    return "Scraped: " + result.get("data").get("scrapeJobPosting");
-  }
-
-  /**
    * Analyzes a job posting using AI.
    */
   @ShellMethod(
@@ -73,6 +52,52 @@ public class ScrapeCommands {
         }""",
       Map.of("id", id));
     return jqProcessor.process(result.get("data").get("analyzeJobPosting"), jq);
+  }
+
+  /**
+   * Submits a job posting from raw data (browser extension, manual entry).
+   */
+  @ShellMethod(
+    key = {"submit-job", "sj"},
+    value = """
+      Submit a job posting from raw data.
+      
+      EXAMPLES
+        - submit-job --url https://linkedin.com/jobs/123 --title "SWE" --company Acme --source LINKEDIN
+        - sj -u https://example.com/job -t "Dev" -c "Corp" -s INDEED -d "Hacker analyst"
+        - sj -u https://... -t "Engineer" -c "Inc" -s LINKEDIN --desc "Job description here"
+      """,
+    group = "Scraping")
+  public String submitJob(
+    @ShellOption(
+      value = {"--url", "-u"},
+      help = "Job posting URL") final String url,
+    @ShellOption(
+      value = {"--title", "-t"},
+      help = "Job title") final String title,
+    @ShellOption(
+      value = {"--company", "-c"},
+      help = "Company name") final String company,
+    @ShellOption(
+      value = {"--source", "-s"},
+      help = "Source: LINKEDIN, INDEED, OTHER") final String source,
+    @ShellOption(
+      value = {"--desc", "-d"},
+      defaultValue = ShellOption.NULL,
+      help = "Job description (optional)") @Nullable final String description) {
+    final var variables = new HashMap<String, Object>();
+    variables.put("url", url);
+    variables.put("title", title);
+    variables.put("company", company);
+    variables.put("source", source);
+    variables.put("desc", description != null ? description : "");
+    final var result = client.execute("""
+        mutation($url: String!, $title: String!, $company: String!, $source: Source!, $desc: String) {
+          submitJobPosting(input: { url: $url, title: $title, company: $company, source: $source, description: $desc })
+          { id title company source }
+        }""",
+      variables);
+    return "Submitted: " + result.get("data").get("submitJobPosting");
   }
 
   /**
@@ -103,7 +128,7 @@ public class ScrapeCommands {
     }
     final var result = client.execute("""
         query($s: Source) {
-          jobPostings(source: $s) { id title company source url postedAt }
+          jobPostings(source: $s) { id title description company source url postedAt }
         }""",
       variables);
     return jqProcessor.process(result.get("data").get("jobPostings"), jq);

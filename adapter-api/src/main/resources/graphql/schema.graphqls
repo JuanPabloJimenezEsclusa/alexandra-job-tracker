@@ -3,6 +3,14 @@ scalar Instant
 enum ApplicationStatus { SAVED APPLIED INTERVIEWING OFFER ACCEPTED REJECTED WITHDRAWN }
 enum Source { LINKEDIN INDEED OTHER }
 
+input SubmitJobInput {
+  url: String!
+  title: String!
+  company: String!
+  description: String
+  source: Source!
+}
+
 type Query {
   me: User
   applications(status: ApplicationStatus, source: Source): [JobApplication!]!
@@ -16,7 +24,7 @@ type Mutation {
   createApplication(company: String!, role: String!, source: Source!, postingUrl: String, notes: String): JobApplication!
   updateApplicationStatus(id: ID!, status: ApplicationStatus!, notes: String): JobApplication!
   deleteApplication(id: ID!): Boolean!
-  scrapeJobPosting(url: String!): JobPosting!
+  submitJobPosting(input: SubmitJobInput!): JobPosting!
   analyzeJobPosting(jobPostingId: ID!): JobAnalysis! }
 
 type AuthPayload { token: String! user: User! }

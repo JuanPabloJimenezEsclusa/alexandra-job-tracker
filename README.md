@@ -28,7 +28,6 @@ multi-module.
 | `adapter-cli`                  | Spring Shell commands, GraphQL HTTP client, session management        |
 | `infrastructure-persistence`   | JPA entities, repositories, Flyway migrations                         |
 | `infrastructure-auth`          | JWT provider, GraphQL auth interceptor                                |
-| `infrastructure-scraping`      | LinkedIn job scraper (Jsoup)                                          |
 | `infrastructure-ai`            | Job analysis via DeepSeek LLM (Spring AI)                             |
 | `infrastructure-cache`         | Caffeine cache with hexagonal `CachePort` decorators                  |
 | `infrastructure-observability` | OpenTelemetry, Prometheus, Micrometer                                 |
@@ -52,7 +51,7 @@ domain  →  application  →  infrastructure-*  +  adapter-*
 ```
 CLI (Spring Shell)  ──HTTP──►  GraphQL API  ──►  Resolver  ──►  Use Case  ──►  Port
                                                                                    │
-                              H2 / PostgreSQL  ◄──  JPA Adapter  ◄───────────────┘
+                                             H2  ◄──  JPA Adapter  ◄───────────────┘
 ```
 
 ---

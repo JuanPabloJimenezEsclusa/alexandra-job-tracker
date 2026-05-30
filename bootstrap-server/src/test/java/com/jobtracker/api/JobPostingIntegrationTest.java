@@ -59,22 +59,24 @@ class JobPostingIntegrationTest {
   }
 
   @Test
-  void shouldScrapeAndListPostings() {
-    final var token = registerAndGetToken("jp-scrape-user");
+  void shouldSubmitJobPosting() {
+    final var token = registerAndGetToken("submit-list-user");
     final var headers = jsonHeaders();
     headers.setBearerAuth(token);
 
-    final var scrapeResp = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>("""
-        {"query": "mutation { scrapeJobPosting(url: \\"https://example.com/job\\") { id title company source } }"}
-        """, headers), String.class);
-    assertThat(scrapeResp.getBody()).contains("Mocked Engineer");
+    final var body = """
+      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id title company source}}",\
+      "variables":{"i":{"url":"https://example.com/job/123","title":"Test Engineer","company":"TestCorp","source":"LINKEDIN"}}}
+      """;
+    final var response = rest.exchange(url(), HttpMethod.POST,
+      new HttpEntity<>(body, headers), String.class);
+    assertThat(response.getBody()).contains("Test Engineer").contains("TestCorp").contains("LINKEDIN");
 
     final var listResp = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>("""
         {"query": "{ jobPostings { title company } }"}
         """, headers), String.class);
-    assertThat(listResp.getBody()).contains("Mocked Engineer");
+    assertThat(listResp.getBody()).contains("Test Engineer");
   }
 
   @Test
@@ -83,10 +85,11 @@ class JobPostingIntegrationTest {
     final var headers = jsonHeaders();
     headers.setBearerAuth(token);
 
-    rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>("""
-        {"query": "mutation { scrapeJobPosting(url: \\"https://example.com/xyz\\") { id } }"}
-        """, headers), String.class);
+    final var submitBody = """
+      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id}}",\
+      "variables":{"i":{"url":"https://linkedin.com/job/1","title":"LinkedIn Job","company":"LinkedCorp","source":"LINKEDIN"}}}
+      """;
+    rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(submitBody, headers), String.class);
 
     final var response = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>("""

@@ -12,7 +12,6 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
   "com.jobtracker.api",
   "com.jobtracker.auth",
   "com.jobtracker.persistence",
-  "com.jobtracker.scraping",
   "com.jobtracker.ai",
   "com.jobtracker.cache",
   "com.jobtracker.observability",

@@ -4,16 +4,15 @@ import com.jobtracker.application.service.AnalyzeJobPostingUseCaseImpl;
 import com.jobtracker.application.service.AuthenticationUseCaseImpl;
 import com.jobtracker.application.service.GetAnalyticsUseCaseImpl;
 import com.jobtracker.application.service.ListJobPostingsUseCaseImpl;
-import com.jobtracker.application.service.ScrapeJobUseCaseImpl;
+import com.jobtracker.application.service.SubmitJobPostingUseCaseImpl;
 import com.jobtracker.application.service.TrackJobApplicationUseCaseImpl;
 import com.jobtracker.domain.port.in.AnalyzeJobPostingUseCase;
 import com.jobtracker.domain.port.in.AuthenticationUseCase;
 import com.jobtracker.domain.port.in.GetAnalyticsUseCase;
 import com.jobtracker.domain.port.in.ListJobPostingsUseCase;
-import com.jobtracker.domain.port.in.ScrapeJobUseCase;
+import com.jobtracker.domain.port.in.SubmitJobPostingUseCase;
 import com.jobtracker.domain.port.in.TrackJobApplicationUseCase;
 import com.jobtracker.domain.port.out.JobAnalysisPort;
-import com.jobtracker.domain.port.out.JobScraperPort;
 import com.jobtracker.domain.port.out.LoadJobApplicationPort;
 import com.jobtracker.domain.port.out.LoadJobPostingPort;
 import com.jobtracker.domain.port.out.LoadUserPort;
@@ -31,10 +30,10 @@ import org.springframework.context.annotation.Configuration;
 public class UseCaseConfig {
 
   @Bean
-  ScrapeJobUseCase scrapeJobUseCase(final JobScraperPort scraper,
-                                    final SaveJobPostingPort savePostingPort,
-                                    final SaveJobApplicationPort saveAppPort) {
-    return new ScrapeJobUseCaseImpl(scraper, savePostingPort, saveAppPort);
+  SubmitJobPostingUseCase submitJobPostingUseCase(
+      final SaveJobPostingPort savePostingPort,
+      final SaveJobApplicationPort saveAppPort) {
+    return new SubmitJobPostingUseCaseImpl(savePostingPort, saveAppPort);
   }
 
   @Bean

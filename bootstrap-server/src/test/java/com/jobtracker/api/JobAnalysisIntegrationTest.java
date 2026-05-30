@@ -51,17 +51,19 @@ class JobAnalysisIntegrationTest {
     final var headers = jsonHeaders();
     headers.setBearerAuth(token);
 
-    final var scrapeResp = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>("""
-        {"query": "mutation { scrapeJobPosting(url: \\"https://example.com/job\\") { id } }"}
-        """, headers), String.class);
-    assert scrapeResp.getBody() != null;
-    final var postingId = scrapeResp.getBody().replaceAll(".*\"id\":\"([^\"]+)\".*", "$1");
+    final var submitBody = """
+      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id}}",\
+      "variables":{"i":{"url":"https://example.com/job","title":"Engineer","company":"Acme","description":"Software engineer role","source":"LINKEDIN"}}}
+      """;
+    final var submitResp = rest.exchange(url(), HttpMethod.POST,
+      new HttpEntity<>(submitBody, headers), String.class);
+    assert submitResp.getBody() != null;
+    final var postingId = submitResp.getBody().replaceAll(".*\"id\":\"([^\"]+)\".*", "$1");
 
     final var response = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>("""
         {"query": "mutation { analyzeJobPosting(jobPostingId: \\"%s\\") { summary skills fitScore } }"}
-        """.formatted(postingId), headers), String.class);
+        """.formatted(postingId), jsonHeaders()), String.class);
     assertThat(response.getBody()).contains("summary").contains("skills").contains("fitScore");
   }
 }

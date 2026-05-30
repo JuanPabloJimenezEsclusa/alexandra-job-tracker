@@ -56,7 +56,6 @@
     <module>application</module>
     <module>infrastructure-persistence</module>
     <module>infrastructure-auth</module>
-    <module>infrastructure-scraping</module>
     <module>infrastructure-ai</module>
     <module>infrastructure-observability</module>
     <module>adapter-api</module>
@@ -79,7 +78,6 @@
     <graphql-java-extended-scalars.version>22.0</graphql-java-extended-scalars.version>
     <opentelemetry-exporter-otlp.version>1.44.1</opentelemetry-exporter-otlp.version>
     <caffeine.version>3.2.0</caffeine.version>
-    <jsoup.version>1.18.1</jsoup.version>
     <jspecify.version>1.0.0</jspecify.version>
     <checkstyle.version>10.23.0</checkstyle.version>
     <jackson-jq.version>1.6.2</jackson-jq.version>

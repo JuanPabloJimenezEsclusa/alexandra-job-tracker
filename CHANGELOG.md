@@ -5,6 +5,11 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**feat: add analyzeJobPosting into cli commands**
+
+
+[a3f2b8543a26b24](https://github.com///commit/a3f2b8543a26b24) juan.pablo.jimenez.esclusa *2026-05-30 12:25:36*
+
 **test: remove e2e and include it**
 
 

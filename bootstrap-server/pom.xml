@@ -33,11 +33,6 @@
     </dependency>
     <dependency>
       <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-scraping</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.jobtracker</groupId>
       <artifactId>infrastructure-ai</artifactId>
       <version>${project.version}</version>
     </dependency>

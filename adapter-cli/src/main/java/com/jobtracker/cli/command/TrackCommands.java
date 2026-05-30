@@ -146,13 +146,21 @@ public class TrackCommands {
     @ShellOption(
       value = {"--notes", "-n"},
       defaultValue = ShellOption.NULL,
-      help = "Notes (optional)") final String notes) {
+      help = "Notes (optional)") @Nullable final String notes) {
+
+    final var variables = new HashMap<String, Object>();
+    variables.put("id", id);
+    variables.put("s", status);
+
+    if (notes != null) {
+      variables.put("n", notes);
+    }
 
     final var result = client.execute("""
         mutation($id: ID!, $s: ApplicationStatus!, $n: String) {
           updateApplicationStatus(id: $id, status: $s, notes: $n) { id status lastUpdated }
         }""",
-      Map.of("id", id, "s", status, "n", notes));
+      variables);
     return "Updated: " + result.get("data").get("updateApplicationStatus");
   }
 

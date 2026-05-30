@@ -1,6 +1,6 @@
 package com.jobtracker.cli.command;
 
-import java.util.Map;
+import java.util.HashMap;
 
 import com.jobtracker.cli.client.GraphqlClient;
 import com.jobtracker.cli.format.JqProcessor;
@@ -40,12 +40,17 @@ public class AnalyticsCommands {
   public String analytics(
     @ShellOption(
       value = {"--since", "-s"},
-      defaultValue = "",
-      help = "Show analytics since this date (ISO-8601, e.g. 2024-01-01)") final String since,
+      defaultValue = ShellOption.NULL,
+      help = "Show analytics since this date (ISO-8601, e.g. 2024-01-01)") @Nullable final String since,
     @ShellOption(
       value = {"--jq", "-j"},
       defaultValue = ShellOption.NULL,
       help = "jq expression to filter output") @Nullable final String jq) {
+
+    final var variables = new HashMap<String, Object>();
+    if (since != null) {
+      variables.put("s", since);
+    }
     var result = client.execute("""
         query($s: Instant) {
           analytics(since: $s) {
@@ -54,7 +59,7 @@ public class AnalyticsCommands {
             }
           }
         }""",
-      Map.of("s", since));
+      variables);
     return "Analytics: " + jqProcessor.process(result.get("data").get("analytics"), jq);
   }
 }

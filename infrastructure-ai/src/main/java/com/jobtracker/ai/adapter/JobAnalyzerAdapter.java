@@ -39,7 +39,7 @@ public class JobAnalyzerAdapter implements JobAnalysisPort {
   }
 
   @Override
-  public JobAnalysis analyze(String jobDescription) {
+  public JobAnalysis analyze(final String jobDescription) {
     final var response = chatClient.prompt()
       .user(u -> u.text(PROMPT)
         .param("description", jobDescription))
