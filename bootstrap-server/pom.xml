@@ -23,6 +23,11 @@
     </dependency>
     <dependency>
       <groupId>com.jobtracker</groupId>
+      <artifactId>application</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.jobtracker</groupId>
       <artifactId>infrastructure-persistence</artifactId>
       <version>${project.version}</version>
     </dependency>

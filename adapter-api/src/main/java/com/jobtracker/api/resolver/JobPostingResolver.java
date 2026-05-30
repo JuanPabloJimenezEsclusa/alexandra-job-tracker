@@ -2,10 +2,8 @@ package com.jobtracker.api.resolver;
 
 import java.util.List;
 
-import com.jobtracker.application.service.ListJobPostingsUseCaseImpl;
 import com.jobtracker.domain.model.JobPosting;
 import com.jobtracker.domain.port.in.ListJobPostingsUseCase;
-import com.jobtracker.domain.port.out.LoadJobPostingPort;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
@@ -24,8 +22,8 @@ public class JobPostingResolver {
   /**
    * Constructor.
    */
-  public JobPostingResolver(final LoadJobPostingPort loadPort) {
-    this.useCase = new ListJobPostingsUseCaseImpl(loadPort);
+  public JobPostingResolver(final ListJobPostingsUseCase useCase) {
+    this.useCase = useCase;
   }
 
   /**

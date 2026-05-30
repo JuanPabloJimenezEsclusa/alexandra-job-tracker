@@ -1,12 +1,10 @@
 package com.jobtracker.api.resolver;
 
 import com.jobtracker.api.dto.AuthPayload;
-import com.jobtracker.application.service.AuthenticationUseCaseImpl;
 import com.jobtracker.auth.JwtProvider;
 import com.jobtracker.domain.model.User;
 import com.jobtracker.domain.port.in.AuthenticationUseCase;
 import com.jobtracker.domain.port.out.LoadUserPort;
-import com.jobtracker.domain.port.out.SaveUserPort;
 import com.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -27,10 +25,10 @@ public class UserResolver {
   /**
    * Constructor.
    */
-  public UserResolver(final SaveUserPort saveUserPort,
-                      final LoadUserPort loadUserPort,
-                      final JwtProvider jwtProvider) {
-    this.authUseCase = new AuthenticationUseCaseImpl(saveUserPort, loadUserPort);
+  public UserResolver(final AuthenticationUseCase authUseCase,
+                      final JwtProvider jwtProvider,
+                      final LoadUserPort loadUserPort) {
+    this.authUseCase = authUseCase;
     this.jwtProvider = jwtProvider;
     this.loadUserPort = loadUserPort;
   }

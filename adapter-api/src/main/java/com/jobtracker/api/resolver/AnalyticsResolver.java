@@ -3,9 +3,7 @@ package com.jobtracker.api.resolver;
 import java.time.Instant;
 
 import com.jobtracker.api.dto.StatusCounts;
-import com.jobtracker.application.service.GetAnalyticsUseCaseImpl;
 import com.jobtracker.domain.port.in.GetAnalyticsUseCase;
-import com.jobtracker.domain.port.out.LoadJobApplicationPort;
 import com.jobtracker.domain.vo.Analytics;
 import com.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
@@ -25,8 +23,8 @@ public class AnalyticsResolver {
   /**
    * Constructor.
    */
-  public AnalyticsResolver(final LoadJobApplicationPort loadPort) {
-    this.useCase = new GetAnalyticsUseCaseImpl(loadPort);
+  public AnalyticsResolver(final GetAnalyticsUseCase useCase) {
+    this.useCase = useCase;
   }
 
   /**

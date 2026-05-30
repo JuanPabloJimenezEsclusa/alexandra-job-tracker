@@ -3,11 +3,8 @@ package com.jobtracker.api.resolver;
 import java.util.List;
 import java.util.UUID;
 
-import com.jobtracker.application.service.TrackJobApplicationUseCaseImpl;
 import com.jobtracker.domain.model.JobApplication;
 import com.jobtracker.domain.port.in.TrackJobApplicationUseCase;
-import com.jobtracker.domain.port.out.LoadJobApplicationPort;
-import com.jobtracker.domain.port.out.SaveJobApplicationPort;
 import com.jobtracker.domain.vo.ApplicationStatus;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
@@ -28,9 +25,8 @@ public class ApplicationResolver {
   /**
    * Constructor.
    */
-  public ApplicationResolver(final SaveJobApplicationPort savePort,
-                             final LoadJobApplicationPort loadPort) {
-    this.useCase = new TrackJobApplicationUseCaseImpl(savePort, loadPort);
+  public ApplicationResolver(final TrackJobApplicationUseCase useCase) {
+    this.useCase = useCase;
   }
 
   /**

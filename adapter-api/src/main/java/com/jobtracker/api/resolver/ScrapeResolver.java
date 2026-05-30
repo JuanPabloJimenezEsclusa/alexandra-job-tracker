@@ -1,11 +1,7 @@
 package com.jobtracker.api.resolver;
 
-import com.jobtracker.application.service.ScrapeJobUseCaseImpl;
 import com.jobtracker.domain.model.JobPosting;
 import com.jobtracker.domain.port.in.ScrapeJobUseCase;
-import com.jobtracker.domain.port.out.JobScraperPort;
-import com.jobtracker.domain.port.out.SaveJobApplicationPort;
-import com.jobtracker.domain.port.out.SaveJobPostingPort;
 import com.jobtracker.domain.vo.UserId;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.ContextValue;
@@ -22,10 +18,8 @@ public class ScrapeResolver {
   /**
    * Constructor.
    */
-  public ScrapeResolver(final JobScraperPort scraper,
-                        final SaveJobPostingPort spp,
-                        final SaveJobApplicationPort sap) {
-    this.useCase = new ScrapeJobUseCaseImpl(scraper, spp, sap);
+  public ScrapeResolver(final ScrapeJobUseCase useCase) {
+    this.useCase = useCase;
   }
 
   /**
