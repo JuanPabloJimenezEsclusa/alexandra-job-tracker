@@ -4,6 +4,7 @@ import java.time.Instant;
 
 import com.jobtracker.api.dto.StatusCounts;
 import com.jobtracker.application.service.GetAnalyticsUseCaseImpl;
+import com.jobtracker.domain.port.in.GetAnalyticsUseCase;
 import com.jobtracker.domain.port.out.LoadJobApplicationPort;
 import com.jobtracker.domain.vo.Analytics;
 import com.jobtracker.domain.vo.UserId;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Controller;
  */
 @Controller
 public class AnalyticsResolver {
-  private final GetAnalyticsUseCaseImpl useCase;
+  private final GetAnalyticsUseCase useCase;
 
   /**
    * Constructor.

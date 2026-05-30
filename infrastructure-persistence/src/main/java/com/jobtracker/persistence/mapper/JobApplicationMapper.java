@@ -23,6 +23,7 @@ public class JobApplicationMapper {
   /**
    * Maps domain model to entity.
    */
+  @SuppressWarnings("java:S4449") // false positives
   public JobApplicationEntity toEntity(final JobApplication domain) {
     final var entity = new JobApplicationEntity();
     entity.setId(domain.id());

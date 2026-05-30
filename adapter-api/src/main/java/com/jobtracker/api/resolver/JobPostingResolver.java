@@ -2,7 +2,9 @@ package com.jobtracker.api.resolver;
 
 import java.util.List;
 
+import com.jobtracker.application.service.ListJobPostingsUseCaseImpl;
 import com.jobtracker.domain.model.JobPosting;
+import com.jobtracker.domain.port.in.ListJobPostingsUseCase;
 import com.jobtracker.domain.port.out.LoadJobPostingPort;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
@@ -17,13 +19,13 @@ import org.springframework.stereotype.Controller;
  */
 @Controller
 public class JobPostingResolver {
-  private final LoadJobPostingPort loadPort;
+  private final ListJobPostingsUseCase useCase;
 
   /**
    * Constructor.
    */
   public JobPostingResolver(final LoadJobPostingPort loadPort) {
-    this.loadPort = loadPort;
+    this.useCase = new ListJobPostingsUseCaseImpl(loadPort);
   }
 
   /**
@@ -32,12 +34,6 @@ public class JobPostingResolver {
   @QueryMapping
   public List<JobPosting> jobPostings(@ContextValue final UserId userId,
                                       @Argument @Nullable final Source source) {
-    var postings = loadPort.findByUserId(userId);
-    if (source != null) {
-      postings = postings.stream()
-        .filter(p -> p.source() == source)
-        .toList();
-    }
-    return postings;
+    return useCase.listJobPostings(userId, source);
   }
 }

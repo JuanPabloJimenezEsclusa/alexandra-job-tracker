@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.jobtracker.application.service.TrackJobApplicationUseCaseImpl;
 import com.jobtracker.domain.model.JobApplication;
+import com.jobtracker.domain.port.in.TrackJobApplicationUseCase;
 import com.jobtracker.domain.port.out.LoadJobApplicationPort;
 import com.jobtracker.domain.port.out.SaveJobApplicationPort;
 import com.jobtracker.domain.vo.ApplicationStatus;
@@ -22,7 +23,7 @@ import org.springframework.stereotype.Controller;
  */
 @Controller
 public class ApplicationResolver {
-  private final TrackJobApplicationUseCaseImpl useCase;
+  private final TrackJobApplicationUseCase useCase;
 
   /**
    * Constructor.

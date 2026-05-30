@@ -7,6 +7,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import org.jspecify.annotations.Nullable;
 
 /**
  * JPA entity for job applications.
@@ -24,14 +25,14 @@ public class JobApplicationEntity {
   private String role;
   @Column(nullable = false)
   private String source;
-  private String postingUrl;
+  @Nullable private String postingUrl;
   @Column(nullable = false)
   private String status;
   @Column(nullable = false)
   private Instant dateApplied;
   @Column(nullable = false)
   private Instant lastUpdated;
-  private String notes;
+  @Nullable private String notes;
 
   public UUID getId() {
     return id;
@@ -73,6 +74,7 @@ public class JobApplicationEntity {
     this.source = source;
   }
 
+  @Nullable
   public String getPostingUrl() {
     return postingUrl;
   }
@@ -105,6 +107,7 @@ public class JobApplicationEntity {
     this.lastUpdated = lastUpdated;
   }
 
+  @Nullable
   public String getNotes() {
     return notes;
   }

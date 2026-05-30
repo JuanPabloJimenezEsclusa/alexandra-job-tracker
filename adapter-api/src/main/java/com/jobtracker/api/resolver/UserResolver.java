@@ -4,6 +4,7 @@ import com.jobtracker.api.dto.AuthPayload;
 import com.jobtracker.application.service.AuthenticationUseCaseImpl;
 import com.jobtracker.auth.JwtProvider;
 import com.jobtracker.domain.model.User;
+import com.jobtracker.domain.port.in.AuthenticationUseCase;
 import com.jobtracker.domain.port.out.LoadUserPort;
 import com.jobtracker.domain.port.out.SaveUserPort;
 import com.jobtracker.domain.vo.UserId;
@@ -19,14 +20,16 @@ import org.springframework.stereotype.Controller;
  */
 @Controller
 public class UserResolver {
-  private final AuthenticationUseCaseImpl authUseCase;
+  private final AuthenticationUseCase authUseCase;
   private final JwtProvider jwtProvider;
   private final LoadUserPort loadUserPort;
 
   /**
    * Constructor.
    */
-  public UserResolver(SaveUserPort saveUserPort, LoadUserPort loadUserPort, JwtProvider jwtProvider) {
+  public UserResolver(final SaveUserPort saveUserPort,
+                      final LoadUserPort loadUserPort,
+                      final JwtProvider jwtProvider) {
     this.authUseCase = new AuthenticationUseCaseImpl(saveUserPort, loadUserPort);
     this.jwtProvider = jwtProvider;
     this.loadUserPort = loadUserPort;
@@ -36,9 +39,10 @@ public class UserResolver {
    * Registers a new user account.
    */
   @MutationMapping
-  public AuthPayload register(@Argument String username, @Argument String password) {
-    var user = authUseCase.register(username, password);
-    var token = jwtProvider.generateToken(user.id());
+  public AuthPayload register(@Argument final String username,
+                              @Argument final String password) {
+    final var user = authUseCase.register(username, password);
+    final var token = jwtProvider.generateToken(user.id());
     return new AuthPayload(token, user);
   }
 
@@ -46,9 +50,10 @@ public class UserResolver {
    * Authenticates a user and returns an auth token.
    */
   @MutationMapping
-  public AuthPayload login(@Argument String username, @Argument String password) {
-    var user = authUseCase.login(username, password);
-    var token = jwtProvider.generateToken(user.id());
+  public AuthPayload login(@Argument final String username,
+                           @Argument final String password) {
+    final var user = authUseCase.login(username, password);
+    final var token = jwtProvider.generateToken(user.id());
     return new AuthPayload(token, user);
   }
 
@@ -57,7 +62,7 @@ public class UserResolver {
    */
   @QueryMapping
   @Nullable
-  public User me(@ContextValue UserId userId) {
+  public User me(@ContextValue final UserId userId) {
     return loadUserPort.findById(userId).orElse(null);
   }
 

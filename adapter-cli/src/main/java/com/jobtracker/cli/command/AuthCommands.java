@@ -27,10 +27,18 @@ public class AuthCommands {
   /**
    * Registers a new user and saves the session token.
    */
-  @ShellMethod(key = {"register", "reg"}, value = "Register a new user", group = "Authentication")
+  @ShellMethod(
+    key = {"register", "reg"},
+    value = """
+      Register a new user.
+      
+      EXAMPLES
+        - register -u alice -p secret123
+        - reg -u bob -p pass456""",
+    group = "Authentication")
   public String register(
-    @ShellOption(value = {"--username", "-u"}) final String username,
-    @ShellOption(value = {"--password", "-p"}) final String password) {
+    @ShellOption(value = {"--username", "-u"}, help = "Username") final String username,
+    @ShellOption(value = {"--password", "-p"}, help = "Password") final String password) {
     final var result = client.execute("""
         mutation($u: String!, $p: String!) {
           register(username: $u, password: $p) { token }
@@ -48,10 +56,17 @@ public class AuthCommands {
   /**
    * Logs in with username and password and saves the session token.
    */
-  @ShellMethod(key = {"login", "li"}, value = "Login with username and password", group = "Authentication")
+  @ShellMethod(
+    key = {"login", "li"},
+    value = """
+      Login with username and password.
+      
+      EXAMPLES
+        - login -u alice -p secret123""",
+    group = "Authentication")
   public String login(
-    @ShellOption(value = {"--username", "-u"}) final String username,
-    @ShellOption(value = {"--password", "-p"}) final String password) {
+    @ShellOption(value = {"--username", "-u"}, help = "Username") final String username,
+    @ShellOption(value = {"--password", "-p"}, help = "Password") final String password) {
     final var result = client.execute("""
         mutation($u: String!, $p: String!) {
           login(username: $u, password: $p) { token }
@@ -69,7 +84,10 @@ public class AuthCommands {
   /**
    * Logs out by clearing the session token.
    */
-  @ShellMethod(key = {"logout", "lo"}, value = "Logout", group = "Authentication")
+  @ShellMethod(
+    key = {"logout", "lo"},
+    value = "Logout.",
+    group = "Authentication")
   public String logout() {
     session.clearToken();
     return "Logged out";
@@ -78,7 +96,10 @@ public class AuthCommands {
   /**
    * Displays the currently logged-in user.
    */
-  @ShellMethod(key = {"whoami", "who"}, value = "Show current user", group = "Authentication")
+  @ShellMethod(
+    key = {"whoami", "who"},
+    value = "Show current user.",
+    group = "Authentication")
   public String whoami() {
     final var result = client.execute("{ me { username } }", Map.of());
     final var data = result.get("data");

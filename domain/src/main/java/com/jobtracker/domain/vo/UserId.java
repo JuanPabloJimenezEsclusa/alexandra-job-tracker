@@ -7,15 +7,6 @@ import java.util.UUID;
  */
 public record UserId(UUID value) {
   /**
-   * Validates that the UUID value is non-null.
-   */
-  public UserId {
-    if (value == null) {
-      throw new IllegalArgumentException("UserId must not be null");
-    }
-  }
-
-  /**
    * Creates a new UserId with a random UUID.
    */
   public static UserId generate() {

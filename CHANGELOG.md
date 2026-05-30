@@ -5,6 +5,16 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**feat: improve cli commands**
+
+
+[6f44c895fda7adb](https://github.com///commit/6f44c895fda7adb) juan.pablo.jimenez.esclusa *2026-05-30 09:54:13*
+
+**feat: add jq processor**
+
+
+[d77f2abfdece26b](https://github.com///commit/d77f2abfdece26b) juan.pablo.jimenez.esclusa *2026-05-29 20:24:09*
+
 **refactor: improve testing**
 
  * refactor: improve design

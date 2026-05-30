@@ -28,10 +28,24 @@ public class AnalyticsCommands {
   /**
    * Shows application analytics, optionally filtered by date.
    */
-  @ShellMethod(key = {"analytics", "an"}, value = "Show application analytics", group = "Analytics")
+  @ShellMethod(
+    key = {"analytics", "an"},
+    value = """
+      Show application analytics.
+      
+      EXAMPLES
+        - analytics
+        - analytics -s 2024-01-01 --jq '.totalApplications'""",
+    group = "Analytics")
   public String analytics(
-    @ShellOption(value = {"--since", "-s"}, defaultValue = "") final String since,
-    @ShellOption(value = {"--jq", "-j"}, defaultValue = ShellOption.NULL) @Nullable final String jq) {
+    @ShellOption(
+      value = {"--since", "-s"},
+      defaultValue = "",
+      help = "Show analytics since this date (ISO-8601, e.g. 2024-01-01)") final String since,
+    @ShellOption(
+      value = {"--jq", "-j"},
+      defaultValue = ShellOption.NULL,
+      help = "jq expression to filter output") @Nullable final String jq) {
     var result = client.execute("""
         query($s: Instant) {
           analytics(since: $s) {
