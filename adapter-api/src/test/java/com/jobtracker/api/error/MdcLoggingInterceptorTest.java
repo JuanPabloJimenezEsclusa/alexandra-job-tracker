@@ -29,7 +29,11 @@ class MdcLoggingInterceptorTest {
 
   private static Stream<Arguments> mdcScenarios() {
     final var shortDoc = "{ me }";
-    final var longDoc = "mutation { createApplication(company: \"VeryLongCompanyNameThatExceedsTheMaxLength\", role: \"Engineer\", source: LINKEDIN) { id } }";
+    final var longDoc = """
+      mutation {
+        createApplication(company: "VeryLongCompanyNameThatExceedsTheMaxLength", role: "Engineer", source: LINKEDIN) { id }
+      }
+      """;
     final var headersWithAuth = new HttpHeaders();
     headersWithAuth.setBearerAuth("some-token");
     return Stream.of(

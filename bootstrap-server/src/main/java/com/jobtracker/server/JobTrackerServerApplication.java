@@ -15,7 +15,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
   "com.jobtracker.scraping",
   "com.jobtracker.ai",
   "com.jobtracker.cache",
-  "com.jobtracker.observability"
+  "com.jobtracker.observability",
+  "com.jobtracker.server"
 })
 @EnableJpaRepositories("com.jobtracker.persistence.repository")
 @EntityScan("com.jobtracker.persistence.entity")

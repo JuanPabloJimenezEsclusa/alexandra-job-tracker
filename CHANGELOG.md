@@ -5,6 +5,11 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**refactor: decouple JwtProvider from UserResolver**
+
+
+[1baafd1a1fb0f9d](https://github.com///commit/1baafd1a1fb0f9d) juan.pablo.jimenez.esclusa *2026-05-30 11:11:06*
+
 **refactor: remove visivility of application module over infrastructure**
 
 

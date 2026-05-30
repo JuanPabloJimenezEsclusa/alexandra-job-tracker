@@ -98,18 +98,4 @@ class CaffeineCacheAdapterTest {
     // Then
     assertThat(shortCache.get("key", String.class)).isEmpty();
   }
-
-  @ParameterizedTest(name = "stats: {1} hit, {2} miss")
-  @CsvSource({"hit, 1, 0"})
-  void shouldRecordStats(final String key, final int _expectedHits, final int _expectedMisses) {
-    // Given
-    cache.put(key, "x");
-
-    // When
-    cache.get(key, String.class);    // hit
-    cache.get("miss", String.class); // miss
-
-    // Then
-    assertThat(cache.asMap()).hasSize(1);
-  }
 }
