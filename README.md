@@ -93,6 +93,7 @@ flowchart LR
     subgraph inbound [Inbound Adapters]
         direction LR
         CLI["Spring Shell"]
+        BrowserExt["Chrome Extension"]
         HTTP["HTTP /graphql"]
     end
     subgraph app [Application]
@@ -201,10 +202,15 @@ The server exposes a GraphQL endpoint at `POST /api/graphql` with the following 
 ```mermaid
 flowchart LR
     SAVED --> APPLIED
+    SAVED --> WITHDRAWN
     APPLIED --> INTERVIEWING
+    APPLIED --> REJECTED
+    APPLIED --> WITHDRAWN
     INTERVIEWING --> OFFER
-    OFFER --> ACCEPTED
     INTERVIEWING --> REJECTED
+    INTERVIEWING --> WITHDRAWN
+    OFFER --> ACCEPTED
+    OFFER --> REJECTED
     OFFER --> WITHDRAWN
 ```
 
