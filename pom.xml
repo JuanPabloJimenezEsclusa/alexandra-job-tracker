@@ -75,7 +75,7 @@
     <archunit.version>1.4.2</archunit.version>
     <jjwt.version>0.12.6</jjwt.version>
     <spring-shell.version>3.4.0</spring-shell.version>
-    <graphql-java-extended-scalars.version>22.0</graphql-java-extended-scalars.version>
+    <graphql-java-extended-scalars.version>24.0</graphql-java-extended-scalars.version>
     <opentelemetry-exporter-otlp.version>1.44.1</opentelemetry-exporter-otlp.version>
     <caffeine.version>3.2.0</caffeine.version>
     <jspecify.version>1.0.0</jspecify.version>
