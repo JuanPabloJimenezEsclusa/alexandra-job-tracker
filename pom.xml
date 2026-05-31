@@ -92,7 +92,7 @@
     <git-changelog-maven-plugin.version>2.2.11</git-changelog-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
     <rewrite-maven-plugin.version>6.40.0</rewrite-maven-plugin.version>
-    <pitest-maven.version>1.24.0</pitest-maven.version>
+    <pitest-maven.version>1.25.3</pitest-maven.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <sonar-maven-plugin.version>5.7.0.6970</sonar-maven-plugin.version>
     <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
