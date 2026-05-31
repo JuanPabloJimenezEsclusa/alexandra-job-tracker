@@ -107,8 +107,8 @@ flowchart LR
         AI["AI Adapter"]
         JWT["JWT Provider"]
     end
-    subgraph storage [(Storage)]
-        H2[(H2)]
+    subgraph storage [Storage]
+        DB[H2]
     end
 
     CLI --> HTTP
