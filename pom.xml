@@ -79,7 +79,7 @@
     <opentelemetry-exporter-otlp.version>1.44.1</opentelemetry-exporter-otlp.version>
     <caffeine.version>3.2.0</caffeine.version>
     <jspecify.version>1.0.0</jspecify.version>
-    <checkstyle.version>10.23.0</checkstyle.version>
+    <checkstyle.version>13.5.0</checkstyle.version>
     <jackson-jq.version>1.6.2</jackson-jq.version>
 
     <!-- Site reports -->
