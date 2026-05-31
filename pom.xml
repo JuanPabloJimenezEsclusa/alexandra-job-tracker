@@ -73,7 +73,7 @@
 
     <spring-ai.version>2.0.0-M8</spring-ai.version>
     <archunit.version>1.4.2</archunit.version>
-    <jjwt.version>0.12.6</jjwt.version>
+    <jjwt.version>0.13.0</jjwt.version>
     <spring-shell.version>4.0.2</spring-shell.version>
     <graphql-java-extended-scalars.version>22.0</graphql-java-extended-scalars.version>
     <opentelemetry-exporter-otlp.version>1.44.1</opentelemetry-exporter-otlp.version>
