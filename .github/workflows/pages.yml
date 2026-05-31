@@ -17,13 +17,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: graalvm
           java-version: 25
           cache: maven
       - run: ./mvnw site site:stage-deploy
-      - uses: actions/configure-pages@v4
+      - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with: { path: "target/site-staging/staging" }
       - uses: actions/deploy-pages@v5
