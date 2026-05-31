@@ -24,6 +24,6 @@ jobs:
           cache: maven
       - run: ./mvnw site site:stage-deploy
       - uses: actions/configure-pages@v4
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with: { path: "target/site-staging/staging" }
       - uses: actions/deploy-pages@v5
