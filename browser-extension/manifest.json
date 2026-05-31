@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "Alexandra Job Tracker",
+  "description": "Capture job postings from LinkedIn and Indeed and submit them to your local Alexandra Job Tracker API",
+  "version": "1.0.0",
+  "permissions": ["storage"],
+  "host_permissions": [
+    "http://localhost:8880/*",
+    "https://www.linkedin.com/*",
+    "https://www.indeed.com/*"
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Alexandra Job Tracker"
+  },
+  "options_page": "options/options.html",
+  "background": {
+    "service_worker": "background/background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.linkedin.com/jobs/view/*",
+        "https://www.indeed.com/viewjob/*"
+      ],
+      "js": ["content/linkedin.js", "content/indeed.js", "content/content.js"]
+    }
+  ],
+  "icons": {
+    "128": "icons/icon128.png"
+  }
+}

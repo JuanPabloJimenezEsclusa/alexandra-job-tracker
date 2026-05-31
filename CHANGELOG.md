@@ -5,6 +5,11 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**feat: apply cqrs**
+
+
+[dd34766be364204](https://github.com///commit/dd34766be364204) juan.pablo.jimenez.esclusa *2026-05-30 18:59:34*
+
 **refactor: remove scrapping**
 
 

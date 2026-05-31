@@ -6,6 +6,7 @@
   <a href="https://www.graalvm.org/"><img src="https://img.shields.io/badge/GraalVM-Native-005571?style=for-the-badge" alt="GraalVM Native"/></a>
   <a href="https://graphql.org/"><img src="https://img.shields.io/badge/API-GraphQL-E10098?style=for-the-badge" alt="GraphQL"/></a>
   <a href="https://spring.io/projects/spring-shell"><img src="https://img.shields.io/badge/CLI-Spring%20Shell-6DB33F?style=for-the-badge" alt="Spring Shell"/></a>
+  <a href="https://spring.io/projects/spring-ai"><img src="https://img.shields.io/badge/AI-Spring%20AI-6DB33F?style=for-the-badge" alt="Spring AI"/></a>
 </p>
 
 ---
@@ -33,16 +34,37 @@ multi-module.
 | `infrastructure-observability` | OpenTelemetry, Prometheus, Micrometer                                 |
 | `bootstrap-server`             | Spring Boot application — GraphQL API, JPA, Flyway, AI                |
 | `bootstrap-cli`                | Spring Boot application — Spring Shell CLI client                     |
+| `coverage-jacoco`              | JaCoCo coverage report aggregation + ArchUnit architecture tests      |
+| `browser-extension`            | Chrome extension for capturing LinkedIn/Indeed job postings           |
 
 ### Layer Constraints
 
-```
-domain  →  application  →  infrastructure-*  +  adapter-*
-                                          ↘              ↙
-                                     bootstrap-server / bootstrap-cli
+```mermaid
+flowchart LR
+    domain --> application --> infrastructure
+    domain --> application --> adapter
+    infrastructure & adapter --> bootstrap
+    subgraph infrastructure [infrastructure-*]
+        direction LR
+        I1[persistence]
+        I2[auth]
+        I3[ai]
+        I4[cache]
+        I5[observability]
+    end
+    subgraph adapter [adapter-*]
+        direction LR
+        A1[api]
+        A2[cli]
+    end
+    subgraph bootstrap [bootstrap-*]
+        direction LR
+        B1[server]
+        B2[cli]
+    end
 ```
 
-- `domain` is pure Java — zero framework imports. Validated by ArchUnit.
+- `domain` is pure Java — zero framework imports. Validated by ArchUnit (13 rules).
 - `adapter-*` and `infrastructure-*` depend on `domain` and `application`.
 - `bootstrap-*` is the composition root — depends on everything, wires adapters.
 
@@ -66,12 +88,34 @@ Resolvers follow **Command Query Responsibility Segregation** — every endpoint
 
 ### Data Flow
 
-```
-CLI (Spring Shell)  ──HTTP──►  GraphQL API  ──►  *QueryResolver / *MutationResolver
-                                                              │
-                                                         Use Case  ──►  Port
-                                                                          │
-                                                H2  ◄──  JPA Adapter  ◄──┘
+```mermaid
+flowchart LR
+    subgraph inbound [Inbound Adapters]
+        direction LR
+        CLI["Spring Shell"]
+        HTTP["HTTP /graphql"]
+    end
+    subgraph app [Application]
+        direction LR
+        QR["*QueryResolver"]
+        MR["*MutationResolver"]
+        UC["Use Case"]
+    end
+    subgraph outbound [Outbound Adapters]
+        direction LR
+        JPA["JPA Adapter"]
+        AI["AI Adapter"]
+        JWT["JWT Provider"]
+    end
+    subgraph storage [(Storage)]
+        H2[(H2)]
+    end
+
+    CLI --> HTTP
+    HTTP --> QR & MR
+    QR & MR --> UC
+    UC --> |inbound Port| JPA & AI & JWT
+    JPA --> DB
 ```
 
 ---
@@ -88,8 +132,9 @@ cd alexandra-job-tracker
 
 ```bash
 mvn compile -pl bootstrap-server -am              # Compile server + deps
-mvn test -pl domain                               # Domain & ArchUnit tests
-mvn verify                                        # Full CI (unit + E2E)
+mvn test -pl domain                               # Domain unit tests
+mvn test -pl coverage-jacoco -am                  # Architecture tests (13 ArchUnit rules)
+mvn verify                                        # Full CI (unit + E2E + arch)
 mvn package -pl bootstrap-server -am -DskipTests  # Server fat JAR
 mvn package -pl bootstrap-cli -am -DskipTests     # CLI fat JAR
 ```
@@ -153,10 +198,14 @@ The server exposes a GraphQL endpoint at `POST /api/graphql` with the following 
 
 ### Status Pipeline
 
-```
-SAVED → APPLIED → INTERVIEWING → OFFER → ACCEPTED
-                             ↘          ↘
-                            REJECTED   WITHDRAWN
+```mermaid
+flowchart LR
+    SAVED --> APPLIED
+    APPLIED --> INTERVIEWING
+    INTERVIEWING --> OFFER
+    OFFER --> ACCEPTED
+    INTERVIEWING --> REJECTED
+    OFFER --> WITHDRAWN
 ```
 
 ---
@@ -192,15 +241,37 @@ analyze -i <posting-id> -j '.fitScore'
 
 ---
 
+## Browser Extension
+
+A Chrome extension for capturing job postings from LinkedIn and Indeed:
+
+| Feature          | Description                                                |
+|------------------|------------------------------------------------------------|
+| **LinkedIn**     | Extracts title, company, and description from job pages    |
+| **Indeed**       | Extracts title, company, and description from job pages    |
+| **Login**        | Authenticates via the extension Options page               |
+| **Review before submit** | Editable form before sending to the API            |
+
+```bash
+# Load the extension
+chrome://extensions → Developer mode → Load unpacked → select browser-extension/
+```
+
+Then configure the server URL (`http://localhost:8880/api/graphql`) and log in via the Options
+page.
+
+---
+
 ## Testing
 
 | Type              | Tool                            | Command                                                                        |
 |-------------------|---------------------------------|--------------------------------------------------------------------------------|
 | Unit              | JUnit 5 + Mockito               | `mvn clean test`                                                               |
 | Mutation          | PIT                             | `mvn -Ppitest test`                                                            |
-| Architecture      | ArchUnit                        | `mvn clean test -pl domain`                                                    |
+| Architecture      | ArchUnit                        | `mvn clean test -pl coverage-jacoco -am` (13 rules)                            |
 | Integration       | Spring Boot Test + RestTemplate | `mvn clean verify` → `coverage-jacoco/target/site/jacoco-aggregate/index.html` |
 | AOT compatibility | Spring AOT                      | `mvn -Pnative test -pl bootstrap-server -am`                                   |
+| Checkstyle        | Checkstyle                      | `mvn validate` (Google Java Style, 140 cols, 2-space indent)                   |
 
 ---
 

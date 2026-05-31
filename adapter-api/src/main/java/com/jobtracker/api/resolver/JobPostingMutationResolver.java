@@ -8,7 +8,6 @@ import com.jobtracker.domain.port.in.AnalyzeJobPostingUseCase;
 import com.jobtracker.domain.port.in.SubmitJobPostingUseCase;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
-import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
@@ -34,7 +33,6 @@ public class JobPostingMutationResolver {
   /**
    * Submits a job posting from raw data (browser extension, manual entry).
    */
-  @SuppressWarnings("java:S4449") // false positives
   @MutationMapping
   public JobPosting submitJobPosting(@ContextValue final UserId userId,
                                       @Argument("input") final JobPostingInput input) {
@@ -56,7 +54,7 @@ public class JobPostingMutationResolver {
     String url,
     String title,
     String company,
-    @Nullable String description,
+    String description,
     Source source) {
   }
 }

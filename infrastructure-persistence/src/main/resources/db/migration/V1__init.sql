@@ -10,7 +10,7 @@ CREATE TABLE applications
 (
   id           UUID PRIMARY KEY,
   user_id      UUID                     NOT NULL REFERENCES users (id),
-  company      VARCHAR(255)             NOT NULL,
+  company      TEXT                     NOT NULL,
   role         VARCHAR(255)             NOT NULL,
   source       VARCHAR(50)              NOT NULL,
   posting_url  TEXT,
@@ -28,8 +28,8 @@ CREATE TABLE job_postings
   user_id     UUID         NOT NULL REFERENCES users (id),
   url         TEXT         NOT NULL,
   source      VARCHAR(50)  NOT NULL,
-  title       VARCHAR(255) NOT NULL,
-  company     VARCHAR(255) NOT NULL,
+  title       TEXT         NOT NULL,
+  company     TEXT         NOT NULL,
   description TEXT,
   posted_at   TIMESTAMP WITH TIME ZONE,
   UNIQUE (user_id, url)
