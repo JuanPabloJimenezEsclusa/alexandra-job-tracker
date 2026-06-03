@@ -8,7 +8,6 @@ import java.time.Duration;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -86,10 +85,11 @@ class CaffeineCacheAdapterTest {
     assertThat(cache.get(key, String.class)).hasValue(newVal);
   }
 
-  @Test
-  void shouldHandleExpiration() {
+  @ParameterizedTest(name = "expiry after {1}ms")
+  @CsvSource({"10, 20"})
+  void shouldHandleExpiration(final long ttlMs, final long sleepMs) {
     // Given
-    var shortCache = new CaffeineCacheAdapter(100, Duration.ofMillis(10));
+    var shortCache = new CaffeineCacheAdapter(100, Duration.ofMillis(ttlMs));
     shortCache.put("key", "value");
 
     // When, then

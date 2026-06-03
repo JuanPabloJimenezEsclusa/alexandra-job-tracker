@@ -28,7 +28,8 @@ class GraphQlExceptionResolverTest {
       arguments(new IllegalArgumentException("Invalid input"), ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION"),
       arguments(new IllegalStateException("Invalid state transition"), ErrorType.InvalidSyntax, "INVALID_STATE", "STATE_ERROR"),
       arguments(new RuntimeException("Unexpected failure"), ErrorType.DataFetchingException, "INTERNAL_ERROR", "UNEXPECTED"),
-      arguments(new IllegalArgumentException("test"), ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION")
+      arguments(new IllegalArgumentException("test"), ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION"),
+      arguments(new NullPointerException("Authentication required"), ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION")
     );
   }
 
@@ -78,6 +79,6 @@ class GraphQlExceptionResolverTest {
 
     // Then
     assertThat(error.getMessage()).isEqualTo("Internal server error");
-    assertThat(error.getExtensions()).containsEntry("errorCode", "INTERNAL_ERROR");
+    assertThat(error.getExtensions()).containsEntry("errorCode", "BAD_REQUEST");
   }
 }

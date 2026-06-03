@@ -13,9 +13,6 @@ import reactor.core.publisher.Mono;
 public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
   private final JwtProvider jwtProvider;
 
-  /**
-   * Constructs an interceptor with the given JWT provider.
-   */
   public GraphQlAuthInterceptor(final JwtProvider jwtProvider) {
     this.jwtProvider = jwtProvider;
   }
@@ -25,12 +22,10 @@ public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
     final var authHeader = request.getHeaders().getFirst("Authorization");
     if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {
       try {
-        final var token = authHeader.substring(7);
-        final var userId = jwtProvider.validateToken(token);
+        final var userId = jwtProvider.validateToken(authHeader.substring(7));
         request.configureExecutionInput((_, builder) ->
           builder.graphQLContext(ctx -> ctx.put("userId", userId)).build());
-      } catch (Exception _) {
-        // invalid/expired token — proceed without authentication
+      } catch (final Exception _) {
       }
     }
     return chain.next(request);

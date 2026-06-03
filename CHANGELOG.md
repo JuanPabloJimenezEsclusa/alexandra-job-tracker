@@ -5,10 +5,15 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**feat: add field constraints**
+
+
+[3b59d45045d00c9](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/3b59d45045d00c9) juan.pablo.jimenez.esclusa *2026-06-03 21:37:24*
+
 **refactor: adapt to spring shell4**
 
 
-[35b77246dc93a77](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/35b77246dc93a77) juan.pablo.jimenez.esclusa *2026-06-03 18:17:33*
+[67ce001c73d20e8](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/67ce001c73d20e8) juan.pablo.jimenez.esclusa *2026-06-03 18:52:23*
 
 **ci: improve workflow actions**
 

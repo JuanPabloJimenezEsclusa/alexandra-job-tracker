@@ -44,6 +44,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
     return switch (ex) {
       case IllegalArgumentException _ -> "BAD_REQUEST";
       case IllegalStateException _ -> "INVALID_STATE";
+      case NullPointerException _ -> "BAD_REQUEST";
       default -> "INTERNAL_ERROR";
     };
   }
@@ -52,6 +53,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
     return switch (ex) {
       case IllegalArgumentException _ -> ErrorType.ValidationError;
       case IllegalStateException _ -> ErrorType.InvalidSyntax;
+      case NullPointerException _ -> ErrorType.ValidationError;
       default -> ErrorType.DataFetchingException;
     };
   }
@@ -60,6 +62,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
     return switch (ex) {
       case IllegalArgumentException _ -> "VALIDATION";
       case IllegalStateException _ -> "STATE_ERROR";
+      case NullPointerException _ -> "VALIDATION";
       default -> "UNEXPECTED";
     };
   }

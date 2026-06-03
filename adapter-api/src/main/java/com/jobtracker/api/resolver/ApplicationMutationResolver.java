@@ -2,6 +2,8 @@ package com.jobtracker.api.resolver;
 
 import java.util.UUID;
 
+import java.util.Objects;
+
 import com.jobtracker.domain.model.JobApplication;
 import com.jobtracker.domain.port.in.TrackJobApplicationUseCase;
 import com.jobtracker.domain.vo.ApplicationStatus;
@@ -31,12 +33,13 @@ public class ApplicationMutationResolver {
    * Creates a new job application for the authenticated user.
    */
   @MutationMapping
-  public JobApplication createApplication(@ContextValue final UserId userId,
+  public JobApplication createApplication(@ContextValue(required = false) @Nullable final UserId userId,
                                           @Argument final String company,
                                           @Argument final String role,
                                           @Argument final Source source,
                                           @Argument @Nullable final String postingUrl,
                                           @Argument @Nullable final String notes) {
+    Objects.requireNonNull(userId, "Authentication required");
     return useCase.create(userId, company, role, source, postingUrl, notes);
   }
 

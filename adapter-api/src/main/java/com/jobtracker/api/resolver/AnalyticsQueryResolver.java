@@ -2,6 +2,8 @@ package com.jobtracker.api.resolver;
 
 import java.time.Instant;
 
+import java.util.Objects;
+
 import com.jobtracker.api.dto.StatusCounts;
 import com.jobtracker.domain.port.in.GetAnalyticsUseCase;
 import com.jobtracker.domain.vo.Analytics;
@@ -31,7 +33,9 @@ public class AnalyticsQueryResolver {
    * Returns analytics for the authenticated user, optionally filtered by date.
    */
   @QueryMapping
-  public Analytics analytics(@ContextValue final UserId userId, @Argument @Nullable final Instant since) {
+  public Analytics analytics(@ContextValue(required = false) @Nullable final UserId userId,
+                             @Argument @Nullable final Instant since) {
+    Objects.requireNonNull(userId, "Authentication required");
     return useCase.getAnalytics(userId, since);
   }
 
