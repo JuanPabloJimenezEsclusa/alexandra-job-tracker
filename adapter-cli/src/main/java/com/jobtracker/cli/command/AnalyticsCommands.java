@@ -5,15 +5,15 @@ import java.util.HashMap;
 import com.jobtracker.cli.client.GraphqlClient;
 import com.jobtracker.cli.format.JqProcessor;
 import org.jspecify.annotations.Nullable;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
+import org.springframework.stereotype.Component;
 
 /**
  * Shell commands for application analytics.
  */
-@ShellComponent
-public class AnalyticsCommands {
+@Component
+public class  AnalyticsCommands {
   private final GraphqlClient client;
   private final JqProcessor jqProcessor;
 
@@ -28,24 +28,26 @@ public class AnalyticsCommands {
   /**
    * Shows application analytics, optionally filtered by date.
    */
-  @ShellMethod(
-    key = {"analytics", "an"},
-    value = """
-      Show application analytics.
+  @Command(
+    name = "analytics",
+    alias = {"an"},
+    description = "Show application analytics.",
+    group = "Analytics",
+    help = """
+      Shows analytics about your job applications, including total count, conversion rates, and breakdown by status.
+      You can optionally filter analytics to show only applications since a certain date (in ISO-8601 format).
       
-      EXAMPLES
+      Example usage:
         - analytics
-        - analytics -s 2024-01-01 --jq '.totalApplications'""",
-    group = "Analytics")
+        - an -s 2026-01-01
+        - an -s 2026-01-01 -j '.totalApplications'""")
   public String analytics(
-    @ShellOption(
-      value = {"--since", "-s"},
-      defaultValue = ShellOption.NULL,
-      help = "Show analytics since this date (ISO-8601, e.g. 2024-01-01)") @Nullable final String since,
-    @ShellOption(
-      value = {"--jq", "-j"},
-      defaultValue = ShellOption.NULL,
-      help = "jq expression to filter output") @Nullable final String jq) {
+    @Option(
+      longName = "since", shortName = 's',
+      description = "Show analytics since this date (ISO-8601, e.g. 2026-01-01)") @Nullable final String since,
+    @Option(
+      longName = "jq", shortName = 'j',
+      description = "jq expression to filter output") @Nullable final String jq) {
 
     final var variables = new HashMap<String, Object>();
     if (since != null) {

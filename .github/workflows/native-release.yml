@@ -12,13 +12,14 @@ concurrency:
 
 env:
   MAVEN_OPTS: "-Xmx2048m"
-  MAVEN_CLI_OPTS: "--no-transfer-progress -B -ntp -e"
+  MAVEN_CLI_OPTS: "-B -ntp -e"
 
 jobs:
   native-build:
+    if: github.event.pull_request.draft == false
     permissions: { contents: read, pull-requests: write }
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v6
         with:
@@ -37,14 +38,14 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: Install all modules (no tests)
-        run: mvn install -DskipTests
+      - name: Build install
+        run: mvn ${MAVEN_CLI_OPTS} clean install -DskipTests
 
       - name: Build native server image
-        run: mvn -Pnative native:compile -pl bootstrap-server -DskipTests
+        run: mvn ${MAVEN_CLI_OPTS} -Pnative native:compile -pl bootstrap-server -DskipTests
 
       - name: Build native CLI binary
-        run: mvn -Pnative native:compile -pl bootstrap-cli -DskipTests
+        run: mvn ${MAVEN_CLI_OPTS} -Pnative native:compile -pl bootstrap-cli -DskipTests
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v4

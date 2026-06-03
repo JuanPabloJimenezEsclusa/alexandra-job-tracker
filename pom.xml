@@ -123,6 +123,16 @@
         <version>${spring-shell.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.springframework.shell</groupId>
+        <artifactId>spring-shell-core</artifactId>
+        <version>${spring-shell.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.shell</groupId>
+        <artifactId>spring-shell-jline</artifactId>
+        <version>${spring-shell.version}</version>
+      </dependency>
+      <dependency>
         <groupId>io.jsonwebtoken</groupId>
         <artifactId>jjwt-api</artifactId>
         <version>${jjwt.version}</version>
@@ -308,6 +318,13 @@
                       <exclude>io.micrometer:micrometer-core</exclude>
                       <exclude>io.micrometer:micrometer-observation</exclude>
                       <exclude>org.jetbrains.kotlin:kotlin-reflect</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-sdk-metrics</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-exporter-otlp</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-exporter-otlp-common</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-sdk-logs</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-exporter-sender-okhttp</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-sdk-trace</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi</exclude>
                     </excludes>
                   </requireUpperBoundDeps>
                   <requireMavenVersion>

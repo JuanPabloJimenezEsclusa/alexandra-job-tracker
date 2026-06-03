@@ -6,14 +6,14 @@ import java.util.Map;
 import com.jobtracker.cli.client.GraphqlClient;
 import com.jobtracker.cli.format.JqProcessor;
 import org.jspecify.annotations.Nullable;
-import org.springframework.shell.standard.ShellComponent;
-import org.springframework.shell.standard.ShellMethod;
-import org.springframework.shell.standard.ShellOption;
+import org.springframework.shell.core.command.annotation.Command;
+import org.springframework.shell.core.command.annotation.Option;
+import org.springframework.stereotype.Component;
 
 /**
  * Shell commands for tracking job applications.
  */
-@ShellComponent
+@Component
 public class TrackCommands {
   private final GraphqlClient client;
   private final JqProcessor jqProcessor;
@@ -29,33 +29,33 @@ public class TrackCommands {
   /**
    * Adds a new job application.
    */
-  @ShellMethod(
-    key = {"add", "a"},
-    value = """
-      Add a job application.
+  @Command(
+    name = "add",
+    alias = {"a"},
+    description = "Add a job application.",
+    group = "Tracking",
+    help = """
+      Adds a new job application with the specified company, role, source, and optional posting URL and notes.
       
-      EXAMPLES
-        - add -c Acme -r Engineer -s LINKEDIN
-        - add -c Google -r SRE -s INDEED --url https://careers.google.com""",
-    group = "Tracking")
+      Example usage:
+        - add -c "Acme Corp" -r 'Software Engineer' -s LINKEDIN
+        - a -c 'Beta Inc' -r 'Data Scientist' -s INDEED -u 'https://example.com/job/123' -n 'Applied on 2026-01-15'""")
   public String add(
-    @ShellOption(
-      value = {"--company", "-c"},
-      help = "Company name") final String company,
-    @ShellOption(
-      value = {"--role", "-r"},
-      help = "Job role/title") final String role,
-    @ShellOption(
-      value = {"--source", "-s"},
-      help = "Source: LINKEDIN, INDEED, OTHER") final String source,
-    @ShellOption(
-      value = {"--url", "-u"},
-      defaultValue = ShellOption.NULL,
-      help = "Posting URL (optional)") @Nullable final String url,
-    @ShellOption(
-      value = {"--notes", "-n"},
-      defaultValue = ShellOption.NULL,
-      help = "Notes (optional)") @Nullable final String notes) {
+    @Option(
+      longName = "company", shortName = 'c',
+      description = "Company name", required = true) final String company,
+    @Option(
+      longName = "role", shortName = 'r',
+      description = "Job role/title", required = true) final String role,
+    @Option(
+      longName = "source", shortName = 's',
+      description = "Source: LINKEDIN, INDEED, OTHER", required = true) final String source,
+    @Option(
+      longName = "url", shortName = 'u',
+      description = "Posting URL (optional)") @Nullable final String url,
+    @Option(
+      longName = "notes", shortName = 'n',
+      description = "Notes (optional)") @Nullable final String notes) {
 
     final var variables = new HashMap<String, Object>();
     variables.put("c", company);
@@ -79,31 +79,30 @@ public class TrackCommands {
   /**
    * Lists applications, optionally filtered by status or source.
    */
-  @ShellMethod(
-    key = {"list", "l"},
-    value = """
-      List applications.
+  @Command(
+    name = "list",
+    alias = {"l"},
+    description = "List applications.",
+    group = "Tracking",
+    help = """
+      Lists job applications, optionally filtered by status or source.
       
-      EXAMPLES
+       Example usage:
         - list
         - list -s APPLIED
         - list --source LINKEDIN
         - l -j '.[] | {role,company,status}'
-        - l -j '.[] | select((.company == "ACME") and (.status == "SAVED")) | {id,role,postingUrl}'""",
-    group = "Tracking")
+        - l -j '.[] | select((.company == "ACME") and (.status == "SAVED")) | {id,role,postingUrl}'""")
   public String list(
-    @ShellOption(
-      value = {"--status", "-s"},
-      defaultValue = ShellOption.NULL,
-      help = "Filter by status: SAVED, APPLIED, INTERVIEWING, OFFER, ACCEPTED, REJECTED, WITHDRAWN") @Nullable final String status,
-    @ShellOption(
-      value = {"--source"},
-      defaultValue = ShellOption.NULL,
-      help = "Filter by source: LINKEDIN, INDEED, OTHER") @Nullable final String source,
-    @ShellOption(
-      value = {"--jq", "-j"},
-      defaultValue = ShellOption.NULL,
-      help = "jq expression to filter output (e.g., '.[].company')") @Nullable final String jq) {
+    @Option(
+      longName = "status", shortName = 's',
+      description = "Filter by status: SAVED, APPLIED, INTERVIEWING, OFFER, ACCEPTED, REJECTED, WITHDRAWN") @Nullable final String status,
+    @Option(
+      longName = "source",
+      description = "Filter by source: LINKEDIN, INDEED, OTHER") @Nullable final String source,
+    @Option(
+      longName = "jq", shortName = 'j',
+      description = "jq expression to filter output (e.g., '.[].company')") @Nullable final String jq) {
 
     final var variables = new HashMap<String, Object>();
     if (status != null) {
@@ -127,26 +126,28 @@ public class TrackCommands {
   /**
    * Updates the status of an application.
    */
-  @ShellMethod(
-    key = {"update", "u"},
-    value = """
-      Update application status.
+  @Command(
+    name = "update",
+    alias = {"u"},
+    description = "Update application status.",
+    group = "Tracking",
+    help = """
+      Updates the status of an application by ID, with optional notes.
       
-      EXAMPLES
+       Example usage:
         - update -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s WITHDRAWN
-        - u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s APPLIED -n 'Followed up via email on May 3rd'""",
-    group = "Tracking")
+        - u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s APPLIED -n 'Followed up via email on May 3rd'""")
   public String update(
-    @ShellOption(
-      value = {"--id", "-i"},
-      help = "Application ID") final String id,
-    @ShellOption(
-      value = {"--status", "-s"},
-      help = "New status: SAVED, APPLIED, INTERVIEWING, OFFER, ACCEPTED, REJECTED, WITHDRAWN") final String status,
-    @ShellOption(
-      value = {"--notes", "-n"},
-      defaultValue = ShellOption.NULL,
-      help = "Notes (optional)") @Nullable final String notes) {
+    @Option(
+      longName = "id", shortName = 'i',
+      description = "Application ID", required = true) final String id,
+    @Option(
+      longName = "status", shortName = 's',
+      description = "New status: SAVED, APPLIED, INTERVIEWING, OFFER, ACCEPTED, REJECTED, WITHDRAWN",
+      required = true) final String status,
+    @Option(
+      longName = "notes", shortName = 'n',
+      description = "Notes (optional)") @Nullable final String notes) {
 
     final var variables = new HashMap<String, Object>();
     variables.put("id", id);
@@ -167,17 +168,20 @@ public class TrackCommands {
   /**
    * Deletes an application by ID.
    */
-  @ShellMethod(
-    key = {"delete", "d"},
-    value = """
-      Delete an application.
+  @Command(
+    name = "delete",
+    alias = {"d"},
+    description = "Delete an application.",
+    group = "Tracking",
+    help = """
+      Deletes an application by ID.
       
-      EXAMPLES
-        - d -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a""",
-    group = "Tracking")
-  public String delete(@ShellOption(
-    value = {"--id", "-i"},
-    help = "Application ID to delete") final String id) {
+       Example usage:
+        - delete -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a
+        - d -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a""")
+  public String delete(@Option(
+    longName = "id", shortName = 'i',
+    description = "Application ID to delete") final String id) {
     client.execute("""
         mutation($id: ID!) {
           deleteApplication(id: $id)

@@ -113,6 +113,7 @@ flowchart LR
     end
 
     CLI --> HTTP
+    BrowserExt --> HTTP
     HTTP --> QR & MR
     QR & MR --> UC
     UC --> |inbound Port| JPA & AI & JWT

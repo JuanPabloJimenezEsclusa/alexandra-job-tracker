@@ -8,6 +8,7 @@ import java.time.Duration;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -85,17 +86,14 @@ class CaffeineCacheAdapterTest {
     assertThat(cache.get(key, String.class)).hasValue(newVal);
   }
 
-  @ParameterizedTest(name = "expiry after {1}ms")
-  @CsvSource({"10, 20"})
-  void shouldHandleExpiration(final long ttlMs, final long sleepMs) {
+  @Test
+  void shouldHandleExpiration() {
     // Given
-    var shortCache = new CaffeineCacheAdapter(100, Duration.ofMillis(ttlMs));
+    var shortCache = new CaffeineCacheAdapter(100, Duration.ofMillis(10));
     shortCache.put("key", "value");
 
-    // When
-    await().during(Duration.ofMillis(sleepMs));
-
-    // Then
-    assertThat(shortCache.get("key", String.class)).isEmpty();
+    // When, then
+    await().atMost(Duration.ofSeconds(2)).untilAsserted(() ->
+      assertThat(shortCache.get("key", String.class)).isEmpty());
   }
 }
