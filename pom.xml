@@ -81,9 +81,13 @@
     <jspecify.version>1.0.0</jspecify.version>
     <checkstyle.version>13.5.0</checkstyle.version>
     <jackson-jq.version>1.6.2</jackson-jq.version>
+    <instancio.version>5.4.0</instancio.version>
+
+    <!-- Cli testing -->
+    <wiremock.version>3.13.2</wiremock.version>
 
     <!-- Site reports -->
-    <inceptionYear>2023</inceptionYear>
+    <inceptionYear>2026</inceptionYear>
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
     <currentYear>${maven.build.timestamp}</currentYear>
 
@@ -102,8 +106,10 @@
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>JuanPabloJimenezEsclusa_alexandra-job-tracker</sonar.projectKey>
     <sonar.coverage.jacoco.xmlReportPaths>
-      ${project.basedir}/coverage-jacoco/target/site/jacoco-aggregate/jacoco.xml
+      ${project.basedir}/coverage-jacoco/target/site/jacoco-aggregate/jacoco.xml,
+      ${project.basedir}/../coverage-jacoco/target/site/jacoco-aggregate/jacoco.xml
     </sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.exclusions>**/*Config.java,**/*Mapper.java**/*Hints.java</sonar.coverage.exclusions>
     <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
     <sonar.branch.name>develop</sonar.branch.name>
   </properties>
@@ -171,6 +177,12 @@
       <groupId>org.jspecify</groupId>
       <artifactId>jspecify</artifactId>
       <version>${jspecify.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.instancio</groupId>
+      <artifactId>instancio-core</artifactId>
+      <version>${instancio.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -249,6 +261,9 @@
           <version>${jacoco-maven-plugin.version}</version>
           <configuration>
             <excludes>
+              <exclude>**/*Config.class</exclude>
+              <exclude>**/*Mapper.class</exclude>
+              <exclude>**/*Hints.class</exclude>
             </excludes>
           </configuration>
           <executions>
@@ -291,6 +306,9 @@
               <configuration>
                 <dataFile>${project.build.directory}/jacoco-aggregate.exec</dataFile>
                 <excludes>
+                  <exclude>**/*Config.class</exclude>
+                  <exclude>**/*Mapper.class</exclude>
+                  <exclude>**/*Hints.class</exclude>
                 </excludes>
               </configuration>
             </execution>

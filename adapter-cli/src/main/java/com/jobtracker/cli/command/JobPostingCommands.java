@@ -38,8 +38,8 @@ public class JobPostingCommands {
       Analyzes a job posting by its ID and returns a summary, key skills, and fit score.
       
       Example usage:
-        - analyze -i 12345
-        - anlz -i 12345 -j '.summary'""")
+        - analyze -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a
+        - anlz -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -j '.summary'""")
   public String analyze(
     @Option(
       longName = "id", shortName = 'i',

@@ -2,18 +2,18 @@ package com.jobtracker.domain.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.withinPercentage;
+import static org.instancio.Select.field;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.jobtracker.domain.model.JobApplication;
 import com.jobtracker.domain.vo.ApplicationStatus;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
+import org.instancio.Instancio;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -43,15 +43,22 @@ class AnalyticsCalculatorTest {
   }
 
   private static JobApplication app(final UserId userId, final ApplicationStatus status) {
-    return new JobApplication(UUID.randomUUID(), userId, "Acme", "SWE",
-      Source.LINKEDIN, null, status, Instant.now(), Instant.now(), null);
+    return Instancio.of(JobApplication.class)
+      .set(field(JobApplication::userId), userId)
+      .set(field(JobApplication::status), status)
+      .set(field(JobApplication::company), "Acme")
+      .set(field(JobApplication::role), "SWE")
+      .set(field(JobApplication::source), Source.LINKEDIN)
+      .set(field(JobApplication::postingUrl), null)
+      .set(field(JobApplication::notes), null)
+      .create();
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("analyticsScenarios")
   void shouldCalculateAnalytics(final List<JobApplication> apps, final int expectedTotal,
                                 final double expectedConversion) {
-    // Given, When
+    // Given, when
     var result = new AnalyticsCalculator().calculate(apps);
 
     // Then

@@ -66,7 +66,8 @@ class JobPostingIntegrationTest {
 
     final var body = """
       {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id title company source}}",\
-      "variables":{"i":{"url":"https://example.com/job/123","title":"Test Engineer","company":"TestCorp","source":"LINKEDIN"}}}
+      "variables":{"i":{"url":"https://example.com/job/123","title":"Test Engineer",\
+      "description":"No empty","company":"TestCorp","source":"LINKEDIN"}}}
       """;
     final var response = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>(body, headers), String.class);
@@ -87,7 +88,8 @@ class JobPostingIntegrationTest {
 
     final var submitBody = """
       {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id}}",\
-      "variables":{"i":{"url":"https://linkedin.com/job/1","title":"LinkedIn Job","company":"LinkedCorp","source":"LINKEDIN"}}}
+      "variables":{"i":{"url":"https://linkedin.com/job/1","title":"LinkedIn Job",\
+      "description":"No empty","company":"LinkedCorp","source":"LINKEDIN"}}}
       """;
     rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(submitBody, headers), String.class);
 

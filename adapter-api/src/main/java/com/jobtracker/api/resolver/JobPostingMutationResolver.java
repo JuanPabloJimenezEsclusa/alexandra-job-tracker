@@ -1,8 +1,7 @@
 package com.jobtracker.api.resolver;
 
-import java.util.UUID;
-
 import java.util.Objects;
+import java.util.UUID;
 
 import com.jobtracker.domain.model.JobAnalysis;
 import com.jobtracker.domain.model.JobPosting;
@@ -38,15 +37,14 @@ public class JobPostingMutationResolver {
    */
   @MutationMapping
   public JobPosting submitJobPosting(@ContextValue(required = false) @Nullable final UserId userId,
-                                      @Argument("input") final JobPostingInput raw) {
+                                     @Argument("input") final JobPostingInput raw) {
     Objects.requireNonNull(userId, "Authentication required");
-    var input = new JobPostingInput(
+    return submitUseCase.submit(userId,
       StringSanitizer.sanitize(raw.url()),
       StringSanitizer.sanitize(raw.title()),
       StringSanitizer.sanitize(raw.company()),
       StringSanitizer.sanitize(raw.description()),
       raw.source());
-    return submitUseCase.submit(userId, input.url(), input.title(), input.company(), input.description(), input.source());
   }
 
   /**

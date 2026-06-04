@@ -64,17 +64,17 @@ public record JobApplication(
   /**
    * Returns a new JobApplication with the given status after validating the transition.
    */
-  public JobApplication withStatus(final ApplicationStatus newStatus) {
+  public JobApplication withStatus(final ApplicationStatus newStatus, final Instant lastUpdated) {
     if (!canTransitionTo(status, newStatus)) {
       throw new IllegalStateException("Cannot transition from " + status + " to " + newStatus);
     }
-    return new JobApplication(id, userId, company, role, source, postingUrl, newStatus, dateApplied, Instant.now(), notes);
+    return new JobApplication(id, userId, company, role, source, postingUrl, newStatus, dateApplied, lastUpdated, notes);
   }
 
   /**
    * Returns a new JobApplication with updated notes.
    */
-  public JobApplication withNotes(@Nullable final String notes) {
-    return new JobApplication(id, userId, company, role, source, postingUrl, status, dateApplied, Instant.now(), notes);
+  public JobApplication withNotes(@Nullable final String notes, final Instant lastUpdated) {
+    return new JobApplication(id, userId, company, role, source, postingUrl, status, dateApplied, lastUpdated, notes);
   }
 }

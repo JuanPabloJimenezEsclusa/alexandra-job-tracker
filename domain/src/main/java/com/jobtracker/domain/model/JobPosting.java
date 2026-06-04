@@ -30,6 +30,7 @@ public record JobPosting(
     Objects.requireNonNull(postedAt, "postedAt must not be null");
     requireNonBlank(url, "url must not be blank");
     requireNonBlank(title, "title must not be blank");
+    requireNonBlank(description, "description must not be blank");
     requireNonBlank(company, "company must not be blank");
   }
 

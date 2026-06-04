@@ -13,6 +13,9 @@ import reactor.core.publisher.Mono;
 public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
   private final JwtProvider jwtProvider;
 
+  /**
+   * Instantiates a new Graph ql auth interceptor.
+   */
   public GraphQlAuthInterceptor(final JwtProvider jwtProvider) {
     this.jwtProvider = jwtProvider;
   }
@@ -21,12 +24,9 @@ public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
   public Mono<WebGraphQlResponse> intercept(final WebGraphQlRequest request, final Chain chain) {
     final var authHeader = request.getHeaders().getFirst("Authorization");
     if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {
-      try {
-        final var userId = jwtProvider.validateToken(authHeader.substring(7));
-        request.configureExecutionInput((_, builder) ->
-          builder.graphQLContext(ctx -> ctx.put("userId", userId)).build());
-      } catch (final Exception _) {
-      }
+      final var userId = jwtProvider.validateToken(authHeader.substring(7));
+      request.configureExecutionInput((_, builder) ->
+        builder.graphQLContext(ctx -> ctx.put("userId", userId)).build());
     }
     return chain.next(request);
   }

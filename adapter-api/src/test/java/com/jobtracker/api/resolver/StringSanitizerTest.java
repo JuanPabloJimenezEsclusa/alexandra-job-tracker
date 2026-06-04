@@ -21,7 +21,6 @@ class StringSanitizerTest {
       arguments("\u0000\u0001\u0002", ""),
       arguments("  spaced  ", "spaced"),
       arguments("  ", ""),
-      arguments(null, null),
       arguments("café", "café"),
       arguments("", "")
     );

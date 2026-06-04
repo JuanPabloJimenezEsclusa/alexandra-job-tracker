@@ -1,5 +1,7 @@
 package com.jobtracker.server;
 
+import java.time.Clock;
+
 import com.jobtracker.application.service.AnalyzeJobPostingUseCaseImpl;
 import com.jobtracker.application.service.AuthenticationUseCaseImpl;
 import com.jobtracker.application.service.GetAnalyticsUseCaseImpl;
@@ -31,9 +33,10 @@ public class UseCaseConfig {
 
   @Bean
   SubmitJobPostingUseCase submitJobPostingUseCase(
+      final Clock clock,
       final SaveJobPostingPort savePostingPort,
       final SaveJobApplicationPort saveAppPort) {
-    return new SubmitJobPostingUseCaseImpl(savePostingPort, saveAppPort);
+    return new SubmitJobPostingUseCaseImpl(savePostingPort, saveAppPort, clock);
   }
 
   @Bean
@@ -54,15 +57,17 @@ public class UseCaseConfig {
 
   @Bean
   TrackJobApplicationUseCase trackJobApplicationUseCase(
+      final Clock clock,
       final SaveJobApplicationPort savePort,
       final LoadJobApplicationPort loadPort) {
-    return new TrackJobApplicationUseCaseImpl(savePort, loadPort);
+    return new TrackJobApplicationUseCaseImpl(savePort, loadPort, clock);
   }
 
   @Bean
-  AuthenticationUseCase authenticationUseCase(final SaveUserPort saveUserPort,
+  AuthenticationUseCase authenticationUseCase(final Clock clock,
+                                              final SaveUserPort saveUserPort,
                                               final LoadUserPort loadUserPort,
                                               final TokenGeneratorPort tokenGenerator) {
-    return new AuthenticationUseCaseImpl(saveUserPort, loadUserPort, tokenGenerator);
+    return new AuthenticationUseCaseImpl(saveUserPort, loadUserPort, tokenGenerator, clock);
   }
 }

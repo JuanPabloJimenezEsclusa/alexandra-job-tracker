@@ -1,7 +1,6 @@
 package com.jobtracker.api.resolver;
 
 import java.time.Instant;
-
 import java.util.Objects;
 
 import com.jobtracker.api.dto.StatusCounts;

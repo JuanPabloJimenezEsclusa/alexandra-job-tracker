@@ -1,17 +1,18 @@
 package com.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.instancio.Select.field;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.jobtracker.domain.model.User;
 import com.jobtracker.domain.port.in.AuthenticationUseCase;
 import com.jobtracker.domain.vo.UserId;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,7 +31,11 @@ class UserQueryResolverTest {
   @Test
   void shouldReturnCurrentUser() {
     final var userId = new UserId(UUID.randomUUID());
-    final var user = new User(userId, "alice", "hash", Instant.now());
+    final var user = Instancio.of(User.class)
+      .set(field(User::id), userId)
+      .set(field(User::username), "alice")
+      .set(field(User::passwordHash), "hash")
+      .create();
 
     when(authUseCase.getCurrentUser(userId)).thenReturn(Optional.of(user));
 

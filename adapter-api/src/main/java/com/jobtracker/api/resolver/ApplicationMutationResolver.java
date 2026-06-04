@@ -1,8 +1,7 @@
 package com.jobtracker.api.resolver;
 
-import java.util.UUID;
-
 import java.util.Objects;
+import java.util.UUID;
 
 import com.jobtracker.domain.model.JobApplication;
 import com.jobtracker.domain.port.in.TrackJobApplicationUseCase;

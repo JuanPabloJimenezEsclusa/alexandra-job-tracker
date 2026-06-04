@@ -41,17 +41,16 @@ class AnalyticsTest {
   @ParameterizedTest(name = "{0}")
   @MethodSource("validAnalytics")
   void shouldComputeTotalFromMap(final EnumMap<ApplicationStatus, Integer> perStatus, final int expectedTotal) {
-    // Given, When
-    var analytics = new Analytics(perStatus);
-
-    // Then
-    assertThat(analytics.totalApplications()).isEqualTo(expectedTotal);
+    // When, then
+    assertThat(new Analytics(perStatus))
+      .returns(perStatus, Analytics::perStatus)
+      .returns(expectedTotal, Analytics::totalApplications);
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("invalidAnalytics")
   void shouldRejectNegativeCounts(final EnumMap<ApplicationStatus, Integer> perStatus) {
-    // When, Then
+    // When, then
     assertThatThrownBy(() -> new Analytics(perStatus))
       .isInstanceOf(IllegalArgumentException.class);
   }

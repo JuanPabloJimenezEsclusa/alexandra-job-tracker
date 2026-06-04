@@ -1,11 +1,11 @@
 package com.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.instancio.Select.field;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import com.jobtracker.domain.model.JobApplication;
@@ -13,6 +13,7 @@ import com.jobtracker.domain.port.in.TrackJobApplicationUseCase;
 import com.jobtracker.domain.vo.ApplicationStatus;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,8 +32,15 @@ class ApplicationMutationResolverTest {
   @Test
   void shouldCreateApplication() {
     final var userId = new UserId(UUID.randomUUID());
-    final var app = new JobApplication(UUID.randomUUID(), userId, "Acme", "Engineer",
-      Source.LINKEDIN, "url", ApplicationStatus.SAVED, Instant.now(), Instant.now(), "notes");
+    final var app = Instancio.of(JobApplication.class)
+      .set(field(JobApplication::userId), userId)
+      .set(field(JobApplication::status), ApplicationStatus.SAVED)
+      .set(field(JobApplication::company), "Acme")
+      .set(field(JobApplication::role), "Engineer")
+      .set(field(JobApplication::source), Source.LINKEDIN)
+      .set(field(JobApplication::postingUrl), "url")
+      .set(field(JobApplication::notes), "notes")
+      .create();
 
     when(useCase.create(userId, "Acme", "Engineer",
       Source.LINKEDIN, "url", "notes")).thenReturn(app);
@@ -47,8 +55,17 @@ class ApplicationMutationResolverTest {
   @Test
   void shouldUpdateApplicationStatus() {
     final var id = UUID.randomUUID();
-    final var app = new JobApplication(id, new UserId(id), "Acme", "Engineer",
-      Source.LINKEDIN, "url", ApplicationStatus.INTERVIEWING, Instant.now(), Instant.now(), "notes");
+    final var userId = new UserId(id);
+    final var app = Instancio.of(JobApplication.class)
+      .set(field(JobApplication::id), id)
+      .set(field(JobApplication::userId), userId)
+      .set(field(JobApplication::status), ApplicationStatus.INTERVIEWING)
+      .set(field(JobApplication::company), "Acme")
+      .set(field(JobApplication::role), "Engineer")
+      .set(field(JobApplication::source), Source.LINKEDIN)
+      .set(field(JobApplication::postingUrl), "url")
+      .set(field(JobApplication::notes), "notes")
+      .create();
 
     when(useCase.updateStatus(id, ApplicationStatus.INTERVIEWING, "notes")).thenReturn(app);
 
