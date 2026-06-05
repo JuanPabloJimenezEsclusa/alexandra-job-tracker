@@ -39,7 +39,8 @@ public class TrackCommands {
       
       Example usage:
         - add -c "Acme Corp" -r 'Software Engineer' -s LINKEDIN
-        - a -c 'Beta Inc' -r 'Data Scientist' -s INDEED -u 'https://example.com/job/123' -n 'Applied on 2026-01-15'""")
+        - a -c 'Beta Inc' -r 'Data Scientist' -s INDEED -u 'https://example.com/job/123' -n 'Applied on 2026-01-15'
+      """)
   public String add(
     @Option(
       longName = "company", shortName = 'c',
@@ -73,7 +74,11 @@ public class TrackCommands {
         }""",
       variables);
 
-    return "Created: " + result.get("data").get("createApplication");
+    final var data = result.get("data");
+    if (data == null || data.isNull()) {
+      return result.toPrettyString();
+    }
+    return "Created: " + data.get("createApplication");
   }
 
   /**
@@ -91,8 +96,9 @@ public class TrackCommands {
         - list
         - list -s APPLIED
         - list --source LINKEDIN
-        - l -j '.[] | {role,company,status}'
-        - l -j '.[] | select((.company == "ACME") and (.status == "SAVED")) | {id,role,postingUrl}'""")
+        - l -j ".[] | {role,company,status}"
+        - l -j ".[] | select((.company == "ACME") and (.status == "SAVED")) | {id,role,postingUrl}"
+      """)
   public String list(
     @Option(
       longName = "status", shortName = 's',
@@ -120,7 +126,11 @@ public class TrackCommands {
         }""",
       variables);
 
-    return jqProcessor.process(result.get("data").get("applications"), jq);
+    final var data = result.get("data");
+    if (data == null || data.isNull()) {
+      return result.toPrettyString();
+    }
+    return jqProcessor.process(data.get("applications"), jq);
   }
 
   /**
@@ -136,7 +146,8 @@ public class TrackCommands {
       
        Example usage:
         - update -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s WITHDRAWN
-        - u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s APPLIED -n 'Followed up via email on May 3rd'""")
+        - u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s APPLIED -n 'Followed up via email on May 3rd'
+      """)
   public String update(
     @Option(
       longName = "id", shortName = 'i',
@@ -162,7 +173,11 @@ public class TrackCommands {
           updateApplicationStatus(id: $id, status: $s, notes: $n) { id status lastUpdated }
         }""",
       variables);
-    return "Updated: " + result.get("data").get("updateApplicationStatus");
+    final var data = result.get("data");
+    if (data == null || data.isNull()) {
+      return result.toPrettyString();
+    }
+    return "Updated: " + data.get("updateApplicationStatus");
   }
 
   /**
@@ -178,7 +193,8 @@ public class TrackCommands {
       
        Example usage:
         - delete -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a
-        - d -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a""")
+        - d -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a
+      """)
   public String delete(@Option(
     longName = "id", shortName = 'i',
     description = "Application ID to delete") final String id) {

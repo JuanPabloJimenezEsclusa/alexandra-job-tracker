@@ -5,10 +5,20 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**refactor: improve ai prompt**
+
+
+[3af3aed8783a635](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/3af3aed8783a635) juan.pablo.jimenez.esclusa *2026-06-05 19:47:19*
+
+**refactor: improve ai prompt**
+
+
+[084dd2b1efbef9f](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/084dd2b1efbef9f) juan.pablo.jimenez.esclusa *2026-06-05 17:57:15*
+
 **feat: improve test coverage**
 
 
-[7b960eb307dcf8d](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/7b960eb307dcf8d) juan.pablo.jimenez.esclusa *2026-06-05 15:56:57*
+[b0f7058c69c4176](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/b0f7058c69c4176) juan.pablo.jimenez.esclusa *2026-06-05 16:34:55*
 
 **feat: add field constraints**
 

@@ -41,7 +41,7 @@ abstract class BaseCliIntegrationTest {
   protected ShellTestClient shell;
 
   @DynamicPropertySource
-  static void configure(DynamicPropertyRegistry registry) {
+  static void configure(final DynamicPropertyRegistry registry) {
     registry.add("server.url", () -> "http://localhost:" + wireMockServer.port() + "/api");
   }
 

@@ -14,7 +14,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 class AuthCommandsIntegrationTest extends BaseCliIntegrationTest {
 
   private static final Consumer<AuthCommandsIntegrationTest> NO_OP = _ -> {};
-  private static final Consumer<AuthCommandsIntegrationTest> STUB_ERROR = _ -> stubGraphqlError();
+  private static final Consumer<AuthCommandsIntegrationTest> STUB_ERROR = _ ->
+    stubGraphqlError();
   private static final Consumer<AuthCommandsIntegrationTest> STUB_ME_NULL = _ ->
     stubGraphql("me", """
       {"data": {"me": null}}
@@ -31,6 +32,10 @@ class AuthCommandsIntegrationTest extends BaseCliIntegrationTest {
     stubGraphql("register", """
       {"errors": [{"message": "Username already taken"}]}
       """);
+  private static final Consumer<AuthCommandsIntegrationTest> STUB_LIST_ERROR = _ ->
+    stubGraphql("applications", """
+      {"errors": [{"message": "Authentication required"}]}
+      """);
   private static final Consumer<AuthCommandsIntegrationTest> AUTH = t -> {
     try {
       t.authenticate();
@@ -44,7 +49,7 @@ class AuthCommandsIntegrationTest extends BaseCliIntegrationTest {
       arguments(named("login with valid credentials", NO_OP), NO_OP,
         "login --username preloaded --password pass", "Logged in as"),
       arguments(named("login with invalid credentials", STUB_ERROR), NO_OP,
-        "login --username preloaded --password wrongpass", "Error"),
+        "login --username preloaded --password wrongpass", "Invalid credentials"),
       arguments(named("whoami without authentication", STUB_ME_NULL), NO_OP,
         "whoami", "Not logged in"),
       arguments(named("logout", NO_OP), AUTH,
@@ -54,7 +59,9 @@ class AuthCommandsIntegrationTest extends BaseCliIntegrationTest {
       arguments(named("register with valid credentials", STUB_REGISTER), NO_OP,
         "register --username newuser --password secret", "Registered and logged in as"),
       arguments(named("register with duplicate username", STUB_REGISTER_ERROR), NO_OP,
-        "register --username existing --password pass", "Error")
+        "register --username existing --password pass", "Username already taken"),
+      arguments(named("list without authentication", STUB_LIST_ERROR), NO_OP,
+        "list", "Authentication required")
     );
   }
 

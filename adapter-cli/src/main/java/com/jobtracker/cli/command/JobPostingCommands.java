@@ -39,7 +39,8 @@ public class JobPostingCommands {
       
       Example usage:
         - analyze -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a
-        - anlz -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -j '.summary'""")
+        - anlz -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -j ".summary"
+      """)
   public String analyze(
     @Option(
       longName = "id", shortName = 'i',
@@ -52,7 +53,11 @@ public class JobPostingCommands {
           analyzeJobPosting(jobPostingId: $id) { summary skills fitScore }
         }""",
       Map.of("id", id));
-    return jqProcessor.process(result.get("data").get("analyzeJobPosting"), jq);
+    final var data = result.get("data");
+    if (data == null || data.isNull()) {
+      return result.toPrettyString();
+    }
+    return jqProcessor.process(data.get("analyzeJobPosting"), jq);
   }
 
   /**
@@ -69,7 +74,8 @@ public class JobPostingCommands {
       
       Example usage:
         - submit-job -u https://example.com/job123 -t "Software Engineer" -c "Tech Corp" -s LINKEDIN -d "Job description here"
-        - sj -u https://example.com/job123 -t "Software Engineer" -c "Tech Corp" -s LINKEDIN -d "Job description here" -j '.id'""")
+        - sj -u https://example.com/job123 -t "Software Engineer" -c "Tech Corp" -s LINKEDIN -d "Job description here" -j ".id"
+      """)
   public String submitJob(
     @Option(
       longName = "url", shortName = 'u',
@@ -98,7 +104,11 @@ public class JobPostingCommands {
           { id title company source }
         }""",
       variables);
-    return "Submitted: " + result.get("data").get("submitJobPosting");
+    final var data = result.get("data");
+    if (data == null || data.isNull() || data.get("submitJobPosting").isNull()) {
+      return result.toPrettyString();
+    }
+    return "Submitted: " + data.get("submitJobPosting");
   }
 
   /**
@@ -114,7 +124,8 @@ public class JobPostingCommands {
       
       Example usage:
         - postings
-        - po -s LINKEDIN -j '.[].title'""")
+        - po -s LINKEDIN -j ".[].title"
+      """)
   public String postings(
     @Option(
       longName = "source", shortName = 's',
@@ -131,6 +142,10 @@ public class JobPostingCommands {
           jobPostings(source: $s) { id title description company source url postedAt }
         }""",
       variables);
-    return jqProcessor.process(result.get("data").get("jobPostings"), jq);
+    final var data = result.get("data");
+    if (data == null || data.isNull()) {
+      return result.toPrettyString();
+    }
+    return jqProcessor.process(data.get("jobPostings"), jq);
   }
 }

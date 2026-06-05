@@ -40,7 +40,8 @@ public class  AnalyticsCommands {
       Example usage:
         - analytics
         - an -s 2026-01-01
-        - an -s 2026-01-01 -j '.totalApplications'""")
+        - an -s 2026-01-01 -j ".totalApplications"
+      """)
   public String analytics(
     @Option(
       longName = "since", shortName = 's',
@@ -62,6 +63,10 @@ public class  AnalyticsCommands {
           }
         }""",
       variables);
-    return "Analytics: " + jqProcessor.process(result.get("data").get("analytics"), jq);
+    final var data = result.get("data");
+    if (data == null || data.isNull()) {
+      return result.toPrettyString();
+    }
+    return "Analytics: " + jqProcessor.process(data.get("analytics"), jq);
   }
 }

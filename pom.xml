@@ -109,7 +109,7 @@
       ${project.basedir}/coverage-jacoco/target/site/jacoco-aggregate/jacoco.xml,
       ${project.basedir}/../coverage-jacoco/target/site/jacoco-aggregate/jacoco.xml
     </sonar.coverage.jacoco.xmlReportPaths>
-    <sonar.coverage.exclusions>**/*Config.java,**/*Mapper.java**/*Hints.java</sonar.coverage.exclusions>
+    <sonar.coverage.exclusions>**/*Config.java,**/*Mapper.java,**/*Hints.java</sonar.coverage.exclusions>
     <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
     <sonar.branch.name>develop</sonar.branch.name>
   </properties>
