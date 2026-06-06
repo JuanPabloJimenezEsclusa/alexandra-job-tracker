@@ -36,11 +36,13 @@ class JobPostingQueryResolverTest {
       .set(field(JobPosting::userId), userId)
       .set(field(JobPosting::source), Source.LINKEDIN)
       .create();
-    final var expected = List.of(posting);
+    final var input = List.of(posting);
 
-    when(useCase.listJobPostings(userId, null)).thenReturn(expected);
+    when(useCase.listJobPostings(userId, null)).thenReturn(input);
 
-    assertThat(resolver.jobPostings(userId, null)).isEqualTo(expected);
+    final var result = resolver.jobPostings(userId, null);
+    assertThat(result).hasSize(1);
+    assertThat(result.getFirst().source()).isEqualTo(Source.LINKEDIN);
 
     verify(useCase).listJobPostings(userId, null);
     verifyNoMoreInteractions(useCase);

@@ -2,7 +2,7 @@ package com.jobtracker.api.resolver;
 
 import java.util.Objects;
 
-import com.jobtracker.domain.model.User;
+import com.jobtracker.api.dto.UserResponse;
 import com.jobtracker.domain.port.in.AuthenticationUseCase;
 import com.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
@@ -29,8 +29,10 @@ public class UserQueryResolver {
    */
   @QueryMapping
   @Nullable
-  public User me(@ContextValue(required = false) @Nullable final UserId userId) {
+  public UserResponse me(@ContextValue(required = false) @Nullable final UserId userId) {
     Objects.requireNonNull(userId, "Authentication required");
-    return authUseCase.getCurrentUser(userId).orElse(null);
+    return authUseCase.getCurrentUser(userId)
+      .map(UserResponse::from)
+      .orElse(null);
   }
 }

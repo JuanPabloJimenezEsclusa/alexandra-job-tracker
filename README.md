@@ -255,12 +255,24 @@ The CLI client connects to the GraphQL API via HTTP. Available commands:
 
 ```bash
 # Examples
-java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost:8080
+java -jar bootstrap-cli/target/bootstrap-cli-*.jar \
+  --server.url=http://localhost:8080
+```
+
+```bash
 register --username alice --password secret
 login --username alice --password secret
-submit-job --url https://linkedin.com/jobs/123 --title "SWE" --company Acme --source LINKEDIN
-postings -s LINKEDIN -j '.[].title'
-analyze -i <posting-id> -j '.fitScore'
+
+submit-job \
+  --url https://linkedin.com/jobs/123 \
+  --title "SWE" \
+  --description "Exciting role..." \
+  --company Acme \
+  --source LINKEDIN
+  
+postings -s LINKEDIN -j ".[].title"
+
+analyze -i <posting-id> -j ".fitScore"
 ```
 
 ---

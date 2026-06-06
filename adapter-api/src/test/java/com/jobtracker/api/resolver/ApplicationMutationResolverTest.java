@@ -45,8 +45,11 @@ class ApplicationMutationResolverTest {
     when(useCase.create(userId, "Acme", "Engineer",
       Source.LINKEDIN, "url", "notes")).thenReturn(app);
 
-    assertThat(resolver.createApplication(userId, "Acme", "Engineer",
-      Source.LINKEDIN, "url", "notes")).isEqualTo(app);
+    final var result = resolver.createApplication(userId, "Acme", "Engineer",
+      Source.LINKEDIN, "url", "notes");
+    assertThat(result.company()).isEqualTo("Acme");
+    assertThat(result.role()).isEqualTo("Engineer");
+    assertThat(result.source()).isEqualTo(Source.LINKEDIN);
 
     verify(useCase).create(userId, "Acme", "Engineer", Source.LINKEDIN, "url", "notes");
     verifyNoMoreInteractions(useCase);
@@ -69,7 +72,9 @@ class ApplicationMutationResolverTest {
 
     when(useCase.updateStatus(id, ApplicationStatus.INTERVIEWING, "notes")).thenReturn(app);
 
-    assertThat(resolver.updateApplicationStatus(id, ApplicationStatus.INTERVIEWING, "notes")).isEqualTo(app);
+    final var result = resolver.updateApplicationStatus(id, ApplicationStatus.INTERVIEWING, "notes");
+    assertThat(result.status()).isEqualTo(ApplicationStatus.INTERVIEWING);
+    assertThat(result.company()).isEqualTo("Acme");
 
     verify(useCase).updateStatus(id, ApplicationStatus.INTERVIEWING, "notes");
     verifyNoMoreInteractions(useCase);

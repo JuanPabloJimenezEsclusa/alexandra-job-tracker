@@ -91,7 +91,10 @@ class JobPostingMutationResolverTest {
 
     when(submitUseCase.submit(userId, "url", "title", "company", "desc", Source.LINKEDIN)).thenReturn(posted);
 
-    assertThat(resolver.submitJobPosting(userId, input)).isEqualTo(posted);
+    final var result = resolver.submitJobPosting(userId, input);
+    assertThat(result.source()).isEqualTo(Source.LINKEDIN);
+    assertThat(result.title()).isEqualTo("title");
+    assertThat(result.company()).isEqualTo("company");
 
     verify(submitUseCase).submit(userId, "url", "title", "company", "desc", Source.LINKEDIN);
     verifyNoMoreInteractions(submitUseCase);

@@ -35,7 +35,9 @@ class UserMutationResolverTest {
 
     when(authUseCase.register("alice", "secret")).thenReturn(payload);
 
-    assertThat(resolver.register("alice", "secret")).isEqualTo(payload);
+    final var result = resolver.register("alice", "secret");
+    assertThat(result.token()).isEqualTo("token");
+    assertThat(result.user().username()).isEqualTo("alice");
 
     verify(authUseCase).register("alice", "secret");
     verifyNoMoreInteractions(authUseCase);
@@ -51,7 +53,9 @@ class UserMutationResolverTest {
 
     when(authUseCase.login("alice", "secret")).thenReturn(payload);
 
-    assertThat(resolver.login("alice", "secret")).isEqualTo(payload);
+    final var result = resolver.login("alice", "secret");
+    assertThat(result.token()).isEqualTo("token");
+    assertThat(result.user().username()).isEqualTo("alice");
 
     verify(authUseCase).login("alice", "secret");
     verifyNoMoreInteractions(authUseCase);

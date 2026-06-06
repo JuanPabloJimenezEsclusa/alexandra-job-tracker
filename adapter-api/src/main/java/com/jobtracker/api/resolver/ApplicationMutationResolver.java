@@ -3,7 +3,7 @@ package com.jobtracker.api.resolver;
 import java.util.Objects;
 import java.util.UUID;
 
-import com.jobtracker.domain.model.JobApplication;
+import com.jobtracker.api.dto.JobApplicationResponse;
 import com.jobtracker.domain.port.in.TrackJobApplicationUseCase;
 import com.jobtracker.domain.vo.ApplicationStatus;
 import com.jobtracker.domain.vo.Source;
@@ -32,24 +32,24 @@ public class ApplicationMutationResolver {
    * Creates a new job application for the authenticated user.
    */
   @MutationMapping
-  public JobApplication createApplication(@ContextValue(required = false) @Nullable final UserId userId,
-                                          @Argument final String company,
-                                          @Argument final String role,
-                                          @Argument final Source source,
-                                          @Argument @Nullable final String postingUrl,
-                                          @Argument @Nullable final String notes) {
+  public JobApplicationResponse createApplication(@ContextValue(required = false) @Nullable final UserId userId,
+                                                   @Argument final String company,
+                                                   @Argument final String role,
+                                                   @Argument final Source source,
+                                                   @Argument @Nullable final String postingUrl,
+                                                   @Argument @Nullable final String notes) {
     Objects.requireNonNull(userId, "Authentication required");
-    return useCase.create(userId, company, role, source, postingUrl, notes);
+    return JobApplicationResponse.from(useCase.create(userId, company, role, source, postingUrl, notes));
   }
 
   /**
    * Updates the status of an existing job application.
    */
   @MutationMapping
-  public JobApplication updateApplicationStatus(@Argument final UUID id,
-                                                @Argument final ApplicationStatus status,
-                                                @Argument @Nullable final String notes) {
-    return useCase.updateStatus(id, status, notes);
+  public JobApplicationResponse updateApplicationStatus(@Argument final UUID id,
+                                                        @Argument final ApplicationStatus status,
+                                                        @Argument @Nullable final String notes) {
+    return JobApplicationResponse.from(useCase.updateStatus(id, status, notes));
   }
 
   /**

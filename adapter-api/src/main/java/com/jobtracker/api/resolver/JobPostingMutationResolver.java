@@ -3,8 +3,8 @@ package com.jobtracker.api.resolver;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.jobtracker.api.dto.JobPostingResponse;
 import com.jobtracker.domain.model.JobAnalysis;
-import com.jobtracker.domain.model.JobPosting;
 import com.jobtracker.domain.port.in.AnalyzeJobPostingUseCase;
 import com.jobtracker.domain.port.in.SubmitJobPostingUseCase;
 import com.jobtracker.domain.vo.Source;
@@ -36,15 +36,15 @@ public class JobPostingMutationResolver {
    * Submits a job posting from raw data (browser extension, manual entry).
    */
   @MutationMapping
-  public JobPosting submitJobPosting(@ContextValue(required = false) @Nullable final UserId userId,
-                                     @Argument("input") final JobPostingInput raw) {
+  public JobPostingResponse submitJobPosting(@ContextValue(required = false) @Nullable final UserId userId,
+                                              @Argument("input") final JobPostingInput raw) {
     Objects.requireNonNull(userId, "Authentication required");
-    return submitUseCase.submit(userId,
+    return JobPostingResponse.from(submitUseCase.submit(userId,
       StringSanitizer.sanitize(raw.url()),
       StringSanitizer.sanitize(raw.title()),
       StringSanitizer.sanitize(raw.company()),
       StringSanitizer.sanitize(raw.description()),
-      raw.source());
+      raw.source()));
   }
 
   /**
