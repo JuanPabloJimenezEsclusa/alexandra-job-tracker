@@ -166,6 +166,16 @@ mvn -Pnative native:compile -pl bootstrap-server -DskipTests  # Server native bi
 mvn -Pnative native:compile -pl bootstrap-cli -DskipTests     # CLI native binary
 ```
 
+### AOT Tracing Agent
+
+Run the server with the GraalVM tracing agent to generate reachability metadata (only works with GraalVM JDK):
+
+```bash
+mvn install -DskipTests && mvn -Ptracing spring-boot:run -pl bootstrap-server
+```
+
+Exercise all API endpoints, then shut down. The agent writes a `reachability-metadata.json` to `bootstrap-server/src/main/resources/META-INF/native-image/com.jobtracker/bootstrap-server/`.
+
 ### Run
 
 ```bash

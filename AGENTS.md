@@ -44,6 +44,7 @@ mvn verify                         # full CI (unit + integration + arch)
 mvn package -pl bootstrap-server -am -DskipTests  # server JAR
 mvn package -pl bootstrap-cli -am -DskipTests     # CLI JAR
 mvn install -DskipTests && mvn -Pnative native:compile -pl bootstrap-server -DskipTests  # native binary
+mvn install -DskipTests && mvn -Ptracing spring-boot:run -pl bootstrap-server  # run with GraalVM tracing agent
 docker compose -f deploy/compose/docker-compose.yml up -d  # all infra
 java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost:8880  # CLI
 ```

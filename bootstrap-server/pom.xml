@@ -152,8 +152,6 @@
           <imageName>job-tracker-server</imageName>
           <mainClass>com.jobtracker.server.JobTrackerServerApplication</mainClass>
           <buildArgs combine.children="append">
-            <!-- https://bell-sw.com/blog/how-to-set-up-graalvm-native-image-debugging/ -->
-            <buildArg>-g</buildArg>
             <!--
             (compile) Recommendations:
             G1GC: Use the G1 GC ('-gc=G1') for improved latency and throughput.
@@ -164,12 +162,12 @@
             -->
             <buildArg>--emit build-report</buildArg>
             <buildArg>--gc=G1</buildArg>
-            <buildArg>-R:MaxHeapSize=4g</buildArg>
+            <buildArg>-R:MaxHeapSize=2g</buildArg>
             <buildArg>-march=native</buildArg>
             <buildArg>-Ob</buildArg>
             <!-- extras -->
             <buildArg>--no-fallback</buildArg>
-            <buildArg>-J-Xmx8g</buildArg>
+            <buildArg>-J-Xmx12g</buildArg>
             <buildArg>--enable-url-protocols=http,https</buildArg>
             <buildArg>--install-exit-handlers</buildArg>
           </buildArgs>
@@ -203,4 +201,15 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>tracing</id>
+      <properties>
+        <spring-boot.run.jvmArguments>
+          -agentlib:native-image-agent=config-output-dir=${project.basedir}/src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}/
+        </spring-boot.run.jvmArguments>
+      </properties>
+    </profile>
+  </profiles>
 </project>

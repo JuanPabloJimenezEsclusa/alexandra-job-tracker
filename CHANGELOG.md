@@ -5,6 +5,11 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**feat: change date format**
+
+
+[adf43ab751983e2](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/adf43ab751983e2) juan.pablo.jimenez.esclusa *2026-06-06 17:26:16*
+
 **refactor: improve ai prompt**
 
 
