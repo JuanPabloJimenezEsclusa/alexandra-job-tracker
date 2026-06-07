@@ -77,7 +77,7 @@ services:
       start_period: 15s
 
   grafana:
-    image: grafana/grafana:13.0.1
+    image: grafana/grafana:13.0.2
     container_name: alexandra-grafana
     hostname: grafana
     restart: unless-stopped
