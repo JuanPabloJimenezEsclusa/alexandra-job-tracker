@@ -2,7 +2,7 @@ package com.jobtracker.observability.config;
 
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
-import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
+import io.opentelemetry.exporter.otlp.http.trace.OtlpHttpSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -23,9 +23,9 @@ public class OtelConfig {
    */
   @Bean
   public OpenTelemetry openTelemetry(
-    @Value("${otel.exporter.otlp.endpoint:http://localhost:4318}") final String endpoint) {
+    @Value("${app.otel.endpoint:http://localhost:4318/v1/traces}") final String endpoint) {
     final var resource = Resource.create(Attributes.of(ServiceAttributes.SERVICE_NAME, "job-tracker-server"));
-    final var spanExporter = OtlpGrpcSpanExporter.builder().setEndpoint(endpoint).build();
+    final var spanExporter = OtlpHttpSpanExporter.builder().setEndpoint(endpoint).build();
     final var tracerProvider = SdkTracerProvider.builder()
       .setResource(resource)
       .addSpanProcessor(SimpleSpanProcessor.create(spanExporter))

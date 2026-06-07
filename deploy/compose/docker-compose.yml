@@ -11,12 +11,20 @@ services:
     restart: unless-stopped
     build:
       context: ../..
-      dockerfile: deploy/compose/Dockerfile
+      dockerfile: ${DOCKERFILE:-deploy/compose/Dockerfile}
     ports: [ "8880:8880" ]
-    volumes: [ "h2data:/app/data" ]
+    volumes:
+      - "../data:/app/deploy/data"
     environment:
       SPRING_PROFILES_ACTIVE: "dev"
+      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-NOT_SET}
+      APP_OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_SERVICE_NAME: job-tracker-server
+      OTEL_TRACES_EXPORTER: otlp
+      OTEL_METRICS_EXPORTER: none
+      OTEL_LOGS_EXPORTER: none
       JVM_OPTIONS: "-Xms1024m -Xmx2048m"
       JAVA_OPTS: "-XX:+UseCompactObjectHeaders -XX:+UseContainerSupport --enable-native-access=ALL-UNNAMED -Djava.security.egd=file:/dev/./urandom"
     networks: [ jobtracker ]
@@ -69,12 +77,6 @@ services:
     command: [ "-config.file=/etc/tempo.yaml" ]
     networks: [ jobtracker ]
     <<: *default-resources
-    healthcheck:
-      test: [ "CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3200/ready" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
 
   grafana:
     image: grafana/grafana:13.0.1
@@ -109,9 +111,6 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     ports: [ "8080:8080" ]
-
-volumes:
-  h2data:
 
 networks:
   jobtracker:

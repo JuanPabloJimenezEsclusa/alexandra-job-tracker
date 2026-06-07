@@ -1,0 +1,98 @@
+/* AJT brand overrides for Reflow Maven Skin / Bootswatch Lux */
+body {
+  padding-top: 60px;
+}
+
+.navbar-inner {
+  background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%);
+  border-bottom: 2px solid #c9a961;
+}
+
+.navbar .brand {
+  color: #c9a961;
+  font-weight: 700;
+  text-shadow: none;
+}
+
+.navbar .nav > li > a {
+  color: #bdc3c7;
+  text-shadow: none;
+}
+
+.navbar .nav > li > a:hover {
+  color: #c9a961;
+}
+
+.navbar .nav .active > a,
+.navbar .nav .active > a:hover {
+  color: #c9a961;
+  background: rgba(255,255,255,0.05);
+}
+
+.hero-unit {
+  background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%);
+  color: #ecf0f1;
+  border-bottom: 3px solid #c9a961;
+}
+
+.hero-unit h1 {
+  color: #c9a961;
+}
+
+.btn-primary {
+  background: #c9a961;
+  border-color: #b8984f;
+}
+
+.btn-primary:hover {
+  background: #b8984f;
+  border-color: #a68845;
+}
+
+a {
+  color: #2c3e50;
+}
+
+a:hover {
+  color: #c9a961;
+}
+
+.page-header {
+  border-bottom-color: #c9a961;
+}
+
+.footer {
+  border-top: 2px solid #c9a961;
+  background: #1a2332;
+  color: #bdc3c7;
+}
+
+.footer a {
+  color: #c9a961;
+}
+
+h1, h2, h3 {
+  color: #1a2332;
+}
+
+table.table-striped th {
+  background: #1a2332;
+  color: #ecf0f1;
+  border-color: #2c3e50;
+}
+
+code {
+  color: #1a2332;
+  border-color: #c9a961;
+}
+
+.nav-list > .active > a,
+.nav-list > .active > a:hover {
+  background: #1a2332;
+  color: #c9a961;
+}
+
+.breadcrumb {
+  background: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+}

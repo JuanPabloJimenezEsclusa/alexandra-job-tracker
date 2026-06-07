@@ -16,8 +16,11 @@
   <version>1.0.0</version>
   <packaging>pom</packaging>
   <name>alexandra-job-tracker</name>
-  <description>Job application tracking system</description>
-  <url/>
+  <description>
+    Job application tracking system built with Java and Spring Boot, designed to help users manage their job applications efficiently.
+    It provides features such as application status tracking, interview scheduling, and analytics to optimize the job search process.
+  </description>
+  <url>https://juanpablojimenezesclusa.github.io/alexandra-job-tracker</url>
 
   <organization>
     <name>JPJE Innovation Inc</name>
@@ -90,6 +93,10 @@
     <inceptionYear>2026</inceptionYear>
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
     <currentYear>${maven.build.timestamp}</currentYear>
+
+    <maven-jxr-plugin.version>3.5.0</maven-jxr-plugin.version>
+    <maven-surefire-report-plugin.version>3.5.2</maven-surefire-report-plugin.version>
+    <reflow-maven-skin.version>2.4.1</reflow-maven-skin.version>
 
     <!-- plugin versions -->
     <git-commit-id-maven-plugin.version>10.0.0</git-commit-id-maven-plugin.version>
@@ -372,6 +379,28 @@
               <inceptionYear>${inceptionYear}</inceptionYear>
             </attributes>
           </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>io.github.devacfr.maven.skins</groupId>
+              <artifactId>reflow-maven-skin</artifactId>
+              <version>${reflow-maven-skin.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>io.github.devacfr.maven.skins</groupId>
+              <artifactId>reflow-velocity-tools</artifactId>
+              <version>${reflow-maven-skin.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jxr-plugin</artifactId>
+          <version>${maven-jxr-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-report-plugin</artifactId>
+          <version>${maven-surefire-report-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -470,12 +499,19 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
+        <artifactId>maven-jxr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
         <reportSets>
           <reportSet>
-            <id>aggregate-javadocs</id>
             <reports>
-              <report>aggregate</report>
+              <report>report</report>
             </reports>
           </reportSet>
         </reportSets>
@@ -488,6 +524,18 @@
             <id>checkstyle-report</id>
             <reports>
               <report>checkstyle</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <id>aggregate-javadocs</id>
+            <reports>
+              <report>aggregate</report>
             </reports>
           </reportSet>
         </reportSets>

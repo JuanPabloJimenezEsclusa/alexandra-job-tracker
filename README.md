@@ -1,4 +1,7 @@
+[![Pages](https://img.shields.io/badge/Docs-GitHub%20Pages-blue.svg)](https://juanpablojimenezesclusa.github.io/alexandra-job-tracker/) 
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
+---
 
 <p align="center">
   <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=alert_status" alt="Quality Gate Status"/></a>
@@ -28,9 +31,7 @@
 
 ---
 
-**Alexandra Job Tracker** is a multi-user job application tracking system with a GraphQL API and CLI
-client. Built with hexagonal (ports & adapters) architecture on Java 25, Spring Boot 4, and Maven
-multi-module.
+**Alexandra Job Tracker** is a multi-user job application tracking system with a GraphQL API and CLI client. Built with hexagonal (ports & adapters) architecture on Java 25, Spring Boot 4, and Maven multi-module.
 
 ---
 

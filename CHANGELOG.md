@@ -5,6 +5,16 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**ci: improve compose deploy**
+
+
+[879296f80a33a5f](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/879296f80a33a5f) juan.pablo.jimenez.esclusa *2026-06-09 15:32:46*
+
+**build: improve native aot compile**
+
+
+[3c05115c22bdac6](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/3c05115c22bdac6) juan.pablo.jimenez.esclusa *2026-06-06 23:05:31*
+
 **feat: change date format**
 
 

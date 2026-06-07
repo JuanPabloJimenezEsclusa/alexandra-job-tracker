@@ -25,8 +25,8 @@ public class JwtProvider implements TokenGeneratorPort {
    * Creates a provider with the configured secret and expiration.
    */
   public JwtProvider(@Value("${jwt.secret}") final String secret,
-                      @Value("${jwt.expiration:86400000}") final long expirationMs,
-                      final Clock clock) {
+                     @Value("${jwt.expiration:86400000}") final long expirationMs,
+                     final Clock clock) {
     this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     this.expirationMs = expirationMs;
     this.clock = clock;

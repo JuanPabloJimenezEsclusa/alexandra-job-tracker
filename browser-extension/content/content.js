@@ -26,7 +26,7 @@ async function poll(maxRetries = 30, interval = 1000) {
   return null;
 }
 
-try {
+(async function () {
   const initial = await poll();
   store(initial);
 
@@ -45,6 +45,4 @@ try {
       setTimeout(async () => { const r = await poll(); store(r); }, 500);
     }
   }).observe(document.body, { childList: true, subtree: true });
-} catch (e) {
-  console.error('[Alexandra] Content script error:', e);
-}
+})();

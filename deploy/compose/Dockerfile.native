@@ -3,8 +3,27 @@ WORKDIR /app
 COPY . .
 RUN ./mvnw install -DskipTests && ./mvnw -Pnative native:compile -pl bootstrap-server -DskipTests
 
-# Use a minimal base image for the runtime
-FROM gcr.io/distroless/base:nonroot
+# Use a lightweight runtime image
+FROM alpine:3.23
+
+# Install su-exec for running the application as a non-root user and create a non-root user for better security
+RUN apk add --no-cache curl su-exec \
+    && addgroup -S appuser && adduser -S -G appuser -h /app appuser
+
+WORKDIR /app
+
 COPY --from=native-build /app/bootstrap-server/target/job-tracker-server /app/
+
+# Set permissions for the application directory
+COPY <<'EOF' /usr/local/bin/entrypoint.sh
+#!/bin/sh
+chown -R appuser:appuser /app/deploy/data 2>/dev/null || true
+exec su-exec appuser "$@"
+EOF
+
+RUN chmod 755 /usr/local/bin/entrypoint.sh
+
 EXPOSE 8880
-ENTRYPOINT ["/app/job-tracker-server"]
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["/app/job-tracker-server"]

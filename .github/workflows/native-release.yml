@@ -17,9 +17,9 @@ env:
 jobs:
   native-build:
     if: github.event.pull_request.draft == false
-    permissions: { contents: read, pull-requests: write }
+    permissions: { contents: read, pull-requests: write, id-token: write, packages: write }
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
         with:
@@ -54,13 +54,22 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract Maven version
+        id: version
+        run: echo "maven_version=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout 2>/dev/null | tail -1)" >> "$GITHUB_OUTPUT"
+
+      - name: Lowercase repository
+        id: repo
+        run: echo "name=$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
+
       - name: Build & push Docker image
         uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
         with:
           context: .
           file: deploy/compose/Dockerfile.native
           push: true
-          tags: ghcr.io/${{ github.repository }}:${{ github.ref_name }},ghcr.io/${{ github.repository }}:latest
+          tags: |
+            ghcr.io/${{ steps.repo.outputs.name }}:${{ steps.version.outputs.maven_version }}
 
       - name: Upload CLI binary to release
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda

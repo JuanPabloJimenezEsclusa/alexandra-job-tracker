@@ -73,8 +73,8 @@ public class JobPostingCommands {
       The system will attempt to parse the job posting and extract relevant information.
       
       Example usage:
-        - submit-job -u https://example.com/job123 -t "Software Engineer" -c "Tech Corp" -s LINKEDIN -d "Job description here"
-        - sj -u https://example.com/job123 -t "Software Engineer" -c "Tech Corp" -s LINKEDIN -d "Job description here" -j ".id"
+        - submit-job -u https://linkedin.com/job123 -t "Tech Lead" -c "META" -s LINKEDIN -d "Job description"
+        - sj -u https://indeed.com/job456 -t "Software Engineer" -c "AMZN" -s INDEED -d "Job description"
       """)
   public String submitJob(
     @Option(
