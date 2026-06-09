@@ -1,10 +1,5 @@
 # alexandra-job-tracker (compose)
 
-> [Summary](#-summary)
-  • [Usage](#-usage)
-  • [Links](#-links)
-  • [How to Validate the Changes](#-how-to-validate-the-changes)
-
 ## 📜 Summary
 
 ---
@@ -35,28 +30,6 @@ cd deploy/compose
 ./stop.sh removeImages=true
 ```
 
-### Manually
-
-```bash
-cd deploy/compose
-
-# Start the services in detached mode (JVM)
-docker compose up -d --build --force-recreate
-
-# Start with native-image build
-DOCKERFILE=deploy/compose/Dockerfile.native docker compose up -d --build --force-recreate
-
-# List running services
-docker compose ps
-
-# View logs
-docker compose logs job-tracker-server --follow
-docker compose logs otel-collector prometheus tempo grafana --follow
-
-# Stop the services
-docker compose down --remove-orphans --volumes
-```
-
 ## 🔗 Links
 
 ---
@@ -71,6 +44,8 @@ docker compose down --remove-orphans --volumes
   * [Prometheus dashboard](http://localhost:9090)
 * **Tempo (Distributed Tracing):**
   * [Tempo search](http://localhost:3200/status)
+* **Loki (Log Aggregation):**
+  * [Loki dashboard](http://localhost:3100/services/loki)
 * **Grafana (Visualization):**
   * [Grafana dashboard](http://localhost:3000) (admin / admin)
 * **Cadvisor (Container Monitoring):**

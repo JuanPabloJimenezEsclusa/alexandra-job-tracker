@@ -1,4 +1,5 @@
 server: { http_listen_port: 3200 }
+
 distributor:
   receivers:
     otlp:
@@ -7,6 +8,7 @@ distributor:
           endpoint: 0.0.0.0:4317
         http:
           endpoint: 0.0.0.0:4318
+
 storage:
   trace:
     backend: local

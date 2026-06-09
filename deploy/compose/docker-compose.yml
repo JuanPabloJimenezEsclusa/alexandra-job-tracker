@@ -73,8 +73,32 @@ services:
     hostname: tempo
     restart: unless-stopped
     ports: [ "3200:3200" ]
-    volumes: [ "./tempo.yml:/etc/tempo.yaml" ]
+    volumes: [ "./grafana/tempo.yml:/etc/tempo.yaml" ]
     command: [ "-config.file=/etc/tempo.yaml" ]
+    networks: [ jobtracker ]
+    <<: *default-resources
+
+  loki:
+    image: grafana/loki:3.7.2
+    container_name: alexandra-loki
+    hostname: loki
+    restart: unless-stopped
+    ports: [ "3100:3100" ]
+    volumes: [ "./grafana/loki.yml:/etc/loki/config.yaml" ]
+    command: [ "-config.file=/etc/loki/config.yaml" ]
+    networks: [ jobtracker ]
+    <<: *default-resources
+
+  promtail:
+    image: grafana/promtail:3.6.11
+    container_name: alexandra-promtail
+    hostname: promtail
+    restart: unless-stopped
+    volumes:
+      - "./grafana/promtail.yml:/etc/promtail/config.yaml"
+      - "/var/log:/var/log:ro"
+      - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+    command: [ "-config.file=/etc/promtail/config.yaml" ]
     networks: [ jobtracker ]
     <<: *default-resources
 
