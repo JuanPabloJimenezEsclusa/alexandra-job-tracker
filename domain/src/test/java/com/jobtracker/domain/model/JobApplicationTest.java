@@ -40,31 +40,66 @@ class JobApplicationTest {
     );
   }
 
+  private static Stream<Arguments> invalidInputs() {
+    final var uid = UserId.generate();
+    final var now = Instant.EPOCH;
+    return Stream.of(
+      arguments(named("null id", ""), null, uid, "Acme", "SWE", Source.LINKEDIN, "url",
+        ApplicationStatus.SAVED, now, now, null),
+      arguments(named("null userId", ""), UUID.randomUUID(), null, "Acme", "SWE", Source.LINKEDIN, "url",
+        ApplicationStatus.SAVED, now, now, null),
+      arguments(named("null source", ""), UUID.randomUUID(), uid, "Acme", "SWE", null, "url",
+        ApplicationStatus.SAVED, now, now, null),
+      arguments(named("null status", ""), UUID.randomUUID(), uid, "Acme", "SWE", Source.LINKEDIN, "url",
+        null, now, now, null),
+      arguments(named("null dateApplied", ""), UUID.randomUUID(), uid, "Acme", "SWE", Source.LINKEDIN, "url",
+        ApplicationStatus.SAVED, null, now, null),
+      arguments(named("null lastUpdated", ""), UUID.randomUUID(), uid, "Acme", "SWE", Source.LINKEDIN, "url",
+        ApplicationStatus.SAVED, now, null, null),
+      arguments(named("blank company", ""), UUID.randomUUID(), uid, "", "SWE", Source.LINKEDIN, "url",
+        ApplicationStatus.SAVED, now, now, null),
+      arguments(named("blank role", ""), UUID.randomUUID(), uid, "Acme", "", Source.LINKEDIN, "url",
+        ApplicationStatus.SAVED, now, now, null)
+    );
+  }
+
   @ParameterizedTest(name = "{0}")
   @MethodSource("validTransitions")
   void shouldTransitionToValidStatus(final ApplicationStatus from, final ApplicationStatus to) {
     // Given
+    final var now = Instant.EPOCH;
     final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), "Acme", "SWE",
       Source.LINKEDIN, "https://linkedin.com/jobs/1", from,
-      Instant.now(), Instant.now(), null);
+      now, now, null);
 
-    // When
-    final var updated = app.withStatus(to);
-
-    // Then
-    assertThat(updated.status()).isEqualTo(to);
+    // When, then
+    assertThat(app.withStatus(to, now))
+      .returns(to, JobApplication::status);
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("invalidTransitions")
   void shouldNotTransitionToInvalidStatus(final ApplicationStatus from, final ApplicationStatus to) {
     // Given
+    final var now = Instant.EPOCH;
     final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), "Acme", "SWE",
       Source.LINKEDIN, "https://linkedin.com/jobs/1", from,
-      Instant.now(), Instant.now(), null);
+      now, now, null);
 
-    // When, Then
-    assertThatThrownBy(() -> app.withStatus(to))
+    // When, then
+    assertThatThrownBy(() -> app.withStatus(to, now))
       .isInstanceOf(IllegalStateException.class);
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("invalidInputs")
+  void shouldRejectInvalidInputs(final String unused, final UUID id, final UserId userId,
+                                  final String company, final String role, final Source source,
+                                  final String postingUrl, final ApplicationStatus status,
+                                  final Instant dateApplied, final Instant lastUpdated,
+                                  final String notes) {
+    assertThatThrownBy(() -> new JobApplication(id, userId, company, role, source, postingUrl,
+      status, dateApplied, lastUpdated, notes))
+      .isInstanceOf(RuntimeException.class);
   }
 }

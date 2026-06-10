@@ -92,10 +92,8 @@ class CaffeineCacheAdapterTest {
     var shortCache = new CaffeineCacheAdapter(100, Duration.ofMillis(ttlMs));
     shortCache.put("key", "value");
 
-    // When
-    await().during(Duration.ofMillis(sleepMs));
-
-    // Then
-    assertThat(shortCache.get("key", String.class)).isEmpty();
+    // When, then
+    await().atMost(Duration.ofSeconds(2)).untilAsserted(() ->
+      assertThat(shortCache.get("key", String.class)).isEmpty());
   }
 }

@@ -1,6 +1,7 @@
 package com.jobtracker.domain.vo;
 
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Analytics data including per-status counts for job applications.
@@ -8,9 +9,10 @@ import java.util.Map;
 public record Analytics(Map<ApplicationStatus, Integer> perStatus) {
 
   /**
-   * Validates that all status counts are non-negative.
+   * Validates that the map is not null and all counts are non-negative.
    */
   public Analytics {
+    Objects.requireNonNull(perStatus, "perStatus must not be null");
     for (final var entry : perStatus.entrySet()) {
       if (entry.getValue() < 0) {
         throw new IllegalArgumentException("Count for " + entry.getKey() + " must not be negative");

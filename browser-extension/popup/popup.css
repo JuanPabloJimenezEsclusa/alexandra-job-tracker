@@ -105,7 +105,7 @@ input:focus, textarea:focus {
 
 input[readonly] {
   background: #f9fafb;
-  color: #888;
+  color: #6b7280;
   cursor: default;
 }
 

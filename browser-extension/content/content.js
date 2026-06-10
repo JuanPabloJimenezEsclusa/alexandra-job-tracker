@@ -1,11 +1,11 @@
 const STORAGE_KEY = 'pendingJob';
 
 async function detect() {
-  const { hostname, href } = window.location;
+  const { hostname, href } = globalThis.location;
   if (hostname.includes('linkedin.com') && href.includes('/jobs/view/'))
-    return window.LinkedInExtractor?.extract();
+    return globalThis.LinkedInExtractor?.extract();
   if (hostname.includes('indeed.com') && href.includes('/viewjob'))
-    return window.IndeedExtractor?.extract();
+    return globalThis.IndeedExtractor?.extract();
   return null;
 }
 
@@ -32,16 +32,16 @@ async function poll(maxRetries = 30, interval = 1000) {
 
   if (!initial) {
     const obs = new MutationObserver(() => {
-      const r = window.LinkedInExtractor?.extract?.() || window.IndeedExtractor?.extract?.();
+      const r = globalThis.LinkedInExtractor?.extract?.() || globalThis.IndeedExtractor?.extract?.();
       if (r) { store(r); obs.disconnect(); }
     });
     obs.observe(document.body, { childList: true, subtree: true });
   }
 
-  let lastUrl = window.location.href;
+  let lastUrl = globalThis.location.href;
   new MutationObserver(() => {
-    if (window.location.href !== lastUrl) {
-      lastUrl = window.location.href;
+    if (globalThis.location.href !== lastUrl) {
+      lastUrl = globalThis.location.href;
       setTimeout(async () => { const r = await poll(); store(r); }, 500);
     }
   }).observe(document.body, { childList: true, subtree: true });

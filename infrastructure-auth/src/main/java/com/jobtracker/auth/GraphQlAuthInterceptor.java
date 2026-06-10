@@ -14,7 +14,7 @@ public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
   private final JwtProvider jwtProvider;
 
   /**
-   * Constructs an interceptor with the given JWT provider.
+   * Instantiates a new Graph ql auth interceptor.
    */
   public GraphQlAuthInterceptor(final JwtProvider jwtProvider) {
     this.jwtProvider = jwtProvider;
@@ -24,14 +24,9 @@ public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
   public Mono<WebGraphQlResponse> intercept(final WebGraphQlRequest request, final Chain chain) {
     final var authHeader = request.getHeaders().getFirst("Authorization");
     if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {
-      try {
-        final var token = authHeader.substring(7);
-        final var userId = jwtProvider.validateToken(token);
-        request.configureExecutionInput((_, builder) ->
-          builder.graphQLContext(ctx -> ctx.put("userId", userId)).build());
-      } catch (Exception _) {
-        // invalid/expired token — proceed without authentication
-      }
+      final var userId = jwtProvider.validateToken(authHeader.substring(7));
+      request.configureExecutionInput((_, builder) ->
+        builder.graphQLContext(ctx -> ctx.put("userId", userId)).build());
     }
     return chain.next(request);
   }

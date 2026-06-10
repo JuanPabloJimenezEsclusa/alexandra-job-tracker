@@ -1,6 +1,6 @@
 class IndeedExtractor {
   static extract() {
-    const url = window.location.href;
+    const url = globalThis.location.href;
 
     const selectors = {
       title: [
@@ -47,4 +47,4 @@ class IndeedExtractor {
   }
 }
 
-window.IndeedExtractor = IndeedExtractor;
+globalThis.IndeedExtractor = IndeedExtractor;

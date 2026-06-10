@@ -1,49 +1,79 @@
-name: CI
+name: Continuous Integration
+
 on:
-  push: { branches: [ develop ] }
-  pull_request: { branches: [ develop ] }
+  push:
+    branches: [develop]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  MAVEN_OPTS: "-Xmx2048m"
+  MAVEN_CLI_OPTS: "-B -ntp -e"
 
 jobs:
   test:
+    permissions: { contents: read, pull-requests: write }
+    timeout-minutes: 10
     runs-on: ubuntu-latest
+    environment: pro
     steps:
       - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
       - uses: actions/setup-java@v5
         with:
-          distribution: graalvm
+          distribution: corretto
           java-version: 25
           cache: maven
+
       - name: Build & Test
-        run: ./mvnw verify
+        run: mvn ${MAVEN_CLI_OPTS} clean verify
+
       - name: SonarCloud Analysis
-        run: ./mvnw sonar:sonar
+        run: mvn ${MAVEN_CLI_OPTS} sonar:sonar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           GITHUB_TOKEN: ${{ github.token }}
+
       - uses: actions/upload-artifact@v7
         with:
           name: jacoco-report
-          path: "**/target/site/jacoco-aggregate/index.html"
+          path: "./coverage-jacoco/target/site/jacoco-aggregate/index.html"
 
   dependency-review:
     needs: test
     permissions: { contents: read, pull-requests: write }
-    uses: actions/dependency-review-action@v5
-    with:
-      fail-on-severity: high
-      comment-summary-in-pr: true
-
-  native-compatibility:
-    needs: test
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+
+      - uses: actions/dependency-review-action@v5
+        with:
+          fail-on-severity: high
+          comment-summary-in-pr: true
+
+  native-compatibility:
+    needs: test
+    permissions: { contents: read, pull-requests: write }
+    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
       - uses: actions/setup-java@v5
         with:
           distribution: graalvm
           java-version: 25
           cache: maven
+
       - name: AOT process (server)
-        run: ./mvnw -Pnative test-compile -pl bootstrap-server -am
+        run: mvn ${MAVEN_CLI_OPTS} -Pnative test-compile -pl bootstrap-server -am
+
       - name: AOT process (CLI)
-        run: ./mvnw -Pnative test-compile -pl bootstrap-cli -am
+        run: mvn ${MAVEN_CLI_OPTS} -Pnative test-compile -pl bootstrap-cli -am

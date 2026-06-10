@@ -1,6 +1,6 @@
 package com.jobtracker.application.service;
 
-import java.time.Instant;
+import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,14 +21,17 @@ public class TrackJobApplicationUseCaseImpl implements TrackJobApplicationUseCas
   private final SaveJobApplicationPort savePort;
   private final LoadJobApplicationPort loadPort;
   private final ApplicationTrackerService tracker;
+  private final Clock clock;
 
   /**
    * Constructor.
    */
   public TrackJobApplicationUseCaseImpl(final SaveJobApplicationPort savePort,
-                                        final LoadJobApplicationPort loadPort) {
+                                        final LoadJobApplicationPort loadPort,
+                                        final Clock clock) {
     this.savePort = savePort;
     this.loadPort = loadPort;
+    this.clock = clock;
     this.tracker = new ApplicationTrackerService();
   }
 
@@ -39,7 +42,7 @@ public class TrackJobApplicationUseCaseImpl implements TrackJobApplicationUseCas
                                final Source source,
                                @Nullable final String postingUrl,
                                @Nullable final String notes) {
-    final var now = Instant.now();
+    final var now = clock.instant();
     final var app = new JobApplication(UUID.randomUUID(), userId, company, role, source, postingUrl,
       ApplicationStatus.SAVED, now, now, notes);
     savePort.save(app);
@@ -52,8 +55,9 @@ public class TrackJobApplicationUseCaseImpl implements TrackJobApplicationUseCas
                                      @Nullable final String notes) {
     final var app = loadPort.findById(applicationId)
       .orElseThrow(() -> new IllegalArgumentException("Application not found"));
-    var updated = tracker.transitionStatus(app, newStatus);
-    updated = updated.withNotes(notes);
+    final var now = clock.instant();
+    var updated = tracker.transitionStatus(app, newStatus, now);
+    updated = updated.withNotes(notes, now);
     savePort.save(updated);
     return updated;
   }

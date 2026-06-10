@@ -1,4 +1,24 @@
+[![Pages](https://img.shields.io/badge/Docs-GitHub%20Pages-blue.svg)](https://juanpablojimenezesclusa.github.io/alexandra-job-tracker/) 
 [![License](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+
+---
+
+<p align="center">
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=alert_status" alt="Quality Gate Status"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=sqale_rating" alt="Maintainability Rating"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=reliability_rating" alt="Reliability Rating"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=security_rating" alt="Security Rating"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=coverage" alt="Coverage"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=ncloc" alt="Lines of Code"/></a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/ci.yml"><img src="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
+  <a href="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/native-release.yml"><img src="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/native-release.yml/badge.svg" alt="Native release"/></a>
+  <a href="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/pages.yml"><img src="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/pages.yml/badge.svg" alt="Pages"/></a>
+</p>
+
+---
 
 <p align="center">
   <a href="https://alistair.cockburn.us/hexagonal-architecture/"><img src="https://img.shields.io/badge/Architecture-Hexagonal-brightgreen?style=for-the-badge" alt="Hexagonal Architecture"/></a>
@@ -11,9 +31,7 @@
 
 ---
 
-**Alexandra Job Tracker** is a multi-user job application tracking system with a GraphQL API and CLI
-client. Built with hexagonal (ports & adapters) architecture on Java 25, Spring Boot 4, and Maven
-multi-module.
+**Alexandra Job Tracker** is a multi-user job application tracking system with a GraphQL API and CLI client. Built with hexagonal (ports & adapters) architecture on Java 25, Spring Boot 4, and Maven multi-module.
 
 ---
 
@@ -93,6 +111,7 @@ flowchart LR
     subgraph inbound [Inbound Adapters]
         direction LR
         CLI["Spring Shell"]
+        BrowserExt["Chrome Extension"]
         HTTP["HTTP /graphql"]
     end
     subgraph app [Application]
@@ -112,6 +131,7 @@ flowchart LR
     end
 
     CLI --> HTTP
+    BrowserExt --> HTTP
     HTTP --> QR & MR
     QR & MR --> UC
     UC --> |inbound Port| JPA & AI & JWT
@@ -146,6 +166,16 @@ mvn install -DskipTests
 mvn -Pnative native:compile -pl bootstrap-server -DskipTests  # Server native binary
 mvn -Pnative native:compile -pl bootstrap-cli -DskipTests     # CLI native binary
 ```
+
+### AOT Tracing Agent
+
+Run the server with the GraalVM tracing agent to generate reachability metadata (only works with GraalVM JDK):
+
+```bash
+mvn install -DskipTests && mvn -Ptracing spring-boot:run -pl bootstrap-server
+```
+
+Exercise all API endpoints, then shut down. The agent writes a `reachability-metadata.json` to `bootstrap-server/src/main/resources/META-INF/native-image/com.jobtracker/bootstrap-server/`.
 
 ### Run
 
@@ -201,10 +231,15 @@ The server exposes a GraphQL endpoint at `POST /api/graphql` with the following 
 ```mermaid
 flowchart LR
     SAVED --> APPLIED
+    SAVED --> WITHDRAWN
     APPLIED --> INTERVIEWING
+    APPLIED --> REJECTED
+    APPLIED --> WITHDRAWN
     INTERVIEWING --> OFFER
-    OFFER --> ACCEPTED
     INTERVIEWING --> REJECTED
+    INTERVIEWING --> WITHDRAWN
+    OFFER --> ACCEPTED
+    OFFER --> REJECTED
     OFFER --> WITHDRAWN
 ```
 
@@ -231,12 +266,24 @@ The CLI client connects to the GraphQL API via HTTP. Available commands:
 
 ```bash
 # Examples
-java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost:8080
+java -jar bootstrap-cli/target/bootstrap-cli-*.jar \
+  --server.url=http://localhost:8080
+```
+
+```bash
 register --username alice --password secret
 login --username alice --password secret
-submit-job --url https://linkedin.com/jobs/123 --title "SWE" --company Acme --source LINKEDIN
-postings -s LINKEDIN -j '.[].title'
-analyze -i <posting-id> -j '.fitScore'
+
+submit-job \
+  --url https://linkedin.com/jobs/123 \
+  --title "SWE" \
+  --description "Exciting role..." \
+  --company Acme \
+  --source LINKEDIN
+  
+postings -s LINKEDIN -j ".[].title"
+
+analyze -i <posting-id> -j ".fitScore"
 ```
 
 ---

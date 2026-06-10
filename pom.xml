@@ -16,8 +16,11 @@
   <version>1.0.0</version>
   <packaging>pom</packaging>
   <name>alexandra-job-tracker</name>
-  <description>Job application tracking system</description>
-  <url/>
+  <description>
+    Job application tracking system built with Java and Spring Boot, designed to help users manage their job applications efficiently.
+    It provides features such as application status tracking, interview scheduling, and analytics to optimize the job search process.
+  </description>
+  <url>https://juanpablojimenezesclusa.github.io/alexandra-job-tracker</url>
 
   <organization>
     <name>JPJE Innovation Inc</name>
@@ -81,11 +84,19 @@
     <jspecify.version>1.0.0</jspecify.version>
     <checkstyle.version>13.5.0</checkstyle.version>
     <jackson-jq.version>1.6.2</jackson-jq.version>
+    <instancio.version>5.4.0</instancio.version>
+
+    <!-- Cli testing -->
+    <wiremock.version>3.13.2</wiremock.version>
 
     <!-- Site reports -->
-    <inceptionYear>2023</inceptionYear>
+    <inceptionYear>2026</inceptionYear>
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
     <currentYear>${maven.build.timestamp}</currentYear>
+
+    <maven-jxr-plugin.version>3.5.0</maven-jxr-plugin.version>
+    <maven-surefire-report-plugin.version>3.5.2</maven-surefire-report-plugin.version>
+    <reflow-maven-skin.version>2.4.1</reflow-maven-skin.version>
 
     <!-- plugin versions -->
     <git-commit-id-maven-plugin.version>10.0.0</git-commit-id-maven-plugin.version>
@@ -102,8 +113,10 @@
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     <sonar.projectKey>JuanPabloJimenezEsclusa_alexandra-job-tracker</sonar.projectKey>
     <sonar.coverage.jacoco.xmlReportPaths>
-      ${project.basedir}/coverage-jacoco/target/site/jacoco-aggregate/jacoco.xml
+      ${project.basedir}/coverage-jacoco/target/site/jacoco-aggregate/jacoco.xml,
+      ${project.basedir}/../coverage-jacoco/target/site/jacoco-aggregate/jacoco.xml
     </sonar.coverage.jacoco.xmlReportPaths>
+    <sonar.coverage.exclusions>**/*Config.java,**/*Mapper.java,**/*Hints.java</sonar.coverage.exclusions>
     <sonar.scm.exclusions.disabled>true</sonar.scm.exclusions.disabled>
     <sonar.branch.name>develop</sonar.branch.name>
   </properties>
@@ -120,6 +133,16 @@
       <dependency>
         <groupId>org.springframework.shell</groupId>
         <artifactId>spring-shell-starter</artifactId>
+        <version>${spring-shell.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.shell</groupId>
+        <artifactId>spring-shell-core</artifactId>
+        <version>${spring-shell.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.springframework.shell</groupId>
+        <artifactId>spring-shell-jline</artifactId>
         <version>${spring-shell.version}</version>
       </dependency>
       <dependency>
@@ -161,6 +184,12 @@
       <groupId>org.jspecify</groupId>
       <artifactId>jspecify</artifactId>
       <version>${jspecify.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.instancio</groupId>
+      <artifactId>instancio-core</artifactId>
+      <version>${instancio.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -239,6 +268,9 @@
           <version>${jacoco-maven-plugin.version}</version>
           <configuration>
             <excludes>
+              <exclude>**/*Config.class</exclude>
+              <exclude>**/*Mapper.class</exclude>
+              <exclude>**/*Hints.class</exclude>
             </excludes>
           </configuration>
           <executions>
@@ -281,6 +313,9 @@
               <configuration>
                 <dataFile>${project.build.directory}/jacoco-aggregate.exec</dataFile>
                 <excludes>
+                  <exclude>**/*Config.class</exclude>
+                  <exclude>**/*Mapper.class</exclude>
+                  <exclude>**/*Hints.class</exclude>
                 </excludes>
               </configuration>
             </execution>
@@ -308,6 +343,13 @@
                       <exclude>io.micrometer:micrometer-core</exclude>
                       <exclude>io.micrometer:micrometer-observation</exclude>
                       <exclude>org.jetbrains.kotlin:kotlin-reflect</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-sdk-metrics</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-exporter-otlp</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-exporter-otlp-common</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-sdk-logs</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-exporter-sender-okhttp</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-sdk-trace</exclude>
+                      <exclude>io.opentelemetry:opentelemetry-sdk-extension-autoconfigure-spi</exclude>
                     </excludes>
                   </requireUpperBoundDeps>
                   <requireMavenVersion>
@@ -337,6 +379,28 @@
               <inceptionYear>${inceptionYear}</inceptionYear>
             </attributes>
           </configuration>
+          <dependencies>
+            <dependency>
+              <groupId>io.github.devacfr.maven.skins</groupId>
+              <artifactId>reflow-maven-skin</artifactId>
+              <version>${reflow-maven-skin.version}</version>
+            </dependency>
+            <dependency>
+              <groupId>io.github.devacfr.maven.skins</groupId>
+              <artifactId>reflow-velocity-tools</artifactId>
+              <version>${reflow-maven-skin.version}</version>
+            </dependency>
+          </dependencies>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jxr-plugin</artifactId>
+          <version>${maven-jxr-plugin.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-report-plugin</artifactId>
+          <version>${maven-surefire-report-plugin.version}</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -435,12 +499,19 @@
     <plugins>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-javadoc-plugin</artifactId>
+        <artifactId>maven-jxr-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-report-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
         <reportSets>
           <reportSet>
-            <id>aggregate-javadocs</id>
             <reports>
-              <report>aggregate</report>
+              <report>report</report>
             </reports>
           </reportSet>
         </reportSets>
@@ -453,6 +524,18 @@
             <id>checkstyle-report</id>
             <reports>
               <report>checkstyle</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <id>aggregate-javadocs</id>
+            <reports>
+              <report>aggregate</report>
             </reports>
           </reportSet>
         </reportSets>

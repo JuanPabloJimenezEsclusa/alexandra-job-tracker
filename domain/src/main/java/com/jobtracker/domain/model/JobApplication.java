@@ -8,6 +8,7 @@ import static com.jobtracker.domain.vo.ApplicationStatus.REJECTED;
 import static com.jobtracker.domain.vo.ApplicationStatus.WITHDRAWN;
 
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
 import com.jobtracker.domain.vo.ApplicationStatus;
@@ -30,6 +31,26 @@ public record JobApplication(
   Instant lastUpdated,
   @Nullable String notes) {
 
+  /**
+   * Instantiates a new Job application.
+   */
+  public JobApplication {
+    Objects.requireNonNull(id, "id must not be null");
+    Objects.requireNonNull(userId, "userId must not be null");
+    Objects.requireNonNull(source, "source must not be null");
+    Objects.requireNonNull(status, "status must not be null");
+    Objects.requireNonNull(dateApplied, "dateApplied must not be null");
+    Objects.requireNonNull(lastUpdated, "lastUpdated must not be null");
+    requireNonBlank(company, "company must not be blank");
+    requireNonBlank(role, "role must not be blank");
+  }
+
+  private static void requireNonBlank(final String value, final String message) {
+    if (value.isBlank()) {
+      throw new IllegalArgumentException(message);
+    }
+  }
+
   private static boolean canTransitionTo(final ApplicationStatus current, final ApplicationStatus target) {
     return switch (current) {
       case SAVED -> target == APPLIED || target == WITHDRAWN;
@@ -43,17 +64,17 @@ public record JobApplication(
   /**
    * Returns a new JobApplication with the given status after validating the transition.
    */
-  public JobApplication withStatus(final ApplicationStatus newStatus) {
+  public JobApplication withStatus(final ApplicationStatus newStatus, final Instant lastUpdated) {
     if (!canTransitionTo(status, newStatus)) {
       throw new IllegalStateException("Cannot transition from " + status + " to " + newStatus);
     }
-    return new JobApplication(id, userId, company, role, source, postingUrl, newStatus, dateApplied, Instant.now(), notes);
+    return new JobApplication(id, userId, company, role, source, postingUrl, newStatus, dateApplied, lastUpdated, notes);
   }
 
   /**
    * Returns a new JobApplication with updated notes.
    */
-  public JobApplication withNotes(@Nullable final String notes) {
-    return new JobApplication(id, userId, company, role, source, postingUrl, status, dateApplied, Instant.now(), notes);
+  public JobApplication withNotes(@Nullable final String notes, final Instant lastUpdated) {
+    return new JobApplication(id, userId, company, role, source, postingUrl, status, dateApplied, lastUpdated, notes);
   }
 }

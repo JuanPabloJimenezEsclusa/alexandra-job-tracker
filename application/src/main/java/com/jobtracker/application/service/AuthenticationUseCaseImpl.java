@@ -2,7 +2,7 @@ package com.jobtracker.application.service;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.Instant;
+import java.time.Clock;
 import java.util.HexFormat;
 import java.util.Optional;
 
@@ -21,16 +21,19 @@ public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
   private final SaveUserPort saveUserPort;
   private final LoadUserPort loadUserPort;
   private final TokenGeneratorPort tokenGenerator;
+  private final Clock clock;
 
   /**
    * Constructor.
    */
   public AuthenticationUseCaseImpl(final SaveUserPort saveUserPort,
-                                   final LoadUserPort loadUserPort,
-                                   final TokenGeneratorPort tokenGenerator) {
+                                    final LoadUserPort loadUserPort,
+                                    final TokenGeneratorPort tokenGenerator,
+                                    final Clock clock) {
     this.saveUserPort = saveUserPort;
     this.loadUserPort = loadUserPort;
     this.tokenGenerator = tokenGenerator;
+    this.clock = clock;
   }
 
   @Override
@@ -38,7 +41,7 @@ public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
     if (loadUserPort.findByUsername(username).isPresent()) {
       throw new IllegalArgumentException("Username already taken");
     }
-    final var user = new User(UserId.generate(), username, hashPassword(password), Instant.now());
+    final var user = new User(UserId.generate(), username, hashPassword(password), clock.instant());
     saveUserPort.save(user);
     return new AuthPayload(tokenGenerator.generateToken(user.id()), user);
   }

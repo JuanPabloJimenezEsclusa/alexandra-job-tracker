@@ -1,8 +1,9 @@
 package com.jobtracker.api.resolver;
 
 import java.util.List;
+import java.util.Objects;
 
-import com.jobtracker.domain.model.JobPosting;
+import com.jobtracker.api.dto.JobPostingResponse;
 import com.jobtracker.domain.port.in.ListJobPostingsUseCase;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
@@ -30,8 +31,11 @@ public class JobPostingQueryResolver {
    * Lists job postings for the authenticated user, optionally filtered by source.
    */
   @QueryMapping
-  public List<JobPosting> jobPostings(@ContextValue final UserId userId,
-                                       @Argument @Nullable final Source source) {
-    return useCase.listJobPostings(userId, source);
+  public List<JobPostingResponse> jobPostings(@ContextValue(required = false) @Nullable final UserId userId,
+                                               @Argument @Nullable final Source source) {
+    Objects.requireNonNull(userId, "Authentication required");
+    return useCase.listJobPostings(userId, source).stream()
+      .map(JobPostingResponse::from)
+      .toList();
   }
 }

@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
@@ -12,16 +13,23 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class SessionManager {
-  private static final Path SESSION_FILE = Path.of(System.getProperty("user.home"), ".job-tracker", "session");
+  private final Path sessionFile;
   private final ObjectMapper mapper = new ObjectMapper();
+
+  /**
+   * Instantiates a new Session manager.
+   */
+  public SessionManager(@Value("${user.home}") final String userHome) {
+    this.sessionFile = Path.of(userHome, ".job-tracker", "session");
+  }
 
   /**
    * Saves the authentication token to the session file.
    */
   public void saveToken(final String token) {
     try {
-      Files.createDirectories(SESSION_FILE.getParent());
-      mapper.writeValue(SESSION_FILE.toFile(), Map.of("token", token));
+      Files.createDirectories(sessionFile.getParent());
+      mapper.writeValue(sessionFile.toFile(), Map.of("token", token));
     } catch (final Exception e) {
       throw new SessionException("Failed to save session", e);
     }
@@ -32,8 +40,8 @@ public class SessionManager {
    */
   public String loadToken() {
     try {
-      if (Files.exists(SESSION_FILE)) {
-        return mapper.readTree(SESSION_FILE.toFile()).get("token").asText();
+      if (Files.exists(sessionFile)) {
+        return mapper.readTree(sessionFile.toFile()).get("token").asText();
       }
     } catch (final Exception e) {
       throw new SessionException("Failed to load session", e);
@@ -46,7 +54,7 @@ public class SessionManager {
    */
   public void clearToken() {
     try {
-      Files.deleteIfExists(SESSION_FILE);
+      Files.deleteIfExists(sessionFile);
     } catch (final Exception e) {
       throw new SessionException("Failed to clear session", e);
     }

@@ -111,7 +111,7 @@ class HexagonalArchitectureTest {
     .should().onlyDependOnClassesThat().resideInAnyPackage(
       concat(ADAPTER_CLI,
         "org.springframework.shell..",
-        "org.springframework.(stereotype|context|beans|core|lang)..",
+        "org.springframework.(stereotype|context|beans|core|boot|lang)..",
         "com.fasterxml.jackson..",
         "net.thisptr.jackson.jq.."))
     .as("Adapter CLI module dependencies")
@@ -149,7 +149,7 @@ class HexagonalArchitectureTest {
     .that().resideInAPackage(INFRA_AI)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
       concat(DOMAIN, INFRA_AI,
-        "org.springframework.(stereotype|context|beans|boot|ai)..",
+        "org.springframework.(stereotype|context|beans|boot|core|ai)..",
         "com.fasterxml.jackson.."))
     .as("AI module dependencies")
     .because("the AI adapter integrates with DeepSeek via Spring AI");

@@ -34,26 +34,12 @@ class AnalyticsQueryResolverTest {
 
     when(useCase.getAnalytics(userId, null)).thenReturn(analytics);
 
-    assertThat(resolver.analytics(userId, null))
-      .isNotNull()
-      .extracting(Analytics::totalApplications, Analytics::conversionRate)
-      .containsExactly(3, 0.0);
+    final var result = resolver.analytics(userId, null);
+    assertThat(result.totalApplications()).isEqualTo(3);
+    assertThat(result.conversionRate()).isEqualTo(0.0);
+    assertThat(result.perStatus().saved()).isEqualTo(3);
 
     verify(useCase).getAnalytics(userId, null);
     verifyNoMoreInteractions(useCase);
-  }
-
-  @Test
-  void shouldMapPerStatus() {
-    final var perStatus = Map.of(
-      ApplicationStatus.SAVED, 5,
-      ApplicationStatus.APPLIED, 3
-    );
-    final var analytics = new Analytics(perStatus);
-
-    final var result = resolver.perStatus(analytics);
-
-    assertThat(result.saved()).isEqualTo(5);
-    assertThat(result.applied()).isEqualTo(3);
   }
 }

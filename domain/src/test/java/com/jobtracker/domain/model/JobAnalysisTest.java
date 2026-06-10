@@ -1,6 +1,7 @@
 package com.jobtracker.domain.model;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
@@ -29,25 +30,38 @@ class JobAnalysisTest {
     );
   }
 
+  private static Stream<Arguments> invalidInputs() {
+    return Stream.of(
+      arguments(named("null summary", ""), null, List.of("Java"), 50.0),
+      arguments(named("null skills", ""), "summary", null, 50.0),
+      arguments(named("fitScore too low", ""), "summary", List.of(), -0.1),
+      arguments(named("fitScore too high", ""), "summary", List.of(), 100.1)
+    );
+  }
+
   @ParameterizedTest(name = "{0}")
   @MethodSource("validAnalysis")
   void shouldCreateJobAnalysis(final String summary, final List<String> skills, final double fitScore) {
-    // Given, When
-    final var analysis = new JobAnalysis(summary, skills, fitScore);
-
-    // Then
-    assertThat(analysis.summary()).isEqualTo(summary);
-    assertThat(analysis.skills()).containsExactlyElementsOf(skills);
-    assertThat(analysis.fitScore()).isEqualTo(fitScore);
+    // Given, when, then
+    assertThat(new JobAnalysis(summary, skills, fitScore))
+      .returns(summary, JobAnalysis::summary)
+      .returns(skills, JobAnalysis::skills)
+      .returns(fitScore, JobAnalysis::fitScore);
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("fitScoreBoundaries")
   void shouldAcceptAllFitScoreValues(final double fitScore) {
-    // Given, When
-    final var analysis = new JobAnalysis("test", List.of(), fitScore);
+    // Given, when, then
+    assertThat(new JobAnalysis("test", List.of(), fitScore))
+      .returns(fitScore, JobAnalysis::fitScore);
+  }
 
-    // Then
-    assertThat(analysis.fitScore()).isEqualTo(fitScore);
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("invalidInputs")
+  void shouldRejectInvalidInputs(final String unused, final String summary,
+                                  final List<String> skills, final double fitScore) {
+    assertThatThrownBy(() -> new JobAnalysis(summary, skills, fitScore))
+      .isInstanceOf(RuntimeException.class);
   }
 }

@@ -2,13 +2,13 @@ package com.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.instancio.Select.field;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
@@ -19,6 +19,7 @@ import com.jobtracker.domain.port.in.AnalyzeJobPostingUseCase;
 import com.jobtracker.domain.port.in.SubmitJobPostingUseCase;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
+import org.instancio.Instancio;
 import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -78,12 +79,22 @@ class JobPostingMutationResolverTest {
   @Test
   void shouldSubmitJobPosting() {
     final var userId = new UserId(UUID.randomUUID());
-    final var posted = new JobPosting(UUID.randomUUID(), userId, "url", Source.LINKEDIN, "title", "company", "desc", Instant.now());
+    final var posted = Instancio.of(JobPosting.class)
+      .set(field(JobPosting::userId), userId)
+      .set(field(JobPosting::source), Source.LINKEDIN)
+      .set(field(JobPosting::url), "url")
+      .set(field(JobPosting::title), "title")
+      .set(field(JobPosting::company), "company")
+      .set(field(JobPosting::description), "desc")
+      .create();
     final var input = new JobPostingMutationResolver.JobPostingInput("url", "title", "company", "desc", Source.LINKEDIN);
 
     when(submitUseCase.submit(userId, "url", "title", "company", "desc", Source.LINKEDIN)).thenReturn(posted);
 
-    assertThat(resolver.submitJobPosting(userId, input)).isEqualTo(posted);
+    final var result = resolver.submitJobPosting(userId, input);
+    assertThat(result.source()).isEqualTo(Source.LINKEDIN);
+    assertThat(result.title()).isEqualTo("title");
+    assertThat(result.company()).isEqualTo("company");
 
     verify(submitUseCase).submit(userId, "url", "title", "company", "desc", Source.LINKEDIN);
     verifyNoMoreInteractions(submitUseCase);

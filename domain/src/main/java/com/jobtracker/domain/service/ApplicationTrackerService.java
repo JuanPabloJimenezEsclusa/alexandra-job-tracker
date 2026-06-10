@@ -1,5 +1,7 @@
 package com.jobtracker.domain.service;
 
+import java.time.Instant;
+
 import com.jobtracker.domain.model.JobApplication;
 import com.jobtracker.domain.vo.ApplicationStatus;
 
@@ -10,7 +12,9 @@ public class ApplicationTrackerService {
   /**
    * Transitions an application to the new status, throwing if the transition is invalid.
    */
-  public JobApplication transitionStatus(final JobApplication application, final ApplicationStatus newStatus) {
-    return application.withStatus(newStatus);
+  public JobApplication transitionStatus(final JobApplication application,
+                                         final ApplicationStatus newStatus,
+                                         final Instant lastUpdated) {
+    return application.withStatus(newStatus, lastUpdated);
   }
 }

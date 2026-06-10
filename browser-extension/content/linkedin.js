@@ -15,7 +15,7 @@ class LinkedInExtractor {
     }
 
     const result = {
-      url: window.location.href,
+      url: globalThis.location.href,
       title: parsed.title,
       company,
       description,
@@ -60,7 +60,7 @@ class LinkedInExtractor {
         let el = h2.nextElementSibling;
         while (el && !el.matches('h2')) {
           const t = el.textContent.trim();
-          const m = t.match(/^([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\s.]+?)\s+\d/);
+          const m = /^([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\s.]+?)\s+\d/.exec(t);
           if (m) return m[1].trim();
           el = el.nextElementSibling;
         }
@@ -93,4 +93,4 @@ class LinkedInExtractor {
   }
 }
 
-window.LinkedInExtractor = LinkedInExtractor;
+globalThis.LinkedInExtractor = LinkedInExtractor;

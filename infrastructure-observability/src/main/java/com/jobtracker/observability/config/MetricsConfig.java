@@ -23,12 +23,12 @@ public class MetricsConfig {
   }
 
   /**
-   * Timer for job posting scraping duration.
+   * Timer for job posting submission duration.
    */
   @Bean
-  public Timer scrapeDurationTimer(final MeterRegistry registry) {
-    return Timer.builder("jobtracker.scrape.duration")
-      .description("Time spent scraping job postings")
+  public Timer submitDurationTimer(final MeterRegistry registry) {
+    return Timer.builder("jobtracker.submit.duration")
+      .description("Time spent submitting job postings")
       .register(registry);
   }
 

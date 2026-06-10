@@ -18,6 +18,8 @@ spring:
     console:
       enabled: true
       path: /h2-console
+      settings:
+        web-allow-others: true
   jpa:
     show-sql: true
     open-in-view: false
@@ -69,6 +71,10 @@ management:
   endpoint:
     health:
       show-details: always
+    env:
+      show-values: always
+    configprops:
+      show-values: always
   info:
     env:
       enabled: true
@@ -88,7 +94,7 @@ spring:
     activate:
       on-profile: "dev|loc"
   datasource:
-    url: jdbc:h2:file:./data/jobtracker;AUTO_SERVER=TRUE
+    url: jdbc:h2:file:./deploy/data/jobtracker;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
     username: sa
     password:

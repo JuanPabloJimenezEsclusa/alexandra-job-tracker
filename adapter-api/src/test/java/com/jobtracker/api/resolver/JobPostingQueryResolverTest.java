@@ -1,11 +1,11 @@
 package com.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.instancio.Select.field;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,6 +13,7 @@ import com.jobtracker.domain.model.JobPosting;
 import com.jobtracker.domain.port.in.ListJobPostingsUseCase;
 import com.jobtracker.domain.vo.Source;
 import com.jobtracker.domain.vo.UserId;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,12 +32,17 @@ class JobPostingQueryResolverTest {
   @Test
   void shouldListJobPostings() {
     final var userId = new UserId(UUID.randomUUID());
-    final var posting = new JobPosting(UUID.randomUUID(), userId, "url", Source.LINKEDIN, "title", "company", "desc", Instant.now());
-    final var expected = List.of(posting);
+    final var posting = Instancio.of(JobPosting.class)
+      .set(field(JobPosting::userId), userId)
+      .set(field(JobPosting::source), Source.LINKEDIN)
+      .create();
+    final var input = List.of(posting);
 
-    when(useCase.listJobPostings(userId, null)).thenReturn(expected);
+    when(useCase.listJobPostings(userId, null)).thenReturn(input);
 
-    assertThat(resolver.jobPostings(userId, null)).isEqualTo(expected);
+    final var result = resolver.jobPostings(userId, null);
+    assertThat(result).hasSize(1);
+    assertThat(result.getFirst().source()).isEqualTo(Source.LINKEDIN);
 
     verify(useCase).listJobPostings(userId, null);
     verifyNoMoreInteractions(useCase);

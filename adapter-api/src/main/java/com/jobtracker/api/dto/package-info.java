@@ -1,5 +1,5 @@
 /**
- * Data Transfer Objects (DTOs) for the Job Tracker API.
+ * Data transfer objects for the GraphQL API layer.
  */
 @NullMarked
 package com.jobtracker.api.dto;

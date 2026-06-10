@@ -23,12 +23,12 @@ public class GraphQlConfig {
 
   static final GraphQLScalarType INSTANT = GraphQLScalarType.newScalar()
     .name("Instant")
-    .description("java.time.Instant as epoch millis")
-    .coercing(new Coercing<Instant, Long>() {
+    .description("java.time.Instant as ISO-8601 string")
+    .coercing(new Coercing<Instant, String>() {
       @Override
-      public Long serialize(final Object dataFetcherResult, final GraphQLContext context, final Locale locale) {
+      public String serialize(final Object dataFetcherResult, final GraphQLContext context, final Locale locale) {
         if (dataFetcherResult instanceof Instant i) {
-          return i.toEpochMilli();
+          return i.toString();
         }
         throw new CoercingSerializeException("Expected Instant");
       }
