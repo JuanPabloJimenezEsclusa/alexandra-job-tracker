@@ -74,17 +74,17 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-    <spring-ai.version>2.0.0-M8</spring-ai.version>
+    <spring-ai.version>2.0.0-RC2</spring-ai.version>
     <archunit.version>1.4.2</archunit.version>
     <jjwt.version>0.13.0</jjwt.version>
     <spring-shell.version>4.0.2</spring-shell.version>
     <graphql-java-extended-scalars.version>24.0</graphql-java-extended-scalars.version>
-    <opentelemetry-exporter-otlp.version>1.62.0</opentelemetry-exporter-otlp.version>
+    <opentelemetry-exporter-otlp.version>1.63.0</opentelemetry-exporter-otlp.version>
     <caffeine.version>3.2.0</caffeine.version>
     <jspecify.version>1.0.0</jspecify.version>
     <checkstyle.version>13.5.0</checkstyle.version>
     <jackson-jq.version>1.6.2</jackson-jq.version>
-    <instancio.version>5.4.0</instancio.version>
+    <instancio.version>5.6.0</instancio.version>
 
     <!-- Cli testing -->
     <wiremock.version>3.13.2</wiremock.version>
@@ -94,16 +94,16 @@
     <maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
     <currentYear>${maven.build.timestamp}</currentYear>
 
-    <maven-jxr-plugin.version>3.5.0</maven-jxr-plugin.version>
-    <maven-surefire-report-plugin.version>3.5.2</maven-surefire-report-plugin.version>
+    <maven-jxr-plugin.version>3.6.0</maven-jxr-plugin.version>
+    <maven-surefire-report-plugin.version>3.5.6</maven-surefire-report-plugin.version>
     <reflow-maven-skin.version>2.4.1</reflow-maven-skin.version>
 
     <!-- plugin versions -->
     <git-commit-id-maven-plugin.version>10.0.0</git-commit-id-maven-plugin.version>
     <git-changelog-maven-plugin.version>2.2.11</git-changelog-maven-plugin.version>
-    <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-    <rewrite-maven-plugin.version>6.40.0</rewrite-maven-plugin.version>
-    <pitest-maven.version>1.25.3</pitest-maven.version>
+    <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+    <rewrite-maven-plugin.version>6.41.0</rewrite-maven-plugin.version>
+    <pitest-maven.version>1.25.4</pitest-maven.version>
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <sonar-maven-plugin.version>5.7.0.6970</sonar-maven-plugin.version>
     <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
