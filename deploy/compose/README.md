@@ -6,9 +6,17 @@
 
 This environment is based on `docker-compose` and is designed for development purposes.
 
-It runs the job-tracker server with a full observability stack (OpenTelemetry collector, Prometheus, Grafana, Tempo) and container monitoring (cadvisor). The server can be built in **JVM** (default) or **native** mode.
+It runs the job-tracker server with a full observability stack (OpenTelemetry collector, Prometheus, Grafana, Tempo, Loki) and container monitoring (cadvisor). The server can be built in **JVM** (default) or **native** mode.
 
-## 🌐 Usage
+## 🏗️ Architecture
+
+---
+
+Docker Compose orchestrates containerized services, making it ideal for local development and testing.
+
+![High Throughput Docker](./images/ajt-docker-compose-diagram.svg)
+
+## 🚀 Usage
 
 ---
 

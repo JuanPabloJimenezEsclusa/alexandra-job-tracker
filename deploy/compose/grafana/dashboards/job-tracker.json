@@ -13,6 +13,7 @@
     {
       "title": "Applications Created",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
@@ -31,6 +32,7 @@
     {
       "title": "Total Applications Created",
       "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
       "targets": [
         {
@@ -49,6 +51,7 @@
     {
       "title": "Submit Duration (p50 / p95 / p99)",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
       "targets": [
         {
@@ -75,6 +78,7 @@
     {
       "title": "AI Analysis Duration (p50 / p95 / p99)",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
       "targets": [
         {
@@ -101,6 +105,7 @@
     {
       "title": "JVM Heap Memory",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
       "targets": [
         {
@@ -119,6 +124,7 @@
     {
       "title": "JVM GC Pause Duration (p50 / p99)",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 8, "x": 8, "y": 8 },
       "targets": [
         {
@@ -137,6 +143,7 @@
     {
       "title": "JVM Threads",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 8 },
       "targets": [
         {
@@ -159,6 +166,7 @@
     {
       "title": "HTTP Request Rate",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 8, "x": 0, "y": 16 },
       "targets": [
         {
@@ -177,6 +185,7 @@
     {
       "title": "HTTP Request Duration (p50 / p95 / p99)",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 8, "x": 8, "y": 16 },
       "targets": [
         {
@@ -203,6 +212,7 @@
     {
       "title": "Database Connections (HikariCP)",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 16 },
       "targets": [
         {
@@ -229,6 +239,7 @@
     {
       "title": "Submit Count",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 8, "x": 0, "y": 24 },
       "targets": [
         {
@@ -247,6 +258,7 @@
     {
       "title": "AI Analysis Count",
       "type": "timeseries",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 8, "x": 8, "y": 24 },
       "targets": [
         {
@@ -265,6 +277,7 @@
     {
       "title": "Process Uptime",
       "type": "stat",
+      "datasource": { "type": "prometheus", "uid": "prometheus" },
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 24 },
       "targets": [
         {

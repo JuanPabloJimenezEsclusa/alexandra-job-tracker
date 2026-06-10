@@ -13,6 +13,7 @@
     {
       "title": "Logs by Container",
       "type": "logs",
+      "datasource": { "type": "loki", "uid": "loki" },
       "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 },
       "targets": [
         {
@@ -29,6 +30,7 @@
     {
       "title": "Log Rate by Container",
       "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "loki" },
       "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
       "targets": [
         {
@@ -47,6 +49,7 @@
     {
       "title": "Logs by Level",
       "type": "piechart",
+      "datasource": { "type": "loki", "uid": "loki" },
       "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
       "targets": [
         {
@@ -64,6 +67,7 @@
     {
       "title": "Log Volume",
       "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "loki" },
       "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
       "targets": [
         {
@@ -82,6 +86,7 @@
     {
       "title": "Error Logs",
       "type": "logs",
+      "datasource": { "type": "loki", "uid": "loki" },
       "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
       "targets": [
         {

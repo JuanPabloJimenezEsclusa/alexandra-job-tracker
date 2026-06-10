@@ -111,7 +111,7 @@ services:
     volumes:
       - "./grafana/dashboards:/etc/grafana/provisioning/dashboards"
       - "./grafana/datasources:/etc/grafana/provisioning/datasources"
-    depends_on: [ prometheus, tempo ]
+    depends_on: [ prometheus, tempo, loki ]
     networks: [ jobtracker ]
     <<: *default-resources
     healthcheck:
