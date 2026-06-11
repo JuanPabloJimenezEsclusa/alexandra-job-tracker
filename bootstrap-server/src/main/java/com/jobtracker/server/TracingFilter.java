@@ -12,12 +12,14 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 /**
  * A servlet filter that creates OpenTelemetry spans for incoming HTTP requests.
  */
 @Component
+@ConditionalOnBean(OpenTelemetry.class)
 public class TracingFilter implements Filter {
 
   private final Tracer tracer;

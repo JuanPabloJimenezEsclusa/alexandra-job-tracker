@@ -40,6 +40,12 @@
       "type": "char[]"
     },
     {
+      "type": "com.arjuna.ats.jta.TransactionManager"
+    },
+    {
+      "type": "com.atomikos.icatch.jta.UserTransactionManager"
+    },
+    {
       "type": "com.couchbase.client.java.Cluster"
     },
     {
@@ -128,9 +134,6 @@
           "parameterTypes": []
         }
       ]
-    },
-    {
-      "type": "com.fasterxml.jackson.module.kotlin.KotlinModule$Builder"
     },
     {
       "type": "com.fasterxml.jackson.module.paramnames.ParameterNamesModule"
@@ -250,6 +253,9 @@
       "type": "com.ibm.lang.management.OperatingSystemMXBean"
     },
     {
+      "type": "com.ibm.tx.jta.TransactionManagerFactory"
+    },
+    {
       "type": "com.jayway.jsonpath.DocumentContext"
     },
     {
@@ -322,140 +328,19 @@
       ]
     },
     {
-      "type": "com.jobtracker.api.GraphQlConfig$1"
+      "type": "com.jobtracker.api.dto.AnalyticsResponse"
     },
     {
-      "type": "com.jobtracker.api.dto.AnalyticsResponse",
-      "methods": [
-        {
-          "name": "conversionRate",
-          "parameterTypes": []
-        },
-        {
-          "name": "perStatus",
-          "parameterTypes": []
-        },
-        {
-          "name": "totalApplications",
-          "parameterTypes": []
-        }
-      ]
+      "type": "com.jobtracker.api.dto.AuthPayloadResponse"
     },
     {
-      "type": "com.jobtracker.api.dto.AuthPayloadResponse",
-      "methods": [
-        {
-          "name": "token",
-          "parameterTypes": []
-        }
-      ]
+      "type": "com.jobtracker.api.dto.JobApplicationResponse"
     },
     {
-      "type": "com.jobtracker.api.dto.JobApplicationResponse",
-      "methods": [
-        {
-          "name": "company",
-          "parameterTypes": []
-        },
-        {
-          "name": "dateApplied",
-          "parameterTypes": []
-        },
-        {
-          "name": "id",
-          "parameterTypes": []
-        },
-        {
-          "name": "lastUpdated",
-          "parameterTypes": []
-        },
-        {
-          "name": "notes",
-          "parameterTypes": []
-        },
-        {
-          "name": "postingUrl",
-          "parameterTypes": []
-        },
-        {
-          "name": "role",
-          "parameterTypes": []
-        },
-        {
-          "name": "source",
-          "parameterTypes": []
-        },
-        {
-          "name": "status",
-          "parameterTypes": []
-        }
-      ]
+      "type": "com.jobtracker.api.dto.JobPostingResponse"
     },
     {
-      "type": "com.jobtracker.api.dto.JobPostingResponse",
-      "methods": [
-        {
-          "name": "company",
-          "parameterTypes": []
-        },
-        {
-          "name": "description",
-          "parameterTypes": []
-        },
-        {
-          "name": "id",
-          "parameterTypes": []
-        },
-        {
-          "name": "postedAt",
-          "parameterTypes": []
-        },
-        {
-          "name": "source",
-          "parameterTypes": []
-        },
-        {
-          "name": "title",
-          "parameterTypes": []
-        },
-        {
-          "name": "url",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "com.jobtracker.api.dto.StatusCounts",
-      "methods": [
-        {
-          "name": "accepted",
-          "parameterTypes": []
-        },
-        {
-          "name": "applied",
-          "parameterTypes": []
-        },
-        {
-          "name": "interviewing",
-          "parameterTypes": []
-        },
-        {
-          "name": "offer",
-          "parameterTypes": []
-        },
-        {
-          "name": "rejected",
-          "parameterTypes": []
-        },
-        {
-          "name": "saved",
-          "parameterTypes": []
-        },
-        {
-          "name": "withdrawn",
-          "parameterTypes": []
-        }
-      ]
+      "type": "com.jobtracker.api.dto.StatusCounts"
     },
     {
       "type": "com.jobtracker.api.dto.UserResponse"
@@ -486,13 +371,6 @@
           "parameterTypes": [
             "com.jobtracker.domain.port.in.GetAnalyticsUseCase"
           ]
-        },
-        {
-          "name": "analytics",
-          "parameterTypes": [
-            "com.jobtracker.domain.vo.UserId",
-            "java.time.Instant"
-          ]
         }
       ]
     },
@@ -504,31 +382,6 @@
           "parameterTypes": [
             "com.jobtracker.domain.port.in.TrackJobApplicationUseCase"
           ]
-        },
-        {
-          "name": "createApplication",
-          "parameterTypes": [
-            "com.jobtracker.domain.vo.UserId",
-            "java.lang.String",
-            "java.lang.String",
-            "com.jobtracker.domain.vo.Source",
-            "java.lang.String",
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "deleteApplication",
-          "parameterTypes": [
-            "java.util.UUID"
-          ]
-        },
-        {
-          "name": "updateApplicationStatus",
-          "parameterTypes": [
-            "java.util.UUID",
-            "com.jobtracker.domain.vo.ApplicationStatus",
-            "java.lang.String"
-          ]
         }
       ]
     },
@@ -539,14 +392,6 @@
           "name": "<init>",
           "parameterTypes": [
             "com.jobtracker.domain.port.in.TrackJobApplicationUseCase"
-          ]
-        },
-        {
-          "name": "applications",
-          "parameterTypes": [
-            "com.jobtracker.domain.vo.UserId",
-            "com.jobtracker.domain.vo.ApplicationStatus",
-            "com.jobtracker.domain.vo.Source"
           ]
         }
       ]
@@ -560,34 +405,6 @@
             "com.jobtracker.domain.port.in.SubmitJobPostingUseCase",
             "com.jobtracker.domain.port.in.AnalyzeJobPostingUseCase"
           ]
-        },
-        {
-          "name": "analyzeJobPosting",
-          "parameterTypes": [
-            "java.util.UUID"
-          ]
-        },
-        {
-          "name": "submitJobPosting",
-          "parameterTypes": [
-            "com.jobtracker.domain.vo.UserId",
-            "com.jobtracker.api.resolver.JobPostingMutationResolver$JobPostingInput"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.jobtracker.api.resolver.JobPostingMutationResolver$JobPostingInput",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.String",
-            "java.lang.String",
-            "java.lang.String",
-            "com.jobtracker.domain.vo.Source"
-          ]
         }
       ]
     },
@@ -599,13 +416,6 @@
           "parameterTypes": [
             "com.jobtracker.domain.port.in.ListJobPostingsUseCase"
           ]
-        },
-        {
-          "name": "jobPostings",
-          "parameterTypes": [
-            "com.jobtracker.domain.vo.UserId",
-            "com.jobtracker.domain.vo.Source"
-          ]
         }
       ]
     },
@@ -616,20 +426,6 @@
           "name": "<init>",
           "parameterTypes": [
             "com.jobtracker.domain.port.in.AuthenticationUseCase"
-          ]
-        },
-        {
-          "name": "login",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "register",
-          "parameterTypes": [
-            "java.lang.String",
-            "java.lang.String"
           ]
         }
       ]
@@ -646,9 +442,6 @@
       ]
     },
     {
-      "type": "com.jobtracker.application.service.AnalyzeJobPostingUseCaseImpl"
-    },
-    {
       "type": "com.jobtracker.application.service.AuthenticationUseCaseImpl"
     },
     {
@@ -656,12 +449,6 @@
     },
     {
       "type": "com.jobtracker.application.service.ListJobPostingsUseCaseImpl"
-    },
-    {
-      "type": "com.jobtracker.application.service.SubmitJobPostingUseCaseImpl"
-    },
-    {
-      "type": "com.jobtracker.application.service.TrackJobApplicationUseCaseImpl"
     },
     {
       "type": "com.jobtracker.auth.GraphQlAuthInterceptor",
@@ -780,7 +567,7 @@
           ]
         },
         {
-          "name": "scrapeDurationTimer",
+          "name": "submitDurationTimer",
           "parameterTypes": [
             "io.micrometer.core.instrument.MeterRegistry"
           ]
@@ -836,89 +623,12 @@
       ]
     },
     {
-      "type": "com.jobtracker.observability.config.OtelConfig",
-      "methods": [
-        {
-          "name": "openTelemetry",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.jobtracker.observability.config.OtelConfig$$SpringCGLIB$$0",
-      "fields": [
-        {
-          "name": "$$beanFactory"
-        },
-        {
-          "name": "CGLIB$CALLBACK_FILTER"
-        },
-        {
-          "name": "CGLIB$FACTORY_DATA"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "CGLIB$SET_STATIC_CALLBACKS",
-          "parameterTypes": [
-            "org.springframework.cglib.proxy.Callback[]"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.jobtracker.observability.config.OtelConfig$$SpringCGLIB$$FastClass$$0",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "com.jobtracker.observability.config.OtelConfig$$SpringCGLIB$$FastClass$$1",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "java.lang.Class"
-          ]
-        }
-      ]
-    },
-    {
       "type": "com.jobtracker.persistence.adapter.JobApplicationPersistenceAdapter",
       "methods": [
         {
           "name": "<init>",
           "parameterTypes": [
             "com.jobtracker.persistence.repository.JobApplicationJpaRepository"
-          ]
-        },
-        {
-          "name": "delete",
-          "parameterTypes": [
-            "java.util.UUID"
-          ]
-        },
-        {
-          "name": "findAllByUserId",
-          "parameterTypes": [
-            "com.jobtracker.domain.vo.UserId"
-          ]
-        },
-        {
-          "name": "save",
-          "parameterTypes": [
-            "com.jobtracker.domain.model.JobApplication"
           ]
         }
       ]
@@ -942,18 +652,6 @@
           "parameterTypes": [
             "com.jobtracker.persistence.repository.JobPostingJpaRepository"
           ]
-        },
-        {
-          "name": "findByUserId",
-          "parameterTypes": [
-            "com.jobtracker.domain.vo.UserId"
-          ]
-        },
-        {
-          "name": "save",
-          "parameterTypes": [
-            "com.jobtracker.domain.model.JobPosting"
-          ]
         }
       ]
     },
@@ -976,18 +674,6 @@
           "parameterTypes": [
             "com.jobtracker.persistence.repository.UserJpaRepository"
           ]
-        },
-        {
-          "name": "findByUsername",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "save",
-          "parameterTypes": [
-            "com.jobtracker.domain.model.User"
-          ]
         }
       ]
     },
@@ -1003,45 +689,7 @@
       ]
     },
     {
-      "type": "com.jobtracker.persistence.entity.JobApplicationEntity",
-      "fields": [
-        {
-          "name": "company"
-        },
-        {
-          "name": "dateApplied"
-        },
-        {
-          "name": "id"
-        },
-        {
-          "name": "lastUpdated"
-        },
-        {
-          "name": "notes"
-        },
-        {
-          "name": "postingUrl"
-        },
-        {
-          "name": "role"
-        },
-        {
-          "name": "source"
-        },
-        {
-          "name": "status"
-        },
-        {
-          "name": "userId"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
+      "type": "com.jobtracker.persistence.entity.JobApplicationEntity"
     },
     {
       "type": "com.jobtracker.persistence.entity.JobApplicationEntity$HibernateInstantiator"
@@ -1056,39 +704,7 @@
       "type": "com.jobtracker.persistence.entity.JobApplicationEntity__Accessor_uv3c38"
     },
     {
-      "type": "com.jobtracker.persistence.entity.JobPostingEntity",
-      "fields": [
-        {
-          "name": "company"
-        },
-        {
-          "name": "description"
-        },
-        {
-          "name": "id"
-        },
-        {
-          "name": "postedAt"
-        },
-        {
-          "name": "source"
-        },
-        {
-          "name": "title"
-        },
-        {
-          "name": "url"
-        },
-        {
-          "name": "userId"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
+      "type": "com.jobtracker.persistence.entity.JobPostingEntity"
     },
     {
       "type": "com.jobtracker.persistence.entity.JobPostingEntity$HibernateInstantiator"
@@ -1103,27 +719,7 @@
       "type": "com.jobtracker.persistence.entity.JobPostingEntity__Accessor_1rl3we"
     },
     {
-      "type": "com.jobtracker.persistence.entity.UserEntity",
-      "fields": [
-        {
-          "name": "createdAt"
-        },
-        {
-          "name": "id"
-        },
-        {
-          "name": "passwordHash"
-        },
-        {
-          "name": "username"
-        }
-      ],
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
+      "type": "com.jobtracker.persistence.entity.UserEntity"
     },
     {
       "type": "com.jobtracker.persistence.entity.UserEntity$HibernateInstantiator"
@@ -1195,6 +791,9 @@
       ]
     },
     {
+      "type": "com.jobtracker.server.TracingFilter"
+    },
+    {
       "type": "com.jobtracker.server.UseCaseConfig",
       "methods": [
         {
@@ -1205,7 +804,8 @@
           "name": "analyzeJobPostingUseCase",
           "parameterTypes": [
             "com.jobtracker.domain.port.out.LoadJobPostingPort",
-            "com.jobtracker.domain.port.out.JobAnalysisPort"
+            "com.jobtracker.domain.port.out.JobAnalysisPort",
+            "io.micrometer.core.instrument.Timer"
           ]
         },
         {
@@ -1234,7 +834,9 @@
           "parameterTypes": [
             "java.time.Clock",
             "com.jobtracker.domain.port.out.SaveJobPostingPort",
-            "com.jobtracker.domain.port.out.SaveJobApplicationPort"
+            "com.jobtracker.domain.port.out.SaveJobApplicationPort",
+            "io.micrometer.core.instrument.Counter",
+            "io.micrometer.core.instrument.Timer"
           ]
         },
         {
@@ -1242,10 +844,14 @@
           "parameterTypes": [
             "java.time.Clock",
             "com.jobtracker.domain.port.out.SaveJobApplicationPort",
-            "com.jobtracker.domain.port.out.LoadJobApplicationPort"
+            "com.jobtracker.domain.port.out.LoadJobApplicationPort",
+            "io.micrometer.core.instrument.Counter"
           ]
         }
       ]
+    },
+    {
+      "type": "com.jobtracker.server.UseCaseConfig$1"
     },
     {
       "type": "com.querydsl.core.Query"
@@ -1311,30 +917,13 @@
       ]
     },
     {
-      "type": "com.sun.crypto.provider.HmacCore$HmacSHA384",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
       "type": "com.sun.management.GarbageCollectionNotificationInfo"
     },
     {
       "type": "com.sun.management.GarbageCollectorMXBean"
     },
     {
-      "type": "com.sun.management.GcInfo",
-      "fields": [
-        {
-          "name": "builder"
-        },
-        {
-          "name": "extAttributes"
-        }
-      ]
+      "type": "com.sun.management.GcInfo"
     },
     {
       "type": "com.sun.management.HotSpotDiagnosticMXBean"
@@ -1455,16 +1044,10 @@
       ]
     },
     {
-      "type": "com.zaxxer.hikari.pool.HikariProxyPreparedStatement"
-    },
-    {
       "type": "com.zaxxer.hikari.pool.PoolBase"
     },
     {
       "type": "com.zaxxer.hikari.pool.PoolEntry"
-    },
-    {
-      "type": "com.zaxxer.hikari.pool.ProxyPreparedStatement"
     },
     {
       "type": "com.zaxxer.hikari.util.ConcurrentBag$IConcurrentBagEntry[]"
@@ -1474,9 +1057,6 @@
     },
     {
       "type": "float[]"
-    },
-    {
-      "type": "graphql.EngineRunningState"
     },
     {
       "type": "graphql.ExperimentalApi"
@@ -1491,33 +1071,6 @@
       "type": "graphql.PublicSpi"
     },
     {
-      "type": "graphql.com.google.common.collect.ImmutableCollection"
-    },
-    {
-      "type": "graphql.com.google.common.collect.ImmutableList"
-    },
-    {
-      "type": "graphql.com.google.common.collect.SingletonImmutableList"
-    },
-    {
-      "type": "graphql.execution.Async"
-    },
-    {
-      "type": "graphql.execution.AsyncSerialExecutionStrategy"
-    },
-    {
-      "type": "graphql.execution.Execution"
-    },
-    {
-      "type": "graphql.execution.ExecutionStrategy"
-    },
-    {
-      "type": "graphql.execution.ValuesResolver"
-    },
-    {
-      "type": "graphql.execution.ValuesResolverConversion"
-    },
-    {
       "type": "graphql.execution.instrumentation.Instrumentation"
     },
     {
@@ -1530,151 +1083,7 @@
       "type": "int[]"
     },
     {
-      "type": "io.jsonwebtoken.Claims"
-    },
-    {
-      "type": "io.jsonwebtoken.Header"
-    },
-    {
-      "type": "io.jsonwebtoken.Identifiable"
-    },
-    {
-      "type": "io.jsonwebtoken.JwsHeader"
-    },
-    {
-      "type": "io.jsonwebtoken.ProtectedHeader"
-    },
-    {
-      "type": "io.jsonwebtoken.impl.DefaultClaims"
-    },
-    {
-      "type": "io.jsonwebtoken.impl.DefaultClaimsBuilder$Supplier",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.impl.DefaultHeader"
-    },
-    {
-      "type": "io.jsonwebtoken.impl.DefaultJwsHeader"
-    },
-    {
-      "type": "io.jsonwebtoken.impl.DefaultJwtBuilder$Supplier",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.impl.DefaultJwtHeaderBuilder$Supplier",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.impl.DefaultJwtParserBuilder$Supplier",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.impl.DefaultProtectedHeader"
-    },
-    {
-      "type": "io.jsonwebtoken.impl.ParameterMap"
-    },
-    {
-      "type": "io.jsonwebtoken.impl.io.StandardCompressionAlgorithms",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.impl.lang.Nameable"
-    },
-    {
-      "type": "io.jsonwebtoken.impl.lang.ParameterReadable"
-    },
-    {
-      "type": "io.jsonwebtoken.impl.security.DefaultKeyOperationBuilder$Supplier",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.impl.security.DefaultKeyOperationPolicyBuilder$Supplier",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
       "type": "io.jsonwebtoken.impl.security.KeysBridge"
-    },
-    {
-      "type": "io.jsonwebtoken.impl.security.StandardEncryptionAlgorithms",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.impl.security.StandardKeyAlgorithms",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.impl.security.StandardKeyOperations",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.impl.security.StandardSecureDigestAlgorithms",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "io.jsonwebtoken.jackson.io.JacksonDeserializer"
-    },
-    {
-      "type": "io.jsonwebtoken.jackson.io.JacksonSerializer"
-    },
-    {
-      "type": "io.jsonwebtoken.security.X509Accessor"
     },
     {
       "type": "io.micrometer.appoptics.AppOpticsMeterRegistry"
@@ -1686,16 +1095,10 @@
       "type": "io.micrometer.common.annotation.ValueExpressionResolver"
     },
     {
-      "type": "io.micrometer.context.ContextRegistry"
-    },
-    {
       "type": "io.micrometer.context.ContextSnapshot"
     },
     {
       "type": "io.micrometer.context.ContextSnapshotFactory"
-    },
-    {
-      "type": "io.micrometer.context.ThreadLocalAccessor"
     },
     {
       "type": "io.micrometer.core.annotation.Timed"
@@ -1896,12 +1299,6 @@
       "type": "io.opentelemetry.api.OpenTelemetry"
     },
     {
-      "type": "io.opentelemetry.exporter.sender.okhttp.internal.OkHttpGrpcSenderProvider"
-    },
-    {
-      "type": "io.opentelemetry.sdk.OpenTelemetrySdk"
-    },
-    {
       "type": "io.prometheus.metrics.exporter.pushgateway.PushGateway"
     },
     {
@@ -2025,9 +1422,6 @@
       "type": "jakarta.persistence.ColumnResult[]"
     },
     {
-      "type": "jakarta.persistence.Column[]"
-    },
-    {
       "type": "jakarta.persistence.ConstructorResult"
     },
     {
@@ -2070,23 +1464,7 @@
       "type": "jakarta.persistence.EntityListeners"
     },
     {
-      "type": "jakarta.persistence.EntityManager",
-      "methods": [
-        {
-          "name": "contains",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "find",
-          "parameterTypes": [
-            "java.lang.Class",
-            "java.lang.Object",
-            "java.util.Map"
-          ]
-        }
-      ]
+      "type": "jakarta.persistence.EntityManager"
     },
     {
       "type": "jakarta.persistence.EntityManagerFactory",
@@ -2434,6 +1812,9 @@
       "type": "jakarta.xml.bind.Binder"
     },
     {
+      "type": "jakarta.xml.bind.JAXBContext"
+    },
+    {
       "type": "jakarta.xml.ws.WebServiceRef"
     },
     {
@@ -2510,10 +1891,6 @@
       "methods": [
         {
           "name": "getModule",
-          "parameterTypes": []
-        },
-        {
-          "name": "isRecord",
           "parameterTypes": []
         }
       ]
@@ -2688,20 +2065,11 @@
             "java.lang.String",
             "long"
           ]
-        },
-        {
-          "name": "start",
-          "parameterTypes": [
-            "java.lang.Runnable"
-          ]
         }
       ]
     },
     {
       "type": "java.lang.Throwable"
-    },
-    {
-      "type": "java.lang.VirtualThread"
     },
     {
       "type": "java.lang.Void",
@@ -2797,15 +2165,7 @@
       "type": "java.lang.management.MemoryPoolMXBean"
     },
     {
-      "type": "java.lang.management.MemoryUsage",
-      "methods": [
-        {
-          "name": "from",
-          "parameterTypes": [
-            "javax.management.openmbean.CompositeData"
-          ]
-        }
-      ]
+      "type": "java.lang.management.MemoryUsage"
     },
     {
       "type": "java.lang.management.MonitorInfo"
@@ -2963,15 +2323,6 @@
     },
     {
       "type": "java.security.SecureClassLoader"
-    },
-    {
-      "type": "java.security.interfaces.EdECKey"
-    },
-    {
-      "type": "java.security.interfaces.XECKey"
-    },
-    {
-      "type": "java.security.spec.NamedParameterSpec"
     },
     {
       "type": "java.sql.Blob"
@@ -3171,9 +2522,6 @@
       "type": "java.time.chrono.ChronoZonedDateTime"
     },
     {
-      "type": "java.time.format.DateTimeFormatter"
-    },
-    {
       "type": "java.time.temporal.Temporal"
     },
     {
@@ -3181,12 +2529,6 @@
     },
     {
       "type": "java.time.temporal.TemporalAdjuster"
-    },
-    {
-      "type": "java.util.AbstractCollection"
-    },
-    {
-      "type": "java.util.AbstractList"
     },
     {
       "type": "java.util.ArrayList"
@@ -3205,12 +2547,6 @@
     },
     {
       "type": "java.util.Collection"
-    },
-    {
-      "type": "java.util.Collections$EmptyList"
-    },
-    {
-      "type": "java.util.Collections$SingletonList"
     },
     {
       "type": "java.util.Comparator"
@@ -3237,9 +2573,6 @@
       "type": "java.util.Map"
     },
     {
-      "type": "java.util.RandomAccess"
-    },
-    {
       "type": "java.util.SequencedCollection"
     },
     {
@@ -3256,12 +2589,6 @@
     },
     {
       "type": "java.util.UUID"
-    },
-    {
-      "type": "java.util.concurrent.Callable"
-    },
-    {
-      "type": "java.util.concurrent.CompletableFuture"
     },
     {
       "type": "java.util.concurrent.Executor"
@@ -3378,9 +2705,6 @@
       "type": "jdk.internal.misc.Unsafe"
     },
     {
-      "type": "jdk.internal.reflect.DirectMethodHandleAccessor"
-    },
-    {
       "type": "jdk.management.VirtualThreadSchedulerMXBean"
     },
     {
@@ -3400,12 +2724,6 @@
     },
     {
       "type": "jdk.management.jfr.SettingDescriptorInfo"
-    },
-    {
-      "type": "kotlin.Boolean"
-    },
-    {
-      "type": "kotlin.Int"
     },
     {
       "type": "kotlin.Metadata",
@@ -3476,6 +2794,9 @@
           "parameterTypes": []
         }
       ]
+    },
+    {
+      "type": "kotlin.reflect.jvm.internal.impl.km.jvm.internal.JvmMetadataExtensions"
     },
     {
       "type": "kotlin.reflect.jvm.internal.impl.load.java.ErasedOverridabilityCondition"
@@ -3821,6 +3142,9 @@
       "type": "net.sf.jsqlparser.parser.JSqlParser"
     },
     {
+      "type": "okhttp3.Request"
+    },
+    {
       "type": "oracle.jdbc.OracleConnection"
     },
     {
@@ -3839,28 +3163,7 @@
       "type": "org.apache.catalina.Manager"
     },
     {
-      "type": "org.apache.catalina.authenticator.AuthenticatorBase"
-    },
-    {
-      "type": "org.apache.catalina.connector.CoyoteAdapter"
-    },
-    {
       "type": "org.apache.catalina.core.ApplicationContextFacade"
-    },
-    {
-      "type": "org.apache.catalina.core.ApplicationFilterChain"
-    },
-    {
-      "type": "org.apache.catalina.core.StandardContextValve"
-    },
-    {
-      "type": "org.apache.catalina.core.StandardEngineValve"
-    },
-    {
-      "type": "org.apache.catalina.core.StandardHostValve"
-    },
-    {
-      "type": "org.apache.catalina.core.StandardWrapperValve"
     },
     {
       "type": "org.apache.catalina.loader.JdbcLeakPrevention",
@@ -3888,9 +3191,6 @@
       ]
     },
     {
-      "type": "org.apache.catalina.valves.ErrorReportValve"
-    },
-    {
       "type": "org.apache.commons.dbcp2.BasicDataSource"
     },
     {
@@ -3913,9 +3213,6 @@
           "parameterTypes": []
         }
       ]
-    },
-    {
-      "type": "org.apache.coyote.AbstractProcessorLight"
     },
     {
       "type": "org.apache.coyote.AbstractProtocol",
@@ -3950,9 +3247,6 @@
       ]
     },
     {
-      "type": "org.apache.coyote.AbstractProtocol$ConnectionHandler"
-    },
-    {
       "type": "org.apache.coyote.UpgradeProtocol"
     },
     {
@@ -3966,9 +3260,6 @@
     },
     {
       "type": "org.apache.coyote.http11.Http11NioProtocol"
-    },
-    {
-      "type": "org.apache.coyote.http11.Http11Processor"
     },
     {
       "type": "org.apache.hc.client5.http.impl.classic.HttpClients"
@@ -4010,12 +3301,6 @@
     },
     {
       "type": "org.apache.tomcat.util.net.NioEndpoint"
-    },
-    {
-      "type": "org.apache.tomcat.util.net.NioEndpoint$SocketProcessor"
-    },
-    {
-      "type": "org.apache.tomcat.util.net.SocketProcessorBase"
     },
     {
       "type": "org.apache.tomcat.websocket.server.WsFilter"
@@ -4098,79 +3383,6 @@
     },
     {
       "type": "org.flywaydb.core.internal.NullFlywayTelemetryManager"
-    },
-    {
-      "type": "org.flywaydb.core.internal.command.clean.CleanModeConfigurationExtension",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "getClean",
-          "parameterTypes": []
-        },
-        {
-          "name": "setClean",
-          "parameterTypes": [
-            "org.flywaydb.core.internal.command.clean.CleanModel"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.flywaydb.core.internal.command.clean.CleanModel"
-    },
-    {
-      "type": "org.flywaydb.core.internal.command.clean.SchemaModel"
-    },
-    {
-      "type": "org.flywaydb.core.internal.configuration.extensions.DeployScriptFilenameConfigurationExtension",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "getScriptFilename",
-          "parameterTypes": []
-        },
-        {
-          "name": "setScriptFilename",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.flywaydb.core.internal.configuration.extensions.PrepareScriptFilenameConfigurationExtension",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "getScriptFilename",
-          "parameterTypes": []
-        },
-        {
-          "name": "getUndoFilename",
-          "parameterTypes": []
-        },
-        {
-          "name": "setScriptFilename",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setUndoFilename",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
     },
     {
       "type": "org.flywaydb.core.internal.configuration.resolvers.EnvironmentProvisionerNone"
@@ -4280,10 +3492,45 @@
       "type": "org.flywaydb.core.internal.schemahistory.BaseAppliedMigration"
     },
     {
+      "type": "org.flywaydb.database.cockroachdb.CockroachDBDatabaseType"
+    },
+    {
       "type": "org.flywaydb.database.oracle.OracleConfigurationExtension"
     },
     {
-      "type": "org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension"
+      "type": "org.flywaydb.database.postgresql.PostgreSQLConfigurationExtension",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "getTransactional",
+          "parameterTypes": []
+        },
+        {
+          "name": "isTransactionalLock",
+          "parameterTypes": []
+        },
+        {
+          "name": "setTransactional",
+          "parameterTypes": [
+            "org.flywaydb.database.postgresql.TransactionalModel"
+          ]
+        },
+        {
+          "name": "setTransactionalLock",
+          "parameterTypes": [
+            "boolean"
+          ]
+        }
+      ]
+    },
+    {
+      "type": "org.flywaydb.database.postgresql.PostgreSQLDatabaseType"
+    },
+    {
+      "type": "org.flywaydb.database.postgresql.TransactionalModel"
     },
     {
       "type": "org.flywaydb.database.sqlserver.SQLServerConfigurationExtension"
@@ -4307,37 +3554,10 @@
       ]
     },
     {
-      "type": "org.h2.command.Command"
-    },
-    {
-      "type": "org.h2.command.CommandContainer"
-    },
-    {
-      "type": "org.h2.command.dml.DataChangeStatement"
-    },
-    {
-      "type": "org.h2.command.dml.Insert"
-    },
-    {
-      "type": "org.h2.index.Index"
-    },
-    {
-      "type": "org.h2.jdbc.JdbcPreparedStatement"
-    },
-    {
-      "type": "org.h2.message.DbException"
-    },
-    {
       "type": "org.h2.mvstore.MVStore$TxCounter"
     },
     {
       "type": "org.h2.mvstore.Page"
-    },
-    {
-      "type": "org.h2.mvstore.db.MVSecondaryIndex"
-    },
-    {
-      "type": "org.h2.mvstore.db.MVTable"
     },
     {
       "type": "org.h2.server.web.JakartaWebServlet"
@@ -4352,24 +3572,6 @@
           "name": "createNamedQuery",
           "parameterTypes": [
             "java.lang.String"
-          ]
-        },
-        {
-          "name": "createQuery",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "merge",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "remove",
-          "parameterTypes": [
-            "java.lang.Object"
           ]
         }
       ]
@@ -4398,20 +3600,6 @@
     },
     {
       "type": "org.hibernate.StatelessSession"
-    },
-    {
-      "type": "org.hibernate.action.internal.ActionLogging_$logger",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "org.jboss.logging.Logger"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.hibernate.action.internal.EntityInsertAction"
     },
     {
       "type": "org.hibernate.annotations.Any"
@@ -4453,6 +3641,9 @@
       "type": "org.hibernate.annotations.AttributeBinderType"
     },
     {
+      "type": "org.hibernate.annotations.Audited"
+    },
+    {
       "type": "org.hibernate.annotations.Bag"
     },
     {
@@ -4466,6 +3657,9 @@
     },
     {
       "type": "org.hibernate.annotations.CascadeType[]"
+    },
+    {
+      "type": "org.hibernate.annotations.Changelog"
     },
     {
       "type": "org.hibernate.annotations.Check"
@@ -4523,9 +3717,6 @@
     },
     {
       "type": "org.hibernate.annotations.ColumnTransformers"
-    },
-    {
-      "type": "org.hibernate.annotations.Columns"
     },
     {
       "type": "org.hibernate.annotations.Comment"
@@ -4942,6 +4133,9 @@
       "type": "org.hibernate.annotations.NaturalIdCache"
     },
     {
+      "type": "org.hibernate.annotations.NaturalIdClass"
+    },
+    {
       "type": "org.hibernate.annotations.NotFound"
     },
     {
@@ -5060,6 +4254,18 @@
     },
     {
       "type": "org.hibernate.annotations.TargetEmbeddable"
+    },
+    {
+      "type": "org.hibernate.annotations.Temporal"
+    },
+    {
+      "type": "org.hibernate.annotations.Temporal$Excluded"
+    },
+    {
+      "type": "org.hibernate.annotations.Temporal$HistoryPartitioning"
+    },
+    {
+      "type": "org.hibernate.annotations.Temporal$HistoryTable"
     },
     {
       "type": "org.hibernate.annotations.TenantId"
@@ -5357,9 +4563,6 @@
           "name": "COLLECTION_TYPE_REGISTRATIONS"
         },
         {
-          "name": "COLUMNS"
-        },
-        {
           "name": "COLUMN_DEFAULT"
         },
         {
@@ -5585,6 +4788,9 @@
           "name": "NATURAL_ID_CACHE"
         },
         {
+          "name": "NATURAL_ID_CLASS"
+        },
+        {
           "name": "NOT_FOUND"
         },
         {
@@ -5682,6 +4888,18 @@
         },
         {
           "name": "TARGET_EMBEDDABLE"
+        },
+        {
+          "name": "TEMPORAL"
+        },
+        {
+          "name": "TEMPORAL_EXCLUDED"
+        },
+        {
+          "name": "TEMPORAL_HISTORY_PARTITIONING"
+        },
+        {
+          "name": "TEMPORAL_HISTORY_TABLE"
         },
         {
           "name": "TENANT_ID"
@@ -6154,6 +5372,9 @@
       "type": "org.hibernate.engine.config.internal.ConfigurationServiceImpl"
     },
     {
+      "type": "org.hibernate.engine.extension.internal.ExtensionIntegrationServiceImpl"
+    },
+    {
       "type": "org.hibernate.engine.internal.SessionMetricsLogger_$logger",
       "methods": [
         {
@@ -6213,36 +5434,10 @@
       "type": "org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentImpl"
     },
     {
-      "type": "org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl"
-    },
-    {
       "type": "org.hibernate.engine.jdbc.internal.JdbcServicesImpl"
     },
     {
-      "type": "org.hibernate.engine.jdbc.internal.ResultSetReturnImpl"
-    },
-    {
-      "type": "org.hibernate.engine.jdbc.mutation.internal.AbstractMutationExecutor"
-    },
-    {
-      "type": "org.hibernate.engine.jdbc.mutation.internal.MutationExecutorSingleNonBatched"
-    },
-    {
       "type": "org.hibernate.engine.jdbc.mutation.internal.StandardMutationExecutorService"
-    },
-    {
-      "type": "org.hibernate.engine.jdbc.spi.SQLExceptionLogging_$logger",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "org.jboss.logging.Logger"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.hibernate.engine.jdbc.spi.SqlExceptionHelper"
     },
     {
       "type": "org.hibernate.engine.jdbc.spi.SqlStatementLogger"
@@ -6254,31 +5449,16 @@
       "type": "org.hibernate.engine.query.internal.NativeQueryInterpreterStandardImpl"
     },
     {
-      "type": "org.hibernate.engine.spi.ActionQueue"
-    },
-    {
       "type": "org.hibernate.engine.spi.PrimeAmongSecondarySupertypes"
     },
     {
       "type": "org.hibernate.engine.spi.SessionImplementor"
     },
     {
-      "type": "org.hibernate.engine.transaction.internal.TransactionImpl"
+      "type": "org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform"
     },
     {
-      "type": "org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.hibernate.event.internal.AbstractFlushingEventListener"
-    },
-    {
-      "type": "org.hibernate.event.internal.DefaultFlushEventListener"
+      "type": "org.hibernate.engine.transaction.jta.platform.internal.StandardJtaPlatformResolver"
     },
     {
       "type": "org.hibernate.event.internal.EntityCopyLogging_$logger",
@@ -6290,20 +5470,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "org.hibernate.event.internal.EventListenerLogging_$logger",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "org.jboss.logging.Logger"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.hibernate.event.service.internal.EventListenerGroupImpl"
     },
     {
       "type": "org.hibernate.event.spi.AutoFlushEventListener[]"
@@ -6476,9 +5642,6 @@
       "type": "org.hibernate.event.spi.ReplicateEventListener[]"
     },
     {
-      "type": "org.hibernate.exception.internal.StandardSQLExceptionConverter"
-    },
-    {
       "type": "org.hibernate.generator.EventType[]"
     },
     {
@@ -6513,9 +5676,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "org.hibernate.internal.SessionImpl"
     },
     {
       "type": "org.hibernate.internal.SessionLogging_$logger",
@@ -6576,7 +5736,21 @@
       ]
     },
     {
+      "type": "org.hibernate.metamodel.mapping.MappingModelCreationLogging_$logger",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": [
+            "org.jboss.logging.Logger"
+          ]
+        }
+      ]
+    },
+    {
       "type": "org.hibernate.metamodel.model.domain.JpaMetamodel"
+    },
+    {
+      "type": "org.hibernate.orm.micrometer.HibernateMetrics"
     },
     {
       "type": "org.hibernate.persister.entity.SingleTableEntityPersister",
@@ -6591,9 +5765,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "org.hibernate.persister.entity.mutation.InsertCoordinatorStandard"
     },
     {
       "type": "org.hibernate.persister.internal.PersisterFactoryImpl"
@@ -6631,20 +5802,6 @@
       "type": "org.hibernate.query.TypedParameterValue"
     },
     {
-      "type": "org.hibernate.query.hql.HqlLogging_$logger",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "org.jboss.logging.Logger"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.hibernate.resource.beans.container.spi.BeanContainer"
-    },
-    {
       "type": "org.hibernate.resource.beans.internal.ManagedBeanRegistryImpl"
     },
     {
@@ -6675,23 +5832,6 @@
         {
           "name": "<init>",
           "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl"
-    },
-    {
-      "type": "org.hibernate.resource.transaction.backend.jdbc.internal.JdbcResourceLocalTransactionCoordinatorImpl$TransactionDriverControlImpl"
-    },
-    {
-      "type": "org.hibernate.resource.transaction.internal.SynchronizationLogging_$logger",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "org.jboss.logging.Logger"
-          ]
         }
       ]
     },
@@ -6730,29 +5870,7 @@
       ]
     },
     {
-      "type": "org.hibernate.sql.exec.SqlExecLogger_$logger",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "org.jboss.logging.Logger"
-          ]
-        }
-      ]
-    },
-    {
       "type": "org.hibernate.sql.model.ModelMutationLogging_$logger",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "org.jboss.logging.Logger"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.hibernate.sql.results.ResultsLogger_$logger",
       "methods": [
         {
           "name": "<init>",
@@ -6766,10 +5884,10 @@
       "type": "org.hibernate.sql.results.jdbc.internal.JdbcValuesMappingProducerProviderStandard"
     },
     {
-      "type": "org.hibernate.stat.HibernateMetrics"
+      "type": "org.hibernate.stat.internal.StatisticsImpl"
     },
     {
-      "type": "org.hibernate.stat.internal.StatisticsImpl"
+      "type": "org.hibernate.temporal.internal.ChangesetCoordinatorImpl"
     },
     {
       "type": "org.hibernate.tool.schema.internal.HibernateSchemaManagementTool"
@@ -7035,16 +6153,13 @@
       "type": "org.jspecify.annotations.NullMarked"
     },
     {
-      "type": "org.jspecify.annotations.NullUnmarked"
-    },
-    {
       "type": "org.jspecify.annotations.Nullable"
     },
     {
-      "type": "org.locationtech.jts.geom.Geometry"
+      "type": "org.osgi.framework.FrameworkUtil"
     },
     {
-      "type": "org.osgi.framework.FrameworkUtil"
+      "type": "org.postgresql.Driver"
     },
     {
       "type": "org.reactivestreams.Publisher"
@@ -7090,16 +6205,10 @@
       "type": "org.springframework.ai.chat.client.ChatClient$Builder"
     },
     {
-      "type": "org.springframework.ai.chat.client.DefaultChatClient$DefaultChatClientRequestSpec"
-    },
-    {
       "type": "org.springframework.ai.chat.client.DefaultChatClientBuilder"
     },
     {
-      "type": "org.springframework.ai.chat.client.DefaultChatClientUtils"
-    },
-    {
-      "type": "org.springframework.ai.chat.client.advisor.ToolCallAdvisor$Builder"
+      "type": "org.springframework.ai.chat.client.advisor.ToolCallingAdvisor$Builder"
     },
     {
       "type": "org.springframework.ai.chat.memory.ChatMemory"
@@ -7121,9 +6230,6 @@
     },
     {
       "type": "org.springframework.ai.chat.observation.ChatModelMeterObservationHandler"
-    },
-    {
-      "type": "org.springframework.ai.chat.prompt.PromptTemplate"
     },
     {
       "type": "org.springframework.ai.embedding.AbstractEmbeddingModel"
@@ -7153,6 +6259,7 @@
         {
           "name": "chatClientBuilder",
           "parameterTypes": [
+            "org.springframework.ai.model.chat.client.autoconfigure.ChatClientBuilderProperties",
             "org.springframework.ai.model.chat.client.autoconfigure.ChatClientBuilderConfigurer",
             "org.springframework.ai.chat.model.ChatModel",
             "org.springframework.beans.factory.ObjectProvider",
@@ -7164,14 +6271,16 @@
         {
           "name": "chatClientBuilderConfigurer",
           "parameterTypes": [
+            "org.springframework.beans.factory.ObjectProvider",
             "org.springframework.beans.factory.ObjectProvider"
           ]
         },
         {
-          "name": "toolCallAdvisorBuilder",
+          "name": "toolCallingAdvisorBuilder",
           "parameterTypes": [
             "org.springframework.ai.model.chat.client.autoconfigure.ChatClientBuilderProperties",
-            "org.springframework.ai.model.tool.ToolCallingManager"
+            "org.springframework.ai.model.tool.ToolCallingManager",
+            "org.springframework.beans.factory.ObjectProvider"
           ]
         }
       ]
@@ -7298,7 +6407,10 @@
           "name": "openAiSdkAudioSpeechModel",
           "parameterTypes": [
             "org.springframework.ai.model.openai.autoconfigure.OpenAiCommonProperties",
-            "org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechProperties"
+            "org.springframework.ai.model.openai.autoconfigure.OpenAiAudioSpeechProperties",
+            "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider"
           ]
         }
       ]
@@ -7323,7 +6435,10 @@
           "name": "openAiSdkAudioTranscriptionModel",
           "parameterTypes": [
             "org.springframework.ai.model.openai.autoconfigure.OpenAiCommonProperties",
-            "org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionProperties"
+            "org.springframework.ai.model.openai.autoconfigure.OpenAiAudioTranscriptionProperties",
+            "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider"
           ]
         }
       ]
@@ -7350,6 +6465,7 @@
             "org.springframework.ai.model.openai.autoconfigure.OpenAiCommonProperties",
             "org.springframework.ai.model.openai.autoconfigure.OpenAiChatProperties",
             "org.springframework.ai.model.tool.ToolCallingManager",
+            "org.springframework.beans.factory.ObjectProvider",
             "org.springframework.beans.factory.ObjectProvider",
             "org.springframework.beans.factory.ObjectProvider",
             "org.springframework.beans.factory.ObjectProvider"
@@ -7388,6 +6504,8 @@
             "org.springframework.ai.model.openai.autoconfigure.OpenAiCommonProperties",
             "org.springframework.ai.model.openai.autoconfigure.OpenAiEmbeddingProperties",
             "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider",
             "org.springframework.beans.factory.ObjectProvider"
           ]
         }
@@ -7415,6 +6533,8 @@
             "org.springframework.ai.model.openai.autoconfigure.OpenAiCommonProperties",
             "org.springframework.ai.model.openai.autoconfigure.OpenAiImageProperties",
             "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider",
             "org.springframework.beans.factory.ObjectProvider"
           ]
         }
@@ -7440,7 +6560,10 @@
           "name": "openAiSdkModerationModel",
           "parameterTypes": [
             "org.springframework.ai.model.openai.autoconfigure.OpenAiCommonProperties",
-            "org.springframework.ai.model.openai.autoconfigure.OpenAiModerationProperties"
+            "org.springframework.ai.model.openai.autoconfigure.OpenAiModerationProperties",
+            "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.ObjectProvider"
           ]
         }
       ]
@@ -7527,9 +6650,6 @@
       "type": "org.springframework.ai.retry.RetryUtils"
     },
     {
-      "type": "org.springframework.ai.template.st.StTemplateRenderer"
-    },
-    {
       "type": "org.springframework.ai.tool.execution.DefaultToolExecutionExceptionProcessor"
     },
     {
@@ -7597,9 +6717,6 @@
       "type": "org.springframework.aop.framework.AopInfrastructureBean"
     },
     {
-      "type": "org.springframework.aop.framework.CglibAopProxy$DynamicAdvisedInterceptor"
-    },
-    {
       "type": "org.springframework.aop.framework.ProxyConfig",
       "methods": [
         {
@@ -7624,9 +6741,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "org.springframework.aop.framework.ReflectiveMethodInvocation"
     },
     {
       "type": "org.springframework.aop.framework.autoproxy.AbstractAdvisorAutoProxyCreator"
@@ -7813,6 +6927,12 @@
         {
           "name": "<init>",
           "parameterTypes": []
+        },
+        {
+          "name": "setShowValues",
+          "parameterTypes": [
+            "org.springframework.boot.actuate.endpoint.Show"
+          ]
         }
       ]
     },
@@ -8040,6 +7160,12 @@
         {
           "name": "<init>",
           "parameterTypes": []
+        },
+        {
+          "name": "setShowValues",
+          "parameterTypes": [
+            "org.springframework.boot.actuate.endpoint.Show"
+          ]
         }
       ]
     },
@@ -8947,6 +8073,15 @@
       ]
     },
     {
+      "type": "org.springframework.boot.autoconfigure.task.TaskExecutorConfigurations$TaskExecutorContextPropagationConfiguration",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        }
+      ]
+    },
+    {
       "type": "org.springframework.boot.autoconfigure.task.TaskExecutorConfigurations$ThreadPoolTaskExecutorBuilderConfiguration",
       "methods": [
         {
@@ -9589,6 +8724,21 @@
       ]
     },
     {
+      "type": "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration$FlywayConfiguration$PostgresqlConfiguration",
+      "methods": [
+        {
+          "name": "<init>",
+          "parameterTypes": []
+        },
+        {
+          "name": "postgresqlFlywayConfigurationCustomizer",
+          "parameterTypes": [
+            "org.springframework.boot.flyway.autoconfigure.FlywayProperties"
+          ]
+        }
+      ]
+    },
+    {
       "type": "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration$FlywayDataSourceCondition",
       "methods": [
         {
@@ -9598,10 +8748,16 @@
       ]
     },
     {
+      "type": "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration$PostgresqlFlywayConfigurationCustomizer"
+    },
+    {
       "type": "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration$PropertiesFlywayConnectionDetails"
     },
     {
       "type": "org.springframework.boot.flyway.autoconfigure.FlywayAutoConfiguration$StringOrNumberToMigrationVersionConverter"
+    },
+    {
+      "type": "org.springframework.boot.flyway.autoconfigure.FlywayConfigurationCustomizer"
     },
     {
       "type": "org.springframework.boot.flyway.autoconfigure.FlywayConnectionDetails"
@@ -9916,51 +9072,6 @@
       "type": "org.springframework.boot.graphql.autoconfigure.servlet.GraphQlWebMvcAutoConfiguration$GraphiQlResourceHints"
     },
     {
-      "type": "org.springframework.boot.h2console.autoconfigure.H2ConsoleAutoConfiguration",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": [
-            "org.springframework.boot.h2console.autoconfigure.H2ConsoleProperties"
-          ]
-        },
-        {
-          "name": "h2Console",
-          "parameterTypes": []
-        },
-        {
-          "name": "h2ConsoleLogger",
-          "parameterTypes": [
-            "org.springframework.beans.factory.ObjectProvider"
-          ]
-        }
-      ]
-    },
-    {
-      "type": "org.springframework.boot.h2console.autoconfigure.H2ConsoleAutoConfiguration$H2ConsoleLogger"
-    },
-    {
-      "type": "org.springframework.boot.h2console.autoconfigure.H2ConsoleProperties",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setEnabled",
-          "parameterTypes": [
-            "boolean"
-          ]
-        },
-        {
-          "name": "setPath",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        }
-      ]
-    },
-    {
       "type": "org.springframework.boot.health.actuate.endpoint.HealthEndpoint"
     },
     {
@@ -10105,9 +9216,6 @@
       ]
     },
     {
-      "type": "org.springframework.boot.health.autoconfigure.actuate.endpoint.HealthEndpointConfiguration$HealthEndpointGroupMembershipValidator"
-    },
-    {
       "type": "org.springframework.boot.health.autoconfigure.actuate.endpoint.HealthEndpointConfiguration$HealthEndpointGroupsBeanPostProcessor"
     },
     {
@@ -10230,6 +9338,9 @@
       ]
     },
     {
+      "type": "org.springframework.boot.health.autoconfigure.contributor.HealthContributorMembershipValidator"
+    },
+    {
       "type": "org.springframework.boot.health.autoconfigure.contributor.OnEnabledHealthIndicatorCondition",
       "methods": [
         {
@@ -10337,7 +9448,6 @@
           "parameterTypes": [
             "javax.sql.DataSource",
             "org.springframework.boot.jpa.autoconfigure.JpaProperties",
-            "org.springframework.beans.factory.config.ConfigurableListableBeanFactory",
             "org.springframework.beans.factory.ObjectProvider",
             "org.springframework.boot.hibernate.autoconfigure.HibernateProperties",
             "org.springframework.beans.factory.ObjectProvider",
@@ -10390,8 +9500,9 @@
         {
           "name": "httpClientSettings",
           "parameterTypes": [
+            "org.springframework.boot.http.client.autoconfigure.HttpClientsProperties",
             "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.boot.http.client.autoconfigure.HttpClientsProperties"
+            "org.springframework.beans.factory.ObjectProvider"
           ]
         }
       ]
@@ -10788,34 +9899,53 @@
           "parameterTypes": []
         },
         {
-          "name": "jsonMapperBuilder",
+          "name": "jsonFactory",
           "parameterTypes": [
             "java.util.List"
           ]
+        },
+        {
+          "name": "jsonMapperBuilder",
+          "parameterTypes": [
+            "java.util.List",
+            "tools.jackson.core.json.JsonFactory"
+          ]
         }
       ]
+    },
+    {
+      "type": "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$AbstractFactoryBuilderCustomizer"
     },
     {
       "type": "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$AbstractMapperBuilderCustomizer"
     },
     {
-      "type": "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonMapperBuilderCustomizerConfiguration",
+      "type": "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration",
       "methods": [
         {
           "name": "<init>",
+          "parameterTypes": [
+            "org.springframework.boot.jackson.autoconfigure.JacksonProperties"
+          ]
+        },
+        {
+          "name": "standardJsonFactoryBuilderCustomizer",
           "parameterTypes": []
         },
         {
           "name": "standardJsonMapperBuilderCustomizer",
           "parameterTypes": [
-            "org.springframework.boot.jackson.autoconfigure.JacksonProperties",
-            "org.springframework.beans.factory.ObjectProvider"
+            "org.springframework.beans.factory.ObjectProvider",
+            "org.springframework.beans.factory.config.AutowireCapableBeanFactory"
           ]
         }
       ]
     },
     {
-      "type": "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonMapperBuilderCustomizerConfiguration$StandardJsonMapperBuilderCustomizer"
+      "type": "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonFactoryBuilderCustomizer"
+    },
+    {
+      "type": "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer"
     },
     {
       "type": "org.springframework.boot.jackson.autoconfigure.JacksonAutoConfiguration$JacksonMixinConfiguration",
@@ -10872,6 +10002,9 @@
           "parameterTypes": []
         }
       ]
+    },
+    {
+      "type": "org.springframework.boot.jackson.autoconfigure.JsonFactoryBuilderCustomizer"
     },
     {
       "type": "org.springframework.boot.jackson.autoconfigure.JsonMapperBuilderCustomizer"
@@ -11135,6 +10268,9 @@
       ]
     },
     {
+      "type": "org.springframework.boot.jdbc.autoconfigure.LazyConnectionDataSourceConfiguration"
+    },
+    {
       "type": "org.springframework.boot.jdbc.autoconfigure.NamedParameterJdbcTemplateConfiguration",
       "methods": [
         {
@@ -11286,7 +10422,8 @@
           "parameterTypes": [
             "org.springframework.orm.jpa.JpaVendorAdapter",
             "org.springframework.beans.factory.ObjectProvider",
-            "org.springframework.beans.factory.ObjectProvider"
+            "org.springframework.beans.factory.ObjectProvider",
+            "java.util.Map"
           ]
         },
         {
@@ -11335,12 +10472,6 @@
           "name": "setOpenInView",
           "parameterTypes": [
             "java.lang.Boolean"
-          ]
-        },
-        {
-          "name": "setShowSql",
-          "parameterTypes": [
-            "boolean"
           ]
         }
       ]
@@ -11429,7 +10560,8 @@
         {
           "name": "meterRegistryCloser",
           "parameterTypes": [
-            "org.springframework.context.ApplicationContext"
+            "org.springframework.context.ApplicationContext",
+            "org.springframework.boot.micrometer.metrics.autoconfigure.MetricsProperties"
           ]
         },
         {
@@ -11581,7 +10713,9 @@
         },
         {
           "name": "classLoaderMetrics",
-          "parameterTypes": []
+          "parameterTypes": [
+            "org.springframework.beans.factory.ObjectProvider"
+          ]
         },
         {
           "name": "jvmCompilationMetrics",
@@ -11601,11 +10735,15 @@
         },
         {
           "name": "jvmMemoryMetrics",
-          "parameterTypes": []
+          "parameterTypes": [
+            "org.springframework.beans.factory.ObjectProvider"
+          ]
         },
         {
           "name": "jvmThreadMetrics",
-          "parameterTypes": []
+          "parameterTypes": [
+            "org.springframework.beans.factory.ObjectProvider"
+          ]
         }
       ]
     },
@@ -11684,7 +10822,9 @@
         },
         {
           "name": "processorMetrics",
-          "parameterTypes": []
+          "parameterTypes": [
+            "org.springframework.beans.factory.ObjectProvider"
+          ]
         },
         {
           "name": "uptimeMetrics",
@@ -13061,15 +12201,7 @@
       "type": "org.springframework.boot.webmvc.autoconfigure.error.AbstractErrorController"
     },
     {
-      "type": "org.springframework.boot.webmvc.autoconfigure.error.BasicErrorController",
-      "methods": [
-        {
-          "name": "error",
-          "parameterTypes": [
-            "jakarta.servlet.http.HttpServletRequest"
-          ]
-        }
-      ]
+      "type": "org.springframework.boot.webmvc.autoconfigure.error.BasicErrorController"
     },
     {
       "type": "org.springframework.boot.webmvc.autoconfigure.error.DefaultErrorViewResolver"
@@ -13547,25 +12679,7 @@
       ]
     },
     {
-      "type": "org.springframework.data.jpa.repository.support.CrudMethodMetadata",
-      "methods": [
-        {
-          "name": "getComment",
-          "parameterTypes": []
-        },
-        {
-          "name": "getEntityGraph",
-          "parameterTypes": []
-        },
-        {
-          "name": "getLockModeType",
-          "parameterTypes": []
-        },
-        {
-          "name": "getQueryHints",
-          "parameterTypes": []
-        }
-      ]
+      "type": "org.springframework.data.jpa.repository.support.CrudMethodMetadata"
     },
     {
       "type": "org.springframework.data.jpa.repository.support.DefaultJpaContext"
@@ -13636,18 +12750,6 @@
           "parameterTypes": [
             "org.springframework.data.jpa.repository.support.JpaEntityInformation",
             "jakarta.persistence.EntityManager"
-          ]
-        },
-        {
-          "name": "deleteById",
-          "parameterTypes": [
-            "java.lang.Object"
-          ]
-        },
-        {
-          "name": "save",
-          "parameterTypes": [
-            "java.lang.Object"
           ]
         }
       ]
@@ -14017,18 +13119,6 @@
       "type": "org.springframework.graphql.ExecutionGraphQlService"
     },
     {
-      "type": "org.springframework.graphql.GraphQlRequest"
-    },
-    {
-      "type": "org.springframework.graphql.data.GraphQlArgumentBinder"
-    },
-    {
-      "type": "org.springframework.graphql.data.method.HandlerMethodArgumentResolverComposite"
-    },
-    {
-      "type": "org.springframework.graphql.data.method.InvocableHandlerMethodSupport"
-    },
-    {
       "type": "org.springframework.graphql.data.method.annotation.Argument"
     },
     {
@@ -14047,9 +13137,6 @@
       "type": "org.springframework.graphql.data.method.annotation.support.AnnotatedControllerConfigurer"
     },
     {
-      "type": "org.springframework.graphql.data.method.annotation.support.AnnotatedControllerConfigurer$SchemaMappingDataFetcher"
-    },
-    {
       "type": "org.springframework.graphql.data.method.annotation.support.AnnotatedControllerDetectionSupport"
     },
     {
@@ -14057,15 +13144,6 @@
     },
     {
       "type": "org.springframework.graphql.data.method.annotation.support.AnnotatedControllerExceptionResolver$MethodResolver"
-    },
-    {
-      "type": "org.springframework.graphql.data.method.annotation.support.ArgumentMethodArgumentResolver"
-    },
-    {
-      "type": "org.springframework.graphql.data.method.annotation.support.DataFetcherHandlerMethod"
-    },
-    {
-      "type": "org.springframework.graphql.data.method.annotation.support.DataFetcherHandlerMethodSupport"
     },
     {
       "type": "org.springframework.graphql.data.method.annotation.support.HandlerDataFetcherExceptionResolver"
@@ -14084,9 +13162,6 @@
     },
     {
       "type": "org.springframework.graphql.execution.BatchLoaderRegistry"
-    },
-    {
-      "type": "org.springframework.graphql.execution.ContextDataFetcherDecorator"
     },
     {
       "type": "org.springframework.graphql.execution.DataFetcherExceptionResolver"
@@ -14126,27 +13201,6 @@
     },
     {
       "type": "org.springframework.graphql.server.WebGraphQlInterceptor"
-    },
-    {
-      "type": "org.springframework.graphql.server.support.SerializableGraphQlRequest",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        },
-        {
-          "name": "setQuery",
-          "parameterTypes": [
-            "java.lang.String"
-          ]
-        },
-        {
-          "name": "setVariables",
-          "parameterTypes": [
-            "java.util.Map"
-          ]
-        }
-      ]
     },
     {
       "type": "org.springframework.graphql.server.webflux.GraphQlHttpHandler"
@@ -14266,12 +13320,6 @@
       "type": "org.springframework.orm.jpa.EntityManagerFactoryInfo",
       "methods": [
         {
-          "name": "createNativeEntityManager",
-          "parameterTypes": [
-            "java.util.Map"
-          ]
-        },
-        {
           "name": "getBeanClassLoader",
           "parameterTypes": []
         },
@@ -14311,9 +13359,6 @@
           ]
         }
       ]
-    },
-    {
-      "type": "org.springframework.orm.jpa.hibernate.HibernateExceptionTranslator"
     },
     {
       "type": "org.springframework.orm.jpa.persistenceunit.MutablePersistenceUnitInfo",
@@ -14422,9 +13467,6 @@
     },
     {
       "type": "org.springframework.orm.jpa.vendor.AbstractJpaVendorAdapter"
-    },
-    {
-      "type": "org.springframework.orm.jpa.vendor.HibernateJpaDialect"
     },
     {
       "type": "org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
@@ -14985,22 +14027,13 @@
       "type": "org.springframework.web.util.pattern.PathPatternParser"
     },
     {
-      "type": "org.stringtemplate.v4.ST"
-    },
-    {
-      "type": "org.stringtemplate.v4.STGroup"
-    },
-    {
-      "type": "org.stringtemplate.v4.compiler.Compiler"
-    },
-    {
-      "type": "org.stringtemplate.v4.misc.ObjectModelAdaptor"
-    },
-    {
       "type": "org.webjars.WebJarAssetLocator"
     },
     {
       "type": "org.webjars.WebJarVersionLocator"
+    },
+    {
+      "type": "org.wildfly.transaction.client.ContextTransactionManager"
     },
     {
       "type": "org.xmlbeam.XBProjector"
@@ -15009,22 +14042,7 @@
       "type": "org.yaml.snakeyaml.Yaml"
     },
     {
-      "type": "reactor.core.publisher.FlatMapTracker"
-    },
-    {
       "type": "reactor.core.publisher.Flux"
-    },
-    {
-      "type": "reactor.core.publisher.FluxDoFinally$DoFinallySubscriber"
-    },
-    {
-      "type": "reactor.core.publisher.FluxFlatMap$FlatMapInner"
-    },
-    {
-      "type": "reactor.core.publisher.FluxFlatMap$FlatMapMain"
-    },
-    {
-      "type": "reactor.core.publisher.FluxIterable$IterableSubscription"
     },
     {
       "type": "reactor.core.publisher.Hooks"
@@ -15034,21 +14052,6 @@
     },
     {
       "type": "reactor.core.publisher.MonoCacheTime"
-    },
-    {
-      "type": "reactor.core.publisher.MonoCompletionStage$MonoCompletionStageSubscription"
-    },
-    {
-      "type": "reactor.core.publisher.MonoDeferContextual"
-    },
-    {
-      "type": "reactor.core.publisher.MonoNext$NextSubscriber"
-    },
-    {
-      "type": "reactor.core.publisher.Operators$MultiSubscriptionSubscriber"
-    },
-    {
-      "type": "reactor.core.publisher.Operators$ScalarSubscription"
     },
     {
       "type": "reactor.netty.contextpropagation.ChannelContextAccessor"
@@ -15178,15 +14181,6 @@
     },
     {
       "type": "sun.security.provider.SHA2$SHA256",
-      "methods": [
-        {
-          "name": "<init>",
-          "parameterTypes": []
-        }
-      ]
-    },
-    {
-      "type": "sun.security.provider.SHA5$SHA384",
       "methods": [
         {
           "name": "<init>",
@@ -15381,10 +14375,25 @@
       "type": "sun.util.resources.cldr.TimeZoneNames_en_US"
     },
     {
+      "type": "tools.jackson.core.TokenStreamFactory"
+    },
+    {
       "type": "tools.jackson.core.TreeCodec"
     },
     {
       "type": "tools.jackson.core.Versioned"
+    },
+    {
+      "type": "tools.jackson.core.base.DecorableTSFactory"
+    },
+    {
+      "type": "tools.jackson.core.base.TextualTSFactory"
+    },
+    {
+      "type": "tools.jackson.core.json.JsonFactory"
+    },
+    {
+      "type": "tools.jackson.core.util.Snapshottable"
     },
     {
       "type": "tools.jackson.databind.JacksonModule"
@@ -15691,6 +14700,26 @@
     {
       "type": {
         "lambda": {
+          "declaringClass": "com.jobtracker.server.UseCaseConfig",
+          "interfaces": [
+            "com.jobtracker.domain.port.in.AnalyzeJobPostingUseCase"
+          ]
+        }
+      }
+    },
+    {
+      "type": {
+        "lambda": {
+          "declaringClass": "com.jobtracker.server.UseCaseConfig",
+          "interfaces": [
+            "com.jobtracker.domain.port.in.SubmitJobPostingUseCase"
+          ]
+        }
+      }
+    },
+    {
+      "type": {
+        "lambda": {
           "declaringClass": "org.hibernate.event.internal.EntityCopyNotAllowedObserver",
           "interfaces": [
             "org.hibernate.event.spi.EntityCopyObserverFactory"
@@ -15872,19 +14901,10 @@
       "glob": "META-INF/services/com.fasterxml.jackson.databind.Module"
     },
     {
-      "glob": "META-INF/services/io.jsonwebtoken.io.Deserializer"
-    },
-    {
-      "glob": "META-INF/services/io.jsonwebtoken.io.Serializer"
-    },
-    {
       "glob": "META-INF/services/io.micrometer.context.ContextAccessor"
     },
     {
       "glob": "META-INF/services/io.micrometer.context.ThreadLocalAccessor"
-    },
-    {
-      "glob": "META-INF/services/io.opentelemetry.exporter.internal.grpc.GrpcSenderProvider"
     },
     {
       "glob": "META-INF/services/java.net.spi.URLStreamHandlerProvider"
@@ -15909,6 +14929,9 @@
     },
     {
       "glob": "META-INF/services/javax.xml.transform.TransformerFactory"
+    },
+    {
+      "glob": "META-INF/services/kotlin.reflect.jvm.internal.impl.km.internal.extensions.MetadataExtensions"
     },
     {
       "glob": "META-INF/services/kotlin.reflect.jvm.internal.impl.resolve.ExternalOverridabilityCondition"
@@ -15965,7 +14988,19 @@
       "glob": "META-INF/services/org.hibernate.bytecode.spi.BytecodeProvider"
     },
     {
+      "glob": "META-INF/services/org.hibernate.engine.extension.spi.ExtensionIntegration"
+    },
+    {
+      "glob": "META-INF/services/org.hibernate.engine.jdbc.batch.spi.BatchBuilder"
+    },
+    {
       "glob": "META-INF/services/org.hibernate.engine.jdbc.dialect.spi.DialectResolver"
+    },
+    {
+      "glob": "META-INF/services/org.hibernate.engine.jdbc.mutation.spi.MutationExecutorService"
+    },
+    {
+      "glob": "META-INF/services/org.hibernate.engine.transaction.jta.platform.spi.JtaPlatformProvider"
     },
     {
       "glob": "META-INF/services/org.hibernate.event.monitor.spi.EventMonitor"
@@ -15987,6 +15022,12 @@
     },
     {
       "glob": "META-INF/services/org.hibernate.service.spi.SessionFactoryServiceContributor"
+    },
+    {
+      "glob": "META-INF/services/org.hibernate.stat.spi.StatisticsFactory"
+    },
+    {
+      "glob": "META-INF/services/org.hibernate.tool.schema.spi.SchemaManagementTool"
     },
     {
       "glob": "META-INF/services/org.slf4j.spi.SLF4JServiceProvider"
@@ -16136,9 +15177,6 @@
       "glob": "com/jobtracker/observability/config/MetricsConfig.class"
     },
     {
-      "glob": "com/jobtracker/observability/config/OtelConfig.class"
-    },
-    {
       "glob": "com/jobtracker/persistence"
     },
     {
@@ -16182,6 +15220,9 @@
     },
     {
       "glob": "com/jobtracker/server/TimeConfig.class"
+    },
+    {
+      "glob": "com/jobtracker/server/TracingFilter.class"
     },
     {
       "glob": "com/jobtracker/server/UseCaseConfig.class"
@@ -16256,22 +15297,7 @@
       "glob": "i18n/Parsing_en_GB.properties"
     },
     {
-      "glob": "i18n/Validation.properties"
-    },
-    {
-      "glob": "i18n/Validation_en.properties"
-    },
-    {
-      "glob": "i18n/Validation_en_GB.properties"
-    },
-    {
-      "glob": "jakarta/servlet/LocalStrings.properties"
-    },
-    {
-      "glob": "jakarta/servlet/LocalStrings_en.properties"
-    },
-    {
-      "glob": "jakarta/servlet/LocalStrings_en_GB.properties"
+      "glob": "jakarta/servlet/Filter.class"
     },
     {
       "glob": "jakarta/servlet/http/LocalStrings.properties"
@@ -16284,9 +15310,6 @@
     },
     {
       "glob": "jndi.properties"
-    },
-    {
-      "glob": "kotlin/kotlin.kotlin_builtins"
     },
     {
       "glob": "log4j2.StatusLogger.properties"
@@ -16326,9 +15349,6 @@
     },
     {
       "glob": "org/apache/catalina/authenticator/LocalStrings.properties"
-    },
-    {
-      "glob": "org/apache/catalina/authenticator/jaspic/LocalStrings.properties"
     },
     {
       "glob": "org/apache/catalina/connector/LocalStrings.properties"
@@ -16389,9 +15409,6 @@
     },
     {
       "glob": "org/apache/coyote/http11/LocalStrings.properties"
-    },
-    {
-      "glob": "org/apache/coyote/http11/filters/LocalStrings.properties"
     },
     {
       "glob": "org/apache/naming/LocalStrings.properties"
@@ -16760,6 +15777,9 @@
       "glob": "org/springframework/boot/autoconfigure/ssl/SslAutoConfiguration.class"
     },
     {
+      "glob": "org/springframework/boot/autoconfigure/task/DefaultTaskSchedulerConfiguration.class"
+    },
+    {
       "glob": "org/springframework/boot/autoconfigure/task/TaskExecutionAutoConfiguration.class"
     },
     {
@@ -16785,6 +15805,9 @@
     },
     {
       "glob": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$TaskExecutorConfiguration.class"
+    },
+    {
+      "glob": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$TaskExecutorContextPropagationConfiguration.class"
     },
     {
       "glob": "org/springframework/boot/autoconfigure/task/TaskExecutorConfigurations$ThreadPoolTaskExecutorBuilderConfiguration.class"
@@ -16872,9 +15895,6 @@
     },
     {
       "glob": "org/springframework/boot/data/couchbase/autoconfigure/DataCouchbaseAutoConfiguration.class"
-    },
-    {
-      "glob": "org/springframework/boot/data/jpa/autoconfigure/DataJpaRepositoriesAutoConfiguration$BootstrapExecutorCondition.class"
     },
     {
       "glob": "org/springframework/boot/data/jpa/autoconfigure/DataJpaRepositoriesAutoConfiguration$JpaRepositoriesImportSelector.class"
@@ -16988,9 +16008,6 @@
       "glob": "org/springframework/boot/gson/autoconfigure/GsonAutoConfiguration.class"
     },
     {
-      "glob": "org/springframework/boot/h2console/autoconfigure/H2ConsoleAutoConfiguration$H2ConsoleLogger.class"
-    },
-    {
       "glob": "org/springframework/boot/h2console/autoconfigure/H2ConsoleAutoConfiguration.class"
     },
     {
@@ -17004,9 +16021,6 @@
     },
     {
       "glob": "org/springframework/boot/health/autoconfigure/actuate/endpoint/HealthEndpointAutoConfiguration.class"
-    },
-    {
-      "glob": "org/springframework/boot/health/autoconfigure/actuate/endpoint/HealthEndpointConfiguration$HealthEndpointGroupMembershipValidator.class"
     },
     {
       "glob": "org/springframework/boot/health/autoconfigure/actuate/endpoint/HealthEndpointConfiguration$HealthEndpointGroupsBeanPostProcessor.class"
@@ -17168,6 +16182,9 @@
       "glob": "org/springframework/boot/http/converter/autoconfigure/KotlinSerializationHttpMessageConvertersConfiguration.class"
     },
     {
+      "glob": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$AbstractFactoryBuilderCustomizer.class"
+    },
+    {
       "glob": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$AbstractMapperBuilderCustomizer.class"
     },
     {
@@ -17177,10 +16194,13 @@
       "glob": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonAutoConfigurationRuntimeHints.class"
     },
     {
-      "glob": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonMapperBuilderCustomizerConfiguration$StandardJsonMapperBuilderCustomizer.class"
+      "glob": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonFactoryBuilderCustomizer.class"
     },
     {
-      "glob": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonMapperBuilderCustomizerConfiguration.class"
+      "glob": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration$StandardJsonMapperBuilderCustomizer.class"
+    },
+    {
+      "glob": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonJsonCustomizerConfiguration.class"
     },
     {
       "glob": "org/springframework/boot/jackson/autoconfigure/JacksonAutoConfiguration$JacksonMixinConfiguration.class"
@@ -17286,6 +16306,9 @@
     },
     {
       "glob": "org/springframework/boot/jdbc/autoconfigure/JndiDataSourceAutoConfiguration.class"
+    },
+    {
+      "glob": "org/springframework/boot/jdbc/autoconfigure/LazyConnectionDataSourceConfiguration.class"
     },
     {
       "glob": "org/springframework/boot/jdbc/autoconfigure/NamedParameterJdbcTemplateConfiguration.class"
@@ -17654,6 +16677,9 @@
       "glob": "org/springframework/context/ApplicationContextAware.class"
     },
     {
+      "glob": "org/springframework/context/EmbeddedValueResolverAware.class"
+    },
+    {
       "glob": "org/springframework/context/EnvironmentAware.class"
     },
     {
@@ -17795,9 +16821,6 @@
       "glob": "prometheus.properties"
     },
     {
-      "glob": "prompts/job-analysis.st"
-    },
-    {
       "glob": "public/index.html"
     },
     {
@@ -17820,14 +16843,6 @@
       "glob": "jdk/internal/icu/impl/data/icudt76b/nfkc.nrm"
     },
     {
-      "module": "java.base",
-      "glob": "jdk/internal/icu/impl/data/icudt76b/uprops.icu"
-    },
-    {
-      "module": "java.base",
-      "glob": "sun/net/idn/uidna.spp"
-    },
-    {
       "module": "jdk.jfr",
       "glob": "jdk/jfr/internal/query/view.ini"
     },
@@ -17835,19 +16850,10 @@
       "bundle": "i18n.Parsing"
     },
     {
-      "bundle": "i18n.Validation"
-    },
-    {
-      "bundle": "jakarta.servlet.LocalStrings"
-    },
-    {
       "bundle": "jakarta.servlet.http.LocalStrings"
     },
     {
       "bundle": "org.apache.catalina.authenticator.LocalStrings"
-    },
-    {
-      "bundle": "org.apache.catalina.authenticator.jaspic.LocalStrings"
     },
     {
       "bundle": "org.apache.catalina.connector.LocalStrings"
@@ -17890,9 +16896,6 @@
     },
     {
       "bundle": "org.apache.coyote.http11.LocalStrings"
-    },
-    {
-      "bundle": "org.apache.coyote.http11.filters.LocalStrings"
     },
     {
       "bundle": "org.apache.naming.LocalStrings"

@@ -1,6 +1,8 @@
 package com.jobtracker.auth;
 
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.util.Date;
 import javax.crypto.SecretKey;
@@ -27,9 +29,19 @@ public class JwtProvider implements TokenGeneratorPort {
   public JwtProvider(@Value("${jwt.secret}") final String secret,
                      @Value("${jwt.expiration:86400000}") final long expirationMs,
                      final Clock clock) {
-    this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+    this.key = deriveKey(secret);
     this.expirationMs = expirationMs;
     this.clock = clock;
+  }
+
+  private static SecretKey deriveKey(final String secret) {
+    try {
+      final var digest = MessageDigest.getInstance("SHA-512");
+      final var hash = digest.digest(secret.getBytes(StandardCharsets.UTF_8));
+      return Keys.hmacShaKeyFor(hash);
+    } catch (final NoSuchAlgorithmException e) {
+      throw new KeyDerivationException("SHA-512 not available", e);
+    }
   }
 
   @SuppressWarnings("java:S2143") // Allow using java.util.Date for JWT claims

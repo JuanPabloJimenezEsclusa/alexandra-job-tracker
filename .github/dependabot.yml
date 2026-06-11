@@ -28,6 +28,15 @@ updates:
         patterns:
           - "*"
 
+  - package-ecosystem: "terraform"
+    directory: "/deploy/aws/terraform/templates"
+    schedule: { interval: weekly }
+    labels: [ infrastructure, automated ]
+    groups:
+      infrastructure-dependencies:
+        patterns:
+          - "*"
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule: { interval: weekly }

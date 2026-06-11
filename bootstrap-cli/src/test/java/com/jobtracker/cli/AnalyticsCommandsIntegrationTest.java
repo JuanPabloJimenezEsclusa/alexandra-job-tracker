@@ -38,7 +38,14 @@ class AnalyticsCommandsIntegrationTest extends BaseCliIntegrationTest {
       arguments(named("default analytics output", "analytics"), ANALYTICS_RESPONSE,
         "an", "Analytics:"),
       arguments(named("analytics with jq filter", "analytics"), ANALYTICS_RESPONSE,
-        "an -j .conversionRate", "30.0")
+        "an -j .conversionRate", "30.0"),
+      arguments(named("analytics with since filter", "analytics"), ANALYTICS_RESPONSE,
+        "an -s 2026-01-01", "30.0"),
+      arguments(named("analytics error", "analytics"),
+        """
+          {"errors": [{"message": "Analytics failed"}], "data": null}
+        """,
+        "an", "Analytics failed")
     );
   }
 

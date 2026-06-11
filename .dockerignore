@@ -1,0 +1,15 @@
+.git
+.gitignore
+.editorconfig
+**/target
+**/*.md
+CLAUDE.md
+GEMINI.md
+.venv
+node_modules
+browser-extension
+deploy
+sonar-project.properties
+.github
+.mvn/repository
+*.log

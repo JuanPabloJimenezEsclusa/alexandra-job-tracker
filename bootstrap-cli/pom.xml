@@ -99,7 +99,7 @@
             -->
             <buildArg>--gc=G1</buildArg>
             <buildArg>-R:MaxHeapSize=2g</buildArg>
-            <buildArg>-march=native</buildArg>
+            <buildArg>-march=x86-64-v2</buildArg>
             <buildArg>-Ob</buildArg>
             <!-- extras -->
             <buildArg>--no-fallback</buildArg>

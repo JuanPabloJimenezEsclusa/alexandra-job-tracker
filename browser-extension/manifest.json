@@ -5,7 +5,8 @@
   "version": "1.0.0",
   "permissions": ["storage"],
   "host_permissions": [
-    "http://localhost:8880/*",
+    "http://localhost:8880/api/*",
+    "https://ajt.jpje.net/api/*",
     "https://www.linkedin.com/*",
     "https://www.indeed.com/*"
   ],

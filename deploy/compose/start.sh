@@ -8,6 +8,7 @@ set -o nounset # Do not allow use of undefined vars. Use ${VAR:-} to use an unde
 if [[ "${debug:-}" == "true" ]]; then set -o xtrace; fi  # enable debug mode.
 
 SEPARATOR="\n ################################################## \n"
+TYPE="${1:-jvm}"
 
 cd "$(dirname "$0")"
 workspace="$(pwd)"
@@ -27,7 +28,7 @@ __initServices() {
 }
 
 main() {
-  __initServices
+  __initServices "${TYPE}"
 }
 
 echo -e "${SEPARATOR} 🔨 Main: ${0} ${SEPARATOR}"

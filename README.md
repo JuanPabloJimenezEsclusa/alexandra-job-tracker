@@ -202,7 +202,7 @@ java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost
 ```bash
 
 # Start native CLI (connects to server)
-./bootstrap-cli/target/bootstrap-cli-*-native --server.url=http://localhost:8880
+./bootstrap-cli/target/bootstrap-cli-*-native --server.url=http://localhost:8880/api
 ```
 
 ---
