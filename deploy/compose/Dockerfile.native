@@ -5,7 +5,7 @@ RUN ./mvnw install -DskipTests -B -ntp -e \
     && ./mvnw -Pnative native:compile -pl bootstrap-server -DskipTests -B -ntp -e
 
 # Use a lightweight runtime image
-FROM alpine:3.23
+FROM alpine:3.24
 
 # Install su-exec for running the application as a non-root user and create a non-root user for better security
 RUN apk add --no-cache curl su-exec \
