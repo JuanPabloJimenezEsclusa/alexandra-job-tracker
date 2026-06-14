@@ -1,13 +1,13 @@
 name: Pages
 
 on:
-  push:
-    branches: [develop]
   pull_request:
+    branches: [develop, main]
     types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore: [src, deploy, docs, browser-extension]
 
 concurrency:
-  group: pages-${{ github.ref }}
+  group: pages
   cancel-in-progress: true
 
 env:

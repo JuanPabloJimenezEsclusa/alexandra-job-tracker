@@ -13,7 +13,16 @@ updates:
   - package-ecosystem: docker
     directory: "/deploy/compose"
     schedule: { interval: weekly }
-    labels: [ dependencies, automated ]
+    labels: [ infrastructure, automated ]
+    groups:
+      infrastructure-dependencies:
+        patterns:
+          - "*"
+
+  - package-ecosystem: docker
+    directory: "/deploy/aws"
+    schedule: { interval: weekly }
+    labels: [ infrastructure, automated ]
     groups:
       infrastructure-dependencies:
         patterns:
@@ -22,7 +31,7 @@ updates:
   - package-ecosystem: docker-compose
     directory: "/deploy/compose"
     schedule: { interval: weekly }
-    labels: [ dependencies, automated ]
+    labels: [ infrastructure, automated ]
     groups:
       infrastructure-dependencies:
         patterns:

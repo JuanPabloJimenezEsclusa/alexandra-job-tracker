@@ -1,13 +1,13 @@
 name: Continuous Integration
 
 on:
-  push:
-    branches: [develop]
   pull_request:
+    branches: [develop, main]
     types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore: [src, deploy, docs, browser-extension]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci
   cancel-in-progress: true
 
 env:
