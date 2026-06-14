@@ -10,22 +10,17 @@ spring:
     virtual:
       enabled: true
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
   jpa:
-    show-sql: true
-    open-in-view: false
-    hibernate.ddl-auto: validate
     database-platform: org.hibernate.dialect.H2Dialect
+    hibernate.ddl-auto: validate
+    open-in-view: false
   flyway:
+    connect-retries: 2
+    connect-retries-interval: 5s
     enabled: true
     encoding: UTF-8
     validate-on-migrate: false
@@ -83,6 +78,31 @@ management:
       application: alexandra-job-tracker
 
 otel:
+  enabled: false
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  datasource:
+    url: jdbc:h2:file:./deploy/data/jobtracker;MODE=PostgreSQL;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
+  jpa:
+    show-sql: true
+
+otel:
+  enabled: true
+  endpoint: http://localhost:4318/v1/traces
   exporter:
     otlp:
       endpoint: http://localhost:4318
@@ -92,9 +112,55 @@ otel:
 spring:
   config:
     activate:
-      on-profile: "dev|loc"
+      on-profile: "aws"
   datasource:
-    url: jdbc:h2:file:./deploy/data/jobtracker;AUTO_SERVER=TRUE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    driver-class-name: org.postgresql.Driver
+    url: "${NEON_DATABASE_URL:jdbc:postgresql://ep-cold-night-as5mvvsz.c-4.eu-central-1.aws.neon.tech/neondb?sslmode=require}"
+    username: "${NEON_USER:neondb_owner}"
+    password: "${NEON_PASSWORD:}"
+    hikari:
+      maximum-pool-size: 3
+      initialization-fail-timeout: -1
+  flyway:
+    enabled: false
+  h2:
+    console:
+      enabled: false
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate.ddl-auto: validate
+    show-sql: false
+  main:
+    banner-mode: "off"
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+
+logging:
+  level:
+    root: WARN
+    com.jobtracker: INFO
+    org.springframework: WARN
+    org.hibernate: ERROR
+    com.zaxxer.hikari: ERROR
+    org.flywaydb: ERROR
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "db-migrate"
+  flyway:
+    enabled: true
+  main:
+    web-application-type: none
+
+logging:
+  level:
+    root: WARN
+    com.jobtracker: INFO
+    org.flywaydb: INFO

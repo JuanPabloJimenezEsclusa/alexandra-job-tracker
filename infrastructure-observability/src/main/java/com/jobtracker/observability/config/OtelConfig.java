@@ -9,6 +9,7 @@ import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.ServiceAttributes;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Configuration;
  * Configures OpenTelemetry for distributed tracing.
  */
 @Configuration
+@ConditionalOnProperty(value = "otel.enabled", havingValue = "true", matchIfMissing = true)
 public class OtelConfig {
 
   /**
@@ -23,7 +25,7 @@ public class OtelConfig {
    */
   @Bean
   public OpenTelemetry openTelemetry(
-    @Value("${app.otel.endpoint:http://localhost:4318/v1/traces}") final String endpoint) {
+    @Value("${otel.endpoint:http://localhost:4318/v1/traces}") final String endpoint) {
     final var resource = Resource.create(Attributes.of(ServiceAttributes.SERVICE_NAME, "job-tracker-server"));
     final var spanExporter = OtlpHttpSpanExporter.builder().setEndpoint(endpoint).build();
     final var tracerProvider = SdkTracerProvider.builder()

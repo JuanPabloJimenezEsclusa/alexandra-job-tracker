@@ -36,6 +36,14 @@ class AuthCommandsIntegrationTest extends BaseCliIntegrationTest {
     stubGraphql("applications", """
       {"errors": [{"message": "Authentication required"}]}
       """);
+  private static final Consumer<AuthCommandsIntegrationTest> STUB_LOGIN_NULL = _ ->
+    stubGraphql("login", """
+      {"data": null}
+      """);
+  private static final Consumer<AuthCommandsIntegrationTest> STUB_REGISTER_NULL = _ ->
+    stubGraphql("register", """
+      {"data": null}
+      """);
   private static final Consumer<AuthCommandsIntegrationTest> AUTH = t -> {
     try {
       t.authenticate();
@@ -61,7 +69,11 @@ class AuthCommandsIntegrationTest extends BaseCliIntegrationTest {
       arguments(named("register with duplicate username", STUB_REGISTER_ERROR), NO_OP,
         "register --username existing --password pass", "Username already taken"),
       arguments(named("list without authentication", STUB_LIST_ERROR), NO_OP,
-        "list", "Authentication required")
+        "list", "Authentication required"),
+      arguments(named("login with null data", STUB_LOGIN_NULL), NO_OP,
+        "login --username test --password pass", "null"),
+      arguments(named("register with null data", STUB_REGISTER_NULL), NO_OP,
+        "register --username test --password pass", "null")
     );
   }
 

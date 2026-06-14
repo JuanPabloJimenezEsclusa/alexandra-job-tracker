@@ -39,6 +39,26 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         "a -c Acme -r Engineer -s LINKEDIN",
         "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
         true),
+      arguments(named("add application with url and notes", "createApplication"),
+        """
+          {
+            "data": {
+              "createApplication": {
+                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a", "status": "SAVED"
+              }
+            }
+          }
+        """,
+        "a -c Acme -r Engineer -s LINKEDIN -u http://example.com -n 'Some notes'",
+        "SAVED",
+        true),
+      arguments(named("add application error", "createApplication"),
+        """
+          {"errors": [{"message": "Request failed"}], "data": null}
+        """,
+        "a -c Acme -r Engineer -s LINKEDIN",
+        "Request failed",
+        true),
       arguments(named("list applications with data", "applications"),
         """
           {
@@ -60,6 +80,55 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         "l",
         "Acme",
         true),
+      arguments(named("list with status filter", "applications"),
+        """
+          {
+            "data": {
+              "applications": [{
+                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+                "company": "Acme",
+                "role": "Engineer",
+                "source": "LINKEDIN",
+                "status": "APPLIED",
+                "dateApplied": "2026-01-01T00:00:00Z",
+                "lastUpdated": "2026-01-01T00:00:00Z",
+                "postingUrl": null,
+                "notes": null
+              }]
+            }
+          }
+        """,
+        "l -s APPLIED",
+        "Acme",
+        true),
+      arguments(named("list with source filter", "applications"),
+        """
+          {
+            "data": {
+              "applications": [{
+                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+                "company": "Acme",
+                "role": "Engineer",
+                "source": "LINKEDIN",
+                "status": "APPLIED",
+                "dateApplied": "2026-01-01T00:00:00Z",
+                "lastUpdated": "2026-01-01T00:00:00Z",
+                "postingUrl": null,
+                "notes": null
+              }]
+            }
+          }
+        """,
+        "l --source LINKEDIN",
+        "Acme",
+        true),
+      arguments(named("list applications error", "applications"),
+        """
+          {"errors": [{"message": "List failed"}], "data": null}
+        """,
+        "l",
+        "List failed",
+        true),
       arguments(named("update application status", "updateApplicationStatus"),
         """
           {
@@ -75,6 +144,28 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         "u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s INTERVIEWING",
         "INTERVIEWING",
         true),
+      arguments(named("update application with notes", "updateApplicationStatus"),
+        """
+          {
+            "data": {
+              "updateApplicationStatus": {
+                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+                "status": "INTERVIEWING",
+                "lastUpdated": "2026-06-01T00:00:00Z"
+              }
+            }
+          }
+        """,
+        "u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s INTERVIEWING -n 'Followed up'",
+        "INTERVIEWING",
+        true),
+      arguments(named("update application error", "updateApplicationStatus"),
+        """
+          {"errors": [{"message": "Update failed"}], "data": null}
+        """,
+        "u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s INTERVIEWING",
+        "Update failed",
+        true),
       arguments(named("delete application", "deleteApplication"),
         """
           {
@@ -85,6 +176,34 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         """,
         "d -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
         "Deleted",
+        true),
+      arguments(named("list with jq filter empty result", "applications"),
+        """
+          {
+            "data": {
+              "applications": [{
+                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+                "company": "Acme",
+                "role": "Engineer",
+                "source": "LINKEDIN",
+                "status": "APPLIED"
+              }]
+            }
+          }
+        """,
+        "l -j '.[] | select(.company == \"NONE\")'",
+        "Acme",
+        false),
+      arguments(named("list with invalid jq expression", "applications"),
+        """
+          {
+            "data": {
+              "applications": []
+            }
+          }
+        """,
+        "l -j '[[['",
+        "JQ error",
         true)
     );
   }

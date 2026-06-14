@@ -1,0 +1,10 @@
+name: alexandra-job-tracker-api-env-aws
+variables:
+  - name: baseUrl
+    value: https://ajt.jpje.net:{{basePort}}/{{basePath}}
+  - name: basePort
+    value: "443"
+  - name: basePath
+    value: api
+  - name: authToken
+    value: ""

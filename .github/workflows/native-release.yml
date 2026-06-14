@@ -72,6 +72,29 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo.outputs.name }}:${{ steps.version.outputs.maven_version }}
 
+      - name: Configure AWS credentials
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-west-1
+
+      - name: Login to Amazon ECR
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64
+
+      - name: Build & push Lambda image to ECR
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: docker/build-push-action@f9f3042f7e2789586610d6e8b85c8f03e5195baf
+        with:
+          context: .
+          file: deploy/aws/Dockerfile.native
+          push: true
+          tags: |
+            ${{ secrets.AWS_ECR_REGISTRY }}/ajt-serverless:${{ steps.version.outputs.maven_version }}
+            ${{ secrets.AWS_ECR_REGISTRY }}/ajt-serverless:latest
+
       - name: Upload CLI binary to release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda

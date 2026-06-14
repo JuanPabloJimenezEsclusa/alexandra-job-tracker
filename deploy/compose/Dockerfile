@@ -18,12 +18,12 @@ COPY bootstrap-cli/pom.xml bootstrap-cli/
 COPY coverage-jacoco/pom.xml coverage-jacoco/
 
 RUN --mount=type=cache,id=mvn-repo,target=/app/.m2-repo \
-    mvn dependency:go-offline -Dmaven.repo.local=/app/.m2-repo -B -q
+    mvn dependency:go-offline -Dmaven.repo.local=/app/.m2-repo -B -ntp -e -q
 
 COPY . .
 
 RUN --mount=type=cache,id=mvn-repo,target=/app/.m2-repo \
-    mvn package -Dmaven.repo.local=/app/.m2-repo -pl bootstrap-server -am -DskipTests -B -q
+    mvn package -Dmaven.repo.local=/app/.m2-repo -pl bootstrap-server -am -DskipTests -B -ntp -e -q
 
 # Download OpenTelemetry Java Agent for auto-instrumentation
 ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.28.1/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar

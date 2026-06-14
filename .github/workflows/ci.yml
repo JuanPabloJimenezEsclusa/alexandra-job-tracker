@@ -57,6 +57,8 @@ jobs:
         with:
           fail-on-severity: high
           comment-summary-in-pr: true
+          base-ref: ${{ github.event.pull_request.base.sha || github.event.before }}
+          head-ref: ${{ github.event.pull_request.head.sha || github.event.after }}
 
   native-compatibility:
     needs: test

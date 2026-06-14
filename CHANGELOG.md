@@ -5,45 +5,134 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
-**ci: improve compose deploy**
+**ci: add aws deployment**
 
 
-[879296f80a33a5f](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/879296f80a33a5f) juan.pablo.jimenez.esclusa *2026-06-09 15:32:46*
+[7dd16a92fcc6e05](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/7dd16a92fcc6e05) juan.pablo.jimenez.esclusa *2026-06-13 23:42:36*
 
-**build: improve native aot compile**
+**chore(deps): bump the maven-dependencies group across 1 directory with 8 updates (#25)**
 
+ * Bumps the maven-dependencies group with 8 updates in the / directory:
+ * | Package | From | To |
+ * | --- | --- | --- |
+ * | [org.springframework.ai:spring-ai-bom](https://github.com/spring-projects/spring-ai) | &#x60;2.0.0-M8&#x60; | &#x60;2.0.0-RC2&#x60; |
+ * | [org.instancio:instancio-core](https://github.com/instancio/instancio) | &#x60;5.4.0&#x60; | &#x60;5.6.0&#x60; |
+ * | [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin) | &#x60;6.40.0&#x60; | &#x60;6.41.0&#x60; |
+ * | [org.jacoco:jacoco-maven-plugin](https://github.com/jacoco/jacoco) | &#x60;0.8.14&#x60; | &#x60;0.8.15&#x60; |
+ * | [org.apache.maven.plugins:maven-jxr-plugin](https://github.com/apache/maven-jxr) | &#x60;3.5.0&#x60; | &#x60;3.6.0&#x60; |
+ * | [org.apache.maven.plugins:maven-surefire-report-plugin](https://github.com/apache/maven-surefire) | &#x60;3.5.2&#x60; | &#x60;3.5.6&#x60; |
+ * | [org.pitest:pitest-maven](https://github.com/hcoles/pitest) | &#x60;1.25.3&#x60; | &#x60;1.25.4&#x60; |
+ * | [io.opentelemetry:opentelemetry-exporter-otlp](https://github.com/open-telemetry/opentelemetry-java) | &#x60;1.62.0&#x60; | &#x60;1.63.0&#x60; |
+ * Updates &#x60;org.springframework.ai:spring-ai-bom&#x60; from 2.0.0-M8 to 2.0.0-RC2
+ * - [Release notes](https://github.com/spring-projects/spring-ai/releases)
+ * - [Commits](https://github.com/spring-projects/spring-ai/compare/v2.0.0-M8...v2.0.0-RC2)
+ * Updates &#x60;org.instancio:instancio-core&#x60; from 5.4.0 to 5.6.0
+ * - [Release notes](https://github.com/instancio/instancio/releases)
+ * - [Commits](https://github.com/instancio/instancio/compare/instancio-parent-5.4.0...instancio-parent-5.6.0)
+ * Updates &#x60;org.openrewrite.maven:rewrite-maven-plugin&#x60; from 6.40.0 to 6.41.0
+ * - [Release notes](https://github.com/openrewrite/rewrite-maven-plugin/releases)
+ * - [Commits](https://github.com/openrewrite/rewrite-maven-plugin/compare/v6.40.0...v6.41.0)
+ * Updates &#x60;org.jacoco:jacoco-maven-plugin&#x60; from 0.8.14 to 0.8.15
+ * - [Release notes](https://github.com/jacoco/jacoco/releases)
+ * - [Commits](https://github.com/jacoco/jacoco/compare/v0.8.14...v0.8.15)
+ * Updates &#x60;org.apache.maven.plugins:maven-jxr-plugin&#x60; from 3.5.0 to 3.6.0
+ * - [Release notes](https://github.com/apache/maven-jxr/releases)
+ * - [Commits](https://github.com/apache/maven-jxr/compare/jxr-3.5.0...jxr-3.6.0)
+ * Updates &#x60;org.apache.maven.plugins:maven-surefire-report-plugin&#x60; from 3.5.2 to 3.5.6
+ * - [Release notes](https://github.com/apache/maven-surefire/releases)
+ * - [Commits](https://github.com/apache/maven-surefire/compare/surefire-3.5.2...surefire-3.5.6)
+ * Updates &#x60;org.pitest:pitest-maven&#x60; from 1.25.3 to 1.25.4
+ * - [Release notes](https://github.com/hcoles/pitest/releases)
+ * - [Commits](https://github.com/hcoles/pitest/compare/1.25.3...1.25.4)
+ * Updates &#x60;io.opentelemetry:opentelemetry-exporter-otlp&#x60; from 1.62.0 to 1.63.0
+ * - [Release notes](https://github.com/open-telemetry/opentelemetry-java/releases)
+ * - [Changelog](https://github.com/open-telemetry/opentelemetry-java/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/open-telemetry/opentelemetry-java/compare/v1.62.0...v1.63.0)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.springframework.ai:spring-ai-bom
+ * dependency-version: 2.0.0-RC2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.instancio:instancio-core
+ * dependency-version: 5.6.0
+ * dependency-type: direct:development
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.openrewrite.maven:rewrite-maven-plugin
+ * dependency-version: 6.41.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.jacoco:jacoco-maven-plugin
+ * dependency-version: 0.8.15
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.apache.maven.plugins:maven-jxr-plugin
+ * dependency-version: 3.6.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.apache.maven.plugins:maven-surefire-report-plugin
+ * dependency-version: 3.5.6
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.pitest:pitest-maven
+ * dependency-version: 1.25.4
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: io.opentelemetry:opentelemetry-exporter-otlp
+ * dependency-version: 1.63.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
 
-[3c05115c22bdac6](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/3c05115c22bdac6) juan.pablo.jimenez.esclusa *2026-06-06 23:05:31*
+[d85691723457dcd](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/d85691723457dcd) dependabot[bot] *2026-06-10 17:29:18*
 
-**feat: change date format**
+**chore(deps): bump the infrastructure-dependencies group across 1 directory with 2 updates (#24)**
 
+ * Bumps the infrastructure-dependencies group with 2 updates in the /deploy/compose directory: grafana/tempo and grafana/grafana.
+ * Updates &#x60;grafana/tempo&#x60; from 3.0.0 to 3.0.2
+ * Updates &#x60;grafana/grafana&#x60; from 13.0.1 to 13.0.2
+ * ---
+ * updated-dependencies:
+ * - dependency-name: grafana/tempo
+ * dependency-version: 3.0.2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: grafana/grafana
+ * dependency-version: 13.0.2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
 
-[adf43ab751983e2](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/adf43ab751983e2) juan.pablo.jimenez.esclusa *2026-06-06 17:26:16*
+[f48c6b698b5599e](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/f48c6b698b5599e) dependabot[bot] *2026-06-10 16:09:41*
 
-**refactor: improve ai prompt**
+**ci: improve workflow actions (#21)**
 
+ * ci: improve workflow actions
+ * refactor: adapt to spring shell4
+ * feat: add field constraints
+ * feat: improve test coverage
+ * refactor: improve ai prompt
+ * feat: change date format
+ * build: improve native aot compile
+ * ci: improve compose deploy
+ * deploy: add grafana loki to compose deploy
+ * ci: improve compose deploy
 
-[1c3ea73ab0e0201](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/1c3ea73ab0e0201) juan.pablo.jimenez.esclusa *2026-06-05 20:03:01*
-
-**feat: improve test coverage**
-
-
-[b0f7058c69c4176](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/b0f7058c69c4176) juan.pablo.jimenez.esclusa *2026-06-05 16:34:55*
-
-**feat: add field constraints**
-
-
-[890b1b8493f42e0](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/890b1b8493f42e0) juan.pablo.jimenez.esclusa *2026-06-03 21:47:30*
-
-**refactor: adapt to spring shell4**
-
-
-[67ce001c73d20e8](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/67ce001c73d20e8) juan.pablo.jimenez.esclusa *2026-06-03 18:52:23*
-
-**ci: improve workflow actions**
-
-
-[e75986e0ec6e752](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/e75986e0ec6e752) juan.pablo.jimenez.esclusa *2026-05-31 16:43:36*
+[50d2297a2b52679](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/50d2297a2b52679) Juan Pablo Jimenez Esclusa *2026-06-10 15:44:43*
 
 **chore(deps): bump the infrastructure-dependencies group (#20)**
 

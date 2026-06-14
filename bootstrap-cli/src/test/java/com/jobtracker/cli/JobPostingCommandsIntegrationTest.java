@@ -26,6 +26,51 @@ class JobPostingCommandsIntegrationTest extends BaseCliIntegrationTest {
         "po",
         "Error",
         false),
+      arguments(named("list postings with data", "jobPostings"),
+        """
+          {
+            "data": {
+              "jobPostings": [{
+                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+                "title": "Engineer",
+                "company": "Acme",
+                "source": "LINKEDIN",
+                "url": "https://example.com/job",
+                "description": "Awesome role",
+                "postedAt": "2026-01-01T00:00:00Z"
+              }]
+            }
+          }
+        """,
+        "po",
+        "Engineer",
+        true),
+      arguments(named("list postings with source filter", "jobPostings"),
+        """
+          {
+            "data": {
+              "jobPostings": [{
+                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+                "title": "Engineer",
+                "company": "Acme",
+                "source": "LINKEDIN",
+                "url": "https://example.com/job",
+                "description": "Awesome role",
+                "postedAt": "2026-01-01T00:00:00Z"
+              }]
+            }
+          }
+        """,
+        "po -s LINKEDIN",
+        "Engineer",
+        true),
+      arguments(named("list postings error", "jobPostings"),
+        """
+          {"errors": [{"message": "List failed"}], "data": null}
+        """,
+        "po",
+        "List failed",
+        true),
       arguments(named("submit job posting", "submitJobPosting"),
         """
           {
@@ -43,6 +88,13 @@ class JobPostingCommandsIntegrationTest extends BaseCliIntegrationTest {
         "sj -u https://example.com/job -t Engineer -d 'Awesome' -c Acme -s LINKEDIN -s 'Java dev'",
         "Engineer",
         true),
+      arguments(named("submit job posting null data", "submitJobPosting"),
+        """
+          {"data": {"submitJobPosting": null}}
+        """,
+        "sj -u https://example.com/job -t Engineer -d 'Desc' -c Acme -s LINKEDIN",
+        "null",
+        true),
       arguments(named("analyze job posting", "analyzeJobPosting"),
         """
           {
@@ -55,6 +107,13 @@ class JobPostingCommandsIntegrationTest extends BaseCliIntegrationTest {
           """,
         "anlz -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
         "85.0",
+        true),
+      arguments(named("analyze job posting error", "analyzeJobPosting"),
+        """
+          {"errors": [{"message": "Analyze failed"}], "data": null}
+          """,
+        "anlz -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+        "Analyze failed",
         true)
     );
   }
