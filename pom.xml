@@ -36,7 +36,7 @@
   <licenses>
     <license>
       <name>GPL-3.0-only</name>
-      <url>https://www.gnu.org/licenses/gpl-3.0-standalone.html</url>
+      <url>https://opensource.org/license/GPL-3.0</url>
       <distribution>repo</distribution>
     </license>
   </licenses>
