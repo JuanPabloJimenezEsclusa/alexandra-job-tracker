@@ -11,6 +11,7 @@
   </parent>
 
   <artifactId>bootstrap-server</artifactId>
+  <name>Bootstrap Server</name>
   <description>Bootstrap server responsible for initializing and orchestrating the various
     components of the Job Tracker application.
   </description>

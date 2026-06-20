@@ -10,6 +10,7 @@
   </parent>
 
   <artifactId>infrastructure-cache</artifactId>
+  <name>Infrastructure Cache</name>
   <description>Infrastructure layer responsible for caching mechanisms in the Job Tracker
     application.
   </description>

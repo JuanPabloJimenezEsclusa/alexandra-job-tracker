@@ -5,6 +5,11 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**test: include penetration and performance testing**
+
+
+[ec9554f28f626ee](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/ec9554f28f626ee) juan.pablo.jimenez.esclusa *2026-06-20 08:48:40*
+
 **chore(deps): bump awsguru/aws-lambda-adapter (#32)**
 
  * Bumps the infrastructure-dependencies group in /deploy/aws with 1 update: awsguru/aws-lambda-adapter.

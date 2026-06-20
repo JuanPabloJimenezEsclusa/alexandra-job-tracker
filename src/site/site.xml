@@ -13,7 +13,7 @@
 
   <custom>
     <reflowSkin>
-      <theme>bootswatch-lux</theme>
+      <theme>bootswatch-darkly</theme>
       <highlightJs>true</highlightJs>
       <smoothScroll>true</smoothScroll>
       <brand>
