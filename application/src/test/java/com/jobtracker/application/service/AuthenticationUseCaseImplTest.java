@@ -8,16 +8,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.HexFormat;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.jobtracker.domain.model.User;
+import org.jspecify.annotations.Nullable;
 import com.jobtracker.domain.port.out.LoadUserPort;
 import com.jobtracker.domain.port.out.SaveUserPort;
 import com.jobtracker.domain.port.out.TokenGeneratorPort;
@@ -28,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -50,12 +49,8 @@ class AuthenticationUseCaseImplTest {
   @Mock
   private Clock clock;
 
-  private static String sha512() {
-    try {
-      return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-512").digest("correct-password".getBytes()));
-    } catch (final NoSuchAlgorithmException e) {
-      throw new RuntimeException(e);
-    }
+  private static String bcryptHash() {
+    return BCrypt.hashpw("correct-password", BCrypt.gensalt());
   }
 
   private static Stream<Arguments> registerScenarios() {
@@ -64,29 +59,29 @@ class AuthenticationUseCaseImplTest {
       .set(field(User::passwordHash), "hash")
       .create();
     return Stream.of(
-      arguments(Optional.empty(), false),
-      arguments(Optional.of(existingUser), true)
+      arguments(null, false),
+      arguments(existingUser, true)
     );
   }
 
   private static Stream<Arguments> loginScenarios() {
-    final var hash = sha512();
+    final var hash = bcryptHash();
     final var matchingUser = Instancio.of(User.class)
       .set(field(User::username), "alice")
       .set(field(User::passwordHash), hash)
       .create();
     return Stream.of(
-      arguments("alice", "correct-password", Optional.of(matchingUser), false),
-      arguments("alice", "wrong-password", Optional.of(matchingUser), true),
-      arguments("nonexistent", "pass", Optional.empty(), true)
+      arguments("alice", "correct-password", matchingUser, false),
+      arguments("alice", "wrong-password", matchingUser, true),
+      arguments("nonexistent", "pass", null, true)
     );
   }
 
   @ParameterizedTest
   @MethodSource("registerScenarios")
-  void shouldRegisterOrThrow(final Optional<User> existing, final boolean shouldThrow) {
+  void shouldRegisterOrThrow(final @Nullable User existing, final boolean shouldThrow) {
     // Given
-    when(loadUserPort.findByUsername("alice")).thenReturn(existing);
+    when(loadUserPort.findByUsername("alice")).thenReturn(Optional.ofNullable(existing));
 
     if (shouldThrow) {
       // When, Then
@@ -110,10 +105,10 @@ class AuthenticationUseCaseImplTest {
 
   @ParameterizedTest
   @MethodSource("loginScenarios")
-  void shouldLoginOrThrow(final String username, final String password, final Optional<User> existing,
+  void shouldLoginOrThrow(final String username, final String password, final @Nullable User existing,
                           final boolean shouldThrow) {
     // Given
-    when(loadUserPort.findByUsername(username)).thenReturn(existing);
+    when(loadUserPort.findByUsername(username)).thenReturn(Optional.ofNullable(existing));
 
     if (shouldThrow) {
       // When, Then

@@ -89,7 +89,7 @@ class HexagonalArchitectureTest {
   static final ArchRule APPLICATION_DEPENDENCIES = classes()
     .that().resideInAPackage(APPLICATION)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
-      concat(DOMAIN, APPLICATION))
+      concat(DOMAIN, APPLICATION, "org.mindrot.jbcrypt.."))
     .as("Application module dependencies")
     .because("application depends on domain types and standard libraries");
 

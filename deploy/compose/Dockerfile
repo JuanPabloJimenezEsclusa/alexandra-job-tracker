@@ -16,6 +16,7 @@ COPY adapter-cli/pom.xml adapter-cli/
 COPY bootstrap-server/pom.xml bootstrap-server/
 COPY bootstrap-cli/pom.xml bootstrap-cli/
 COPY coverage-jacoco/pom.xml coverage-jacoco/
+COPY testing-pentest/pom.xml testing-pentest/
 
 RUN --mount=type=cache,id=mvn-repo,target=/app/.m2-repo \
     mvn dependency:go-offline -Dmaven.repo.local=/app/.m2-repo -B -ntp -e -q

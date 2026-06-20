@@ -58,6 +58,12 @@ cd deploy/compose
   * [Grafana dashboard](http://localhost:3000) (admin / admin)
 * **Cadvisor (Container Monitoring):**
   * [Cadvisor dashboard](http://localhost:8080)
+* **k6 (Performance/Security Testing):**
+  * Runs load/spike/soak/security scripts from `testing-pentest/src/test/k6/`
+  * Activated via `docker compose --profile perf-test up` or `docker compose --profile pen-test up`
+* **ZAP (Penetration Testing):**
+  * Runs automated OWASP security scan against the GraphQL endpoint
+  * Activated via `docker compose --profile pen-test up`
 
 ## 🧪 How to Validate the Changes
 
