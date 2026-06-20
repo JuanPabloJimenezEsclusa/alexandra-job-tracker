@@ -11,5 +11,6 @@
   </parent>
 
   <artifactId>domain</artifactId>
+  <name>Domain</name>
   <description>Domain layer containing core business logic and entities.</description>
 </project>

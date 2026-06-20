@@ -5,10 +5,174 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
-**ci: add aws deployment**
+**test: include penetration and performance testing**
 
 
-[7dd16a92fcc6e05](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/7dd16a92fcc6e05) juan.pablo.jimenez.esclusa *2026-06-13 23:42:36*
+[ec9554f28f626ee](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/ec9554f28f626ee) juan.pablo.jimenez.esclusa *2026-06-20 08:48:40*
+
+**chore(deps): bump awsguru/aws-lambda-adapter (#32)**
+
+ * Bumps the infrastructure-dependencies group in /deploy/aws with 1 update: awsguru/aws-lambda-adapter.
+ * Updates &#x60;awsguru/aws-lambda-adapter&#x60; from 0.9.0 to 1.0.1
+ * ---
+ * updated-dependencies:
+ * - dependency-name: awsguru/aws-lambda-adapter
+ * dependency-version: 1.0.1
+ * dependency-type: direct:production
+ * update-type: version-update:semver-major
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[f389e096a3b086b](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/f389e096a3b086b) dependabot[bot] *2026-06-14 16:39:32*
+
+**ci: improve action triggers and docs (#31)**
+
+
+[c4dbc2810f780e6](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/c4dbc2810f780e6) Juan Pablo Jimenez Esclusa *2026-06-14 15:45:18*
+
+**chore(deps): bump the maven-dependencies group with 5 updates (#30)**
+
+ * Bumps the maven-dependencies group with 5 updates:
+ * | Package | From | To |
+ * | --- | --- | --- |
+ * | [org.springframework.ai:spring-ai-bom](https://github.com/spring-projects/spring-ai) | &#x60;2.0.0-RC2&#x60; | &#x60;2.0.0&#x60; |
+ * | [org.springframework.shell:spring-shell-starter](https://github.com/spring-projects/spring-shell) | &#x60;4.0.2&#x60; | &#x60;4.0.3&#x60; |
+ * | [org.springframework.shell:spring-shell-core](https://github.com/spring-projects/spring-shell) | &#x60;4.0.2&#x60; | &#x60;4.0.3&#x60; |
+ * | [org.springframework.shell:spring-shell-jline](https://github.com/spring-projects/spring-shell) | &#x60;4.0.2&#x60; | &#x60;4.0.3&#x60; |
+ * | [org.springframework.shell:spring-shell-starter-test](https://github.com/spring-projects/spring-shell) | &#x60;4.0.2&#x60; | &#x60;4.0.3&#x60; |
+ * Updates &#x60;org.springframework.ai:spring-ai-bom&#x60; from 2.0.0-RC2 to 2.0.0
+ * - [Release notes](https://github.com/spring-projects/spring-ai/releases)
+ * - [Commits](https://github.com/spring-projects/spring-ai/compare/v2.0.0-RC2...v2.0.0)
+ * Updates &#x60;org.springframework.shell:spring-shell-starter&#x60; from 4.0.2 to 4.0.3
+ * - [Release notes](https://github.com/spring-projects/spring-shell/releases)
+ * - [Commits](https://github.com/spring-projects/spring-shell/compare/v4.0.2...v4.0.3)
+ * Updates &#x60;org.springframework.shell:spring-shell-core&#x60; from 4.0.2 to 4.0.3
+ * - [Release notes](https://github.com/spring-projects/spring-shell/releases)
+ * - [Commits](https://github.com/spring-projects/spring-shell/compare/v4.0.2...v4.0.3)
+ * Updates &#x60;org.springframework.shell:spring-shell-jline&#x60; from 4.0.2 to 4.0.3
+ * - [Release notes](https://github.com/spring-projects/spring-shell/releases)
+ * - [Commits](https://github.com/spring-projects/spring-shell/compare/v4.0.2...v4.0.3)
+ * Updates &#x60;org.springframework.shell:spring-shell-starter-test&#x60; from 4.0.2 to 4.0.3
+ * - [Release notes](https://github.com/spring-projects/spring-shell/releases)
+ * - [Commits](https://github.com/spring-projects/spring-shell/compare/v4.0.2...v4.0.3)
+ * Updates &#x60;org.springframework.shell:spring-shell-core&#x60; from 4.0.2 to 4.0.3
+ * - [Release notes](https://github.com/spring-projects/spring-shell/releases)
+ * - [Commits](https://github.com/spring-projects/spring-shell/compare/v4.0.2...v4.0.3)
+ * Updates &#x60;org.springframework.shell:spring-shell-jline&#x60; from 4.0.2 to 4.0.3
+ * - [Release notes](https://github.com/spring-projects/spring-shell/releases)
+ * - [Commits](https://github.com/spring-projects/spring-shell/compare/v4.0.2...v4.0.3)
+ * Updates &#x60;org.springframework.shell:spring-shell-starter-test&#x60; from 4.0.2 to 4.0.3
+ * - [Release notes](https://github.com/spring-projects/spring-shell/releases)
+ * - [Commits](https://github.com/spring-projects/spring-shell/compare/v4.0.2...v4.0.3)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.springframework.ai:spring-ai-bom
+ * dependency-version: 2.0.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.springframework.shell:spring-shell-starter
+ * dependency-version: 4.0.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.springframework.shell:spring-shell-core
+ * dependency-version: 4.0.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.springframework.shell:spring-shell-jline
+ * dependency-version: 4.0.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.springframework.shell:spring-shell-starter-test
+ * dependency-version: 4.0.3
+ * dependency-type: direct:development
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.springframework.shell:spring-shell-core
+ * dependency-version: 4.0.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.springframework.shell:spring-shell-jline
+ * dependency-version: 4.0.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.springframework.shell:spring-shell-starter-test
+ * dependency-version: 4.0.3
+ * dependency-type: direct:development
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[8000618eb80a8d4](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/8000618eb80a8d4) dependabot[bot] *2026-06-14 12:56:54*
+
+**chore(deps): bump docker/login-action (#28)**
+
+ * Bumps the github-actions-dependencies group with 1 update in the / directory: [docker/login-action](https://github.com/docker/login-action).
+ * Updates &#x60;docker/login-action&#x60; from 4.1.0 to 4.2.0
+ * - [Release notes](https://github.com/docker/login-action/releases)
+ * - [Commits](https://github.com/docker/login-action/compare/4907a6ddec9925e35a0a9e82d7399ccc52663121...650006c6eb7dba73a995cc03b0b2d7f5ca915bee)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: docker/login-action
+ * dependency-version: 4.2.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: github-actions-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[b88d9c53c725354](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/b88d9c53c725354) dependabot[bot] *2026-06-14 12:34:39*
+
+**chore(deps): update hashicorp/aws requirement from ~> 6.45.0 to ~> 6.50.0 (#29)**
+
+ * Updates the requirements on [hashicorp/aws](https://github.com/hashicorp/terraform-provider-aws) to permit the latest version.
+ * Updates &#x60;hashicorp/aws&#x60; to 6.50.0
+ * - [Release notes](https://github.com/hashicorp/terraform-provider-aws/releases)
+ * - [Changelog](https://github.com/hashicorp/terraform-provider-aws/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/hashicorp/terraform-provider-aws/compare/v6.45.0...v6.50.0)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: hashicorp/aws
+ * dependency-version: 6.50.0
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[917b57ab2d54947](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/917b57ab2d54947) dependabot[bot] *2026-06-14 12:32:36*
+
+**chore(deps): bump alpine (#27)**
+
+ * Bumps the infrastructure-dependencies group with 1 update in the /deploy/compose directory: alpine.
+ * Updates &#x60;alpine&#x60; from 3.23 to 3.24
+ * ---
+ * updated-dependencies:
+ * - dependency-name: alpine
+ * dependency-version: &#x27;3.24&#x27;
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[48fdfcfcdb2ab19](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/48fdfcfcdb2ab19) dependabot[bot] *2026-06-14 12:31:28*
+
+**ci: add aws deployment (#26)**
+
+
+[74da7a4b0751814](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/74da7a4b0751814) Juan Pablo Jimenez Esclusa *2026-06-14 12:17:29*
 
 **chore(deps): bump the maven-dependencies group across 1 directory with 8 updates (#25)**
 

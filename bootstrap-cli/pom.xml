@@ -11,6 +11,7 @@
   </parent>
 
   <artifactId>bootstrap-cli</artifactId>
+  <name>Bootstrap CLI</name>
   <description>Bootstrap CLI application for the Job Tracker, providing a command-line interface to
     interact with the system.
   </description>

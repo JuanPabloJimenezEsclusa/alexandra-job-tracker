@@ -66,6 +66,7 @@
     <module>bootstrap-server</module>
     <module>infrastructure-cache</module>
     <module>coverage-jacoco</module>
+    <module>testing-pentest</module>
     <module>bootstrap-cli</module>
   </modules>
 
@@ -77,6 +78,7 @@
     <spring-ai.version>2.0.0</spring-ai.version>
     <archunit.version>1.4.2</archunit.version>
     <jjwt.version>0.13.0</jjwt.version>
+    <jbcrypt.version>0.4</jbcrypt.version>
     <spring-shell.version>4.0.3</spring-shell.version>
     <graphql-java-extended-scalars.version>24.0</graphql-java-extended-scalars.version>
     <opentelemetry-exporter-otlp.version>1.63.0</opentelemetry-exporter-otlp.version>
@@ -108,6 +110,7 @@
     <maven-checkstyle-plugin.version>3.6.0</maven-checkstyle-plugin.version>
     <sonar-maven-plugin.version>5.7.0.6970</sonar-maven-plugin.version>
     <maven-site-plugin.version>3.22.0</maven-site-plugin.version>
+    <exec-maven-plugin.version>3.5.0</exec-maven-plugin.version>
 
     <!-- Sonar -->
     <sonar.organization>juanpablojimenezesclusa</sonar.organization>
@@ -166,6 +169,11 @@
         <groupId>net.thisptr</groupId>
         <artifactId>jackson-jq</artifactId>
         <version>${jackson-jq.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.mindrot</groupId>
+        <artifactId>jbcrypt</artifactId>
+        <version>${jbcrypt.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

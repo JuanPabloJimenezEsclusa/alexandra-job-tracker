@@ -4,6 +4,22 @@ x-resources: &default-resources
       limits: { cpus: "1", memory: "512M" }
       reservations: { cpus: "0.25", memory: "256M" }
 
+x-k6-base: &k6-base
+  image: grafana/k6:latest
+  user: ${K6_UID:-12345}
+  hostname: k6
+  depends_on:
+    job-tracker-server:
+      condition: service_healthy
+  entrypoint: ["/bin/sh", "/scripts/k6-run.sh"]
+  volumes:
+    - ../../testing-pentest/src/test/k6:/scripts
+    - ../../testing-pentest/src/test/k6/reports:/reports
+  environment:
+    TARGET_URL: http://job-tracker-server:8880/api/graphql
+  networks: [ jobtracker ]
+  <<: *default-resources
+
 services:
   job-tracker-server:
     container_name: alexandra-job-tracker-server
@@ -33,11 +49,11 @@ services:
         limits: { cpus: "2", memory: "2048M" }
         reservations: { cpus: "1", memory: "1024M" }
     healthcheck:
-      test: [ "CMD", "curl", "-f", "-o", "/dev/null", "http://localhost:8880/api/actuator/health" ]
-      interval: 30s
+      test: [ "CMD", "curl", "-f", "-o", "/dev/null", "http://localhost:8880/api/actuator/health/readinessState" ]
+      interval: 10s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 30s
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.152.0-nightly.286fff0
@@ -135,6 +151,46 @@ services:
       - /var/lib/docker/:/var/lib/docker:ro
       - /dev/disk/:/dev/disk:ro
     ports: [ "8080:8080" ]
+
+  # Performance and Penetration Testing Services
+  k6-pen:
+    <<: *k6-base
+    profiles: [pen-test]
+    container_name: alexandra-k6-pen
+    environment:
+      K6_TEST_TYPE: pen
+      TARGET_URL: http://job-tracker-server:8880/api/graphql
+
+  k6-perf:
+    <<: *k6-base
+    profiles: [perf-test]
+    container_name: alexandra-k6-perf
+    environment:
+      K6_TEST_TYPE: perf
+      TARGET_URL: http://job-tracker-server:8880/api/graphql
+
+  zap:
+    image: ghcr.io/zaproxy/zaproxy:stable
+    profiles: [pen-test]
+    container_name: alexandra-zap
+    hostname: zap
+    depends_on:
+      job-tracker-server:
+        condition: service_healthy
+    command:
+      - /zap/zap.sh
+      - -cmd
+      - -loglevel
+      - debug
+      - -autorun
+      - /zap/wrk/plan.yaml
+    volumes:
+      - ../../testing-pentest/src/test/zap:/zap/wrk
+    networks: [ jobtracker ]
+    deploy:
+      resources:
+        limits: { cpus: "1", memory: "1024M" }
+        reservations: { cpus: "1", memory: "1024M" }
 
 networks:
   jobtracker:

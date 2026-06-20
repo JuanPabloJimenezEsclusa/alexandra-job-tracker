@@ -11,6 +11,7 @@
   </parent>
 
   <artifactId>coverage-jacoco</artifactId>
+  <name>Testing - Architecture &amp; Coverage</name>
   <description>Module for aggregating JaCoCo code coverage reports across all submodules.
   </description>
   <packaging>pom</packaging>

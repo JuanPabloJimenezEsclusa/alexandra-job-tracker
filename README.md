@@ -16,6 +16,8 @@
   <a href="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/ci.yml"><img src="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
   <a href="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/native-release.yml"><img src="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/native-release.yml/badge.svg" alt="Native release"/></a>
   <a href="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/pages.yml"><img src="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/pages.yml/badge.svg" alt="Pages"/></a>
+  <a href="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/pen-test.yml"><img src="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/pen-test.yml/badge.svg" alt="Penetration Test"/></a>
+  <a href="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/perf-test.yml"><img src="https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/actions/workflows/perf-test.yml/badge.svg" alt="Performance Test"/></a>
 </p>
 
 ---
@@ -127,7 +129,7 @@ flowchart LR
         JWT["JWT Provider"]
     end
     subgraph storage [Storage]
-        DB[H2]
+        DB[H2/PostgreSQL]
     end
 
     CLI --> HTTP
@@ -319,6 +321,8 @@ page.
 | Integration       | Spring Boot Test + RestTemplate | `mvn clean verify` → `coverage-jacoco/target/site/jacoco-aggregate/index.html` |
 | AOT compatibility | Spring AOT                      | `mvn -Pnative test -pl bootstrap-server -am`                                   |
 | Checkstyle        | Checkstyle                      | `mvn validate` (Google Java Style, 140 cols, 2-space indent)                   |
+| Security          | k6 + OWASP ZAP                  | `mvn -Ppen-test verify -pl testing-pentest`                                    |
+| Performance       | k6                              | `mvn -Pperf-test verify -pl testing-pentest`                                   |
 
 ---
 
@@ -337,6 +341,7 @@ Profiles:
 
 - **default**: H2 in-memory, Flyway auto-migration
 - **dev/loc**: H2 file-based (`./data/jobtracker`)
+- **aws**: Neon PostgreSQL, AWS lambda, API Gateway, CloudWatch logs
 
 ---
 
@@ -356,6 +361,8 @@ mvn clean verify site site:stage-deploy
 | `ci.yml`             | Push/PR to `develop` | `mvn verify` + SonarCloud + dependency review + AOT check                |
 | `pages.yml`          | Push to `develop`    | `mvn site` → GitHub Pages                                                |
 | `native-release.yml` | Tag `v*`             | Native compile both modules → Docker push (server) + release asset (CLI) |
+| `pen-test.yml`       | Manual / weekly cron | k6 GraphQL/JWT security tests + OWASP ZAP active scan                    |
+| `perf-test.yml`      | Push to `main`/`develop` | k6 load (20 users), spike (100), soak (10 min)                           |
 
 ---
 

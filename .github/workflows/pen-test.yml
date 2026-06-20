@@ -1,0 +1,47 @@
+name: Penetration Test
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 6 * * 1"
+
+concurrency:
+  group: pen-test
+  cancel-in-progress: true
+
+env:
+  MAVEN_CLI_OPTS: "-B -ntp -e"
+  JWT_SECRET: "change-me-in-production-at-least-32-chars-long!!"
+
+jobs:
+  pen-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: corretto
+          java-version: 25
+          cache: maven
+
+      - name: Build server image
+        run: mvn ${MAVEN_CLI_OPTS} package -pl bootstrap-server -am -DskipTests
+
+      - name: Run penetration tests
+        run: mvn ${MAVEN_CLI_OPTS} verify -pl testing-pentest -Ppen-test
+
+      - name: Upload ZAP report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: zap-report
+          path: testing-pentest/src/test/zap/reports/zap-report.html
+
+      - name: Upload k6 security reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: k6-security-reports
+          path: testing-pentest/src/test/k6/reports/k6-*.html

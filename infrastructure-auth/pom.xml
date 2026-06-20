@@ -10,6 +10,7 @@
   </parent>
 
   <artifactId>infrastructure-auth</artifactId>
+  <name>Infrastructure Auth</name>
   <description>Infrastructure layer responsible for authentication and authorization
     functionalities.
   </description>

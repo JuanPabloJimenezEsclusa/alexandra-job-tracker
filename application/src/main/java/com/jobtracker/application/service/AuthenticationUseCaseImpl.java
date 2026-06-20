@@ -1,9 +1,6 @@
 package com.jobtracker.application.service;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
-import java.util.HexFormat;
 import java.util.Optional;
 
 import com.jobtracker.domain.model.AuthPayload;
@@ -13,9 +10,10 @@ import com.jobtracker.domain.port.out.LoadUserPort;
 import com.jobtracker.domain.port.out.SaveUserPort;
 import com.jobtracker.domain.port.out.TokenGeneratorPort;
 import com.jobtracker.domain.vo.UserId;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
- * Implementation of AuthenticationUseCase with SHA-512 password hashing.
+ * Implementation of AuthenticationUseCase with bcrypt password hashing.
  */
 public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
   private final SaveUserPort saveUserPort;
@@ -41,7 +39,7 @@ public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
     if (loadUserPort.findByUsername(username).isPresent()) {
       throw new IllegalArgumentException("Username already taken");
     }
-    final var user = new User(UserId.generate(), username, hashPassword(password), clock.instant());
+    final var user = new User(UserId.generate(), username, BCrypt.hashpw(password, BCrypt.gensalt()), clock.instant());
     saveUserPort.save(user);
     return new AuthPayload(tokenGenerator.generateToken(user.id()), user);
   }
@@ -50,7 +48,7 @@ public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
   public AuthPayload login(final String username, final String password) {
     final var user = loadUserPort.findByUsername(username)
       .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
-    if (!user.passwordHash().equals(hashPassword(password))) {
+    if (!BCrypt.checkpw(password, user.passwordHash())) {
       throw new IllegalArgumentException("Invalid credentials");
     }
     return new AuthPayload(tokenGenerator.generateToken(user.id()), user);
@@ -59,14 +57,5 @@ public class AuthenticationUseCaseImpl implements AuthenticationUseCase {
   @Override
   public Optional<User> getCurrentUser(final UserId userId) {
     return loadUserPort.findById(userId);
-  }
-
-  private String hashPassword(final String password) {
-    try {
-      final var digest = MessageDigest.getInstance("SHA-512");
-      return HexFormat.of().formatHex(digest.digest(password.getBytes()));
-    } catch (final NoSuchAlgorithmException e) {
-      throw new UnsupportedOperationException("SHA-512 not supported", e);
-    }
   }
 }
