@@ -95,7 +95,7 @@ services:
     <<: *default-resources
 
   loki:
-    image: grafana/loki:3.7.2
+    image: grafana/loki:3.7.3
     container_name: alexandra-loki
     hostname: loki
     restart: unless-stopped
@@ -119,7 +119,7 @@ services:
     <<: *default-resources
 
   grafana:
-    image: grafana/grafana:13.0.2
+    image: grafana/grafana:13.1.0
     container_name: alexandra-grafana
     hostname: grafana
     restart: unless-stopped
