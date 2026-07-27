@@ -6,8 +6,6 @@
 *.iml
 **/target
 **/*.md
-CLAUDE.md
-GEMINI.md
 .venv
 node_modules
 browser-extension

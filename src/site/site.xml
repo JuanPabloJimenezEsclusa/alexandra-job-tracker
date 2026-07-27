@@ -22,7 +22,7 @@
       </brand>
       <slogan>
         Alexandra Job Tracker.
-        A simple job tracking application built with Spring Boot and React.
+        A job tracking application built with Spring Boot.
         Monitor and manage your job applications with ease.
       </slogan>
       <topNav>reports|modules</topNav>

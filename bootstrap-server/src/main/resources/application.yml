@@ -1,11 +1,11 @@
 spring:
   application:
-    group: com.alexandra
+    group: dev.jpje.jobtracker
     name: alexandra-job-tracker
     version: 1.0.0
     admin:
       enabled: true
-      jmx-name: "com.alexandra:type=Admin,name=SpringApplication"
+      jmx-name: "dev.jpje.jobtracker:type=Admin,name=SpringApplication"
   threads:
     virtual:
       enabled: true
@@ -62,7 +62,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metrics,env,beans,mappings,loggers,heapdump,threaddump,conditions,configprops,caches
+        include: health,info,prometheus,metrics,env,beans,mappings,loggers,configprops,caches
   endpoint:
     health:
       show-details: always
@@ -142,7 +142,7 @@ management:
 logging:
   level:
     root: WARN
-    com.jobtracker: INFO
+    dev.jpje.jobtracker: INFO
     org.springframework: WARN
     org.hibernate: ERROR
     com.zaxxer.hikari: ERROR
@@ -162,5 +162,5 @@ spring:
 logging:
   level:
     root: WARN
-    com.jobtracker: INFO
+    dev.jpje.jobtracker: INFO
     org.flywaydb: INFO

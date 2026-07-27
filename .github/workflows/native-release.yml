@@ -2,7 +2,7 @@ name: Native Release
 
 on:
   pull_request:
-    branches: [develop, main]
+    branches: [develop]
     types: [opened, synchronize, reopened, ready_for_review]
     paths-ignore: [src, deploy, docs, browser-extension]
 

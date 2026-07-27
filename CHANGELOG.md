@@ -5,10 +5,382 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
-**test: include penetration and performance testing**
+**chore(deps): bump the maven-dependencies group with 3 updates (#50)**
 
+ * Bumps the maven-dependencies group with 3 updates: [com.puppycrawl.tools:checkstyle](https://github.com/checkstyle/checkstyle), [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin) and [org.pitest:pitest-maven](https://github.com/hcoles/pitest).
+ * Updates &#x60;com.puppycrawl.tools:checkstyle&#x60; from 13.8.0 to 13.9.0
+ * - [Release notes](https://github.com/checkstyle/checkstyle/releases)
+ * - [Commits](https://github.com/checkstyle/checkstyle/compare/checkstyle-13.8.0...checkstyle-13.9.0)
+ * Updates &#x60;org.openrewrite.maven:rewrite-maven-plugin&#x60; from 6.43.0 to 6.44.0
+ * - [Release notes](https://github.com/openrewrite/rewrite-maven-plugin/releases)
+ * - [Commits](https://github.com/openrewrite/rewrite-maven-plugin/compare/v6.43.0...v6.44.0)
+ * Updates &#x60;org.pitest:pitest-maven&#x60; from 1.25.7 to 1.25.8
+ * - [Release notes](https://github.com/hcoles/pitest/releases)
+ * - [Commits](https://github.com/hcoles/pitest/compare/1.25.7...1.25.8)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: com.puppycrawl.tools:checkstyle
+ * dependency-version: 13.9.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.openrewrite.maven:rewrite-maven-plugin
+ * dependency-version: 6.44.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.pitest:pitest-maven
+ * dependency-version: 1.25.8
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
 
-[ec9554f28f626ee](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/ec9554f28f626ee) juan.pablo.jimenez.esclusa *2026-06-20 08:48:40*
+[f16b24adab100dd](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/f16b24adab100dd) dependabot[bot] *2026-07-27 08:01:17*
+
+**chore(deps): bump the infrastructure-dependencies group (#49)**
+
+ * Bumps the infrastructure-dependencies group in /deploy/compose with 3 updates: prom/prometheus, grafana/loki and grafana/grafana.
+ * Updates &#x60;prom/prometheus&#x60; from v3.13.0 to v3.13.1
+ * Updates &#x60;grafana/loki&#x60; from 3.7.3 to 3.7.4
+ * Updates &#x60;grafana/grafana&#x60; from 13.1.0 to 13.1.1
+ * ---
+ * updated-dependencies:
+ * - dependency-name: prom/prometheus
+ * dependency-version: v3.13.1
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: grafana/loki
+ * dependency-version: 3.7.4
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: grafana/grafana
+ * dependency-version: 13.1.1
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[2cd6824e59acb0c](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/2cd6824e59acb0c) dependabot[bot] *2026-07-27 08:00:24*
+
+**chore(deps): bump the github-actions-dependencies group with 2 updates (#48)**
+
+ * Bumps the github-actions-dependencies group with 2 updates: [docker/login-action](https://github.com/docker/login-action) and [aws-actions/configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials).
+ * Updates &#x60;docker/login-action&#x60; from 4.4.0 to 4.5.1
+ * - [Release notes](https://github.com/docker/login-action/releases)
+ * - [Commits](https://github.com/docker/login-action/compare/af1e73f918a031802d376d3c8bbc3fe56130a9b0...abd2ef45e78c5afb21d64d4ca52ee8550d9572c7)
+ * Updates &#x60;aws-actions/configure-aws-credentials&#x60; from 6.2.2 to 6.2.3
+ * - [Release notes](https://github.com/aws-actions/configure-aws-credentials/releases)
+ * - [Changelog](https://github.com/aws-actions/configure-aws-credentials/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/aws-actions/configure-aws-credentials/compare/517a711dbcd0e402f90c77e7e2f81e849156e31d...e6de054238d6b7531b4efff3b6587d9aade6a06c)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: docker/login-action
+ * dependency-version: 4.5.1
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: github-actions-dependencies
+ * - dependency-name: aws-actions/configure-aws-credentials
+ * dependency-version: 6.2.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: github-actions-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[bf0229a99fbd0c6](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/bf0229a99fbd0c6) dependabot[bot] *2026-07-27 07:59:47*
+
+**chore(deps): update hashicorp/aws requirement from ~> 6.52.0 to ~> 6.56.0 (#47)**
+
+ * Updates the requirements on [hashicorp/aws](https://github.com/hashicorp/terraform-provider-aws) to permit the latest version.
+ * Updates &#x60;hashicorp/aws&#x60; to 6.56.0
+ * - [Release notes](https://github.com/hashicorp/terraform-provider-aws/releases)
+ * - [Changelog](https://github.com/hashicorp/terraform-provider-aws/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/hashicorp/terraform-provider-aws/compare/v6.52.0...v6.56.0)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: hashicorp/aws
+ * dependency-version: 6.56.0
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[bd7f5677a144bdb](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/bd7f5677a144bdb) dependabot[bot] *2026-07-27 07:59:08*
+
+**chore(deps): bump the maven-dependencies group across 1 directory with 4 updates (#45)**
+
+ * Bumps the maven-dependencies group with 4 updates in the / directory: [com.puppycrawl.tools:checkstyle](https://github.com/checkstyle/checkstyle), [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin), [org.pitest:pitest-maven](https://github.com/hcoles/pitest) and [io.opentelemetry:opentelemetry-exporter-otlp](https://github.com/open-telemetry/opentelemetry-java).
+ * Updates &#x60;com.puppycrawl.tools:checkstyle&#x60; from 13.6.0 to 13.8.0
+ * - [Release notes](https://github.com/checkstyle/checkstyle/releases)
+ * - [Commits](https://github.com/checkstyle/checkstyle/compare/checkstyle-13.6.0...checkstyle-13.8.0)
+ * Updates &#x60;org.openrewrite.maven:rewrite-maven-plugin&#x60; from 6.42.0 to 6.43.0
+ * - [Release notes](https://github.com/openrewrite/rewrite-maven-plugin/releases)
+ * - [Commits](https://github.com/openrewrite/rewrite-maven-plugin/compare/v6.42.0...v6.43.0)
+ * Updates &#x60;org.pitest:pitest-maven&#x60; from 1.25.5 to 1.25.7
+ * - [Release notes](https://github.com/hcoles/pitest/releases)
+ * - [Commits](https://github.com/hcoles/pitest/compare/1.25.5...1.25.7)
+ * Updates &#x60;io.opentelemetry:opentelemetry-exporter-otlp&#x60; from 1.63.0 to 1.64.0
+ * - [Release notes](https://github.com/open-telemetry/opentelemetry-java/releases)
+ * - [Changelog](https://github.com/open-telemetry/opentelemetry-java/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/open-telemetry/opentelemetry-java/compare/v1.63.0...v1.64.0)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: com.puppycrawl.tools:checkstyle
+ * dependency-version: 13.8.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.openrewrite.maven:rewrite-maven-plugin
+ * dependency-version: 6.43.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.pitest:pitest-maven
+ * dependency-version: 1.25.7
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: io.opentelemetry:opentelemetry-exporter-otlp
+ * dependency-version: 1.64.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[81c48ad6944cd7f](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/81c48ad6944cd7f) dependabot[bot] *2026-07-25 13:54:02*
+
+**chore(deps): bump awsguru/aws-lambda-adapter (#44)**
+
+ * Bumps the infrastructure-dependencies group in /deploy/aws with 1 update: awsguru/aws-lambda-adapter.
+ * Updates &#x60;awsguru/aws-lambda-adapter&#x60; from 1.0.1 to 1.1.0
+ * ---
+ * updated-dependencies:
+ * - dependency-name: awsguru/aws-lambda-adapter
+ * dependency-version: 1.1.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[abea3c8178f104c](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/abea3c8178f104c) dependabot[bot] *2026-07-25 13:38:09*
+
+**chore(deps): bump the infrastructure-dependencies group across 1 directory with 3 updates (#41)**
+
+ * Bumps the infrastructure-dependencies group with 3 updates in the /deploy/compose directory: prom/prometheus, grafana/loki and grafana/grafana.
+ * Updates &#x60;prom/prometheus&#x60; from v3.12.0 to v3.13.0
+ * Updates &#x60;grafana/loki&#x60; from 3.7.2 to 3.7.3
+ * Updates &#x60;grafana/grafana&#x60; from 13.0.2 to 13.1.0
+ * ---
+ * updated-dependencies:
+ * - dependency-name: prom/prometheus
+ * dependency-version: v3.13.0
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: grafana/loki
+ * dependency-version: 3.7.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: grafana/grafana
+ * dependency-version: 13.1.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[ca1af8c26d700e1](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/ca1af8c26d700e1) dependabot[bot] *2026-07-25 13:36:27*
+
+**chore(deps): update hashicorp/aws requirement from ~> 6.51.0 to ~> 6.52.0 (#37)**
+
+ * Updates the requirements on [hashicorp/aws](https://github.com/hashicorp/terraform-provider-aws) to permit the latest version.
+ * Updates &#x60;hashicorp/aws&#x60; to 6.52.0
+ * - [Release notes](https://github.com/hashicorp/terraform-provider-aws/releases)
+ * - [Changelog](https://github.com/hashicorp/terraform-provider-aws/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/hashicorp/terraform-provider-aws/compare/v6.51.0...v6.52.0)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: hashicorp/aws
+ * dependency-version: 6.52.0
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[3678f6b4f8620ab](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/3678f6b4f8620ab) dependabot[bot] *2026-07-25 13:35:24*
+
+**chore(deps): bump the github-actions-dependencies group across 1 directory with 5 updates (#46)**
+
+ * Bumps the github-actions-dependencies group with 5 updates in the / directory:
+ * | Package | From | To |
+ * | --- | --- | --- |
+ * | [actions/cache](https://github.com/actions/cache) | &#x60;5&#x60; | &#x60;6&#x60; |
+ * | [docker/login-action](https://github.com/docker/login-action) | &#x60;4.2.0&#x60; | &#x60;4.4.0&#x60; |
+ * | [docker/build-push-action](https://github.com/docker/build-push-action) | &#x60;7.2.0&#x60; | &#x60;7.3.0&#x60; |
+ * | [aws-actions/configure-aws-credentials](https://github.com/aws-actions/configure-aws-credentials) | &#x60;6.2.0&#x60; | &#x60;6.2.2&#x60; |
+ * | [softprops/action-gh-release](https://github.com/softprops/action-gh-release) | &#x60;3.0.1&#x60; | &#x60;3.0.2&#x60; |
+ * Updates &#x60;actions/cache&#x60; from 5 to 6
+ * - [Release notes](https://github.com/actions/cache/releases)
+ * - [Changelog](https://github.com/actions/cache/blob/main/RELEASES.md)
+ * - [Commits](https://github.com/actions/cache/compare/v5...v6)
+ * Updates &#x60;docker/login-action&#x60; from 4.2.0 to 4.4.0
+ * - [Release notes](https://github.com/docker/login-action/releases)
+ * - [Commits](https://github.com/docker/login-action/compare/650006c6eb7dba73a995cc03b0b2d7f5ca915bee...af1e73f918a031802d376d3c8bbc3fe56130a9b0)
+ * Updates &#x60;docker/build-push-action&#x60; from 7.2.0 to 7.3.0
+ * - [Release notes](https://github.com/docker/build-push-action/releases)
+ * - [Commits](https://github.com/docker/build-push-action/compare/f9f3042f7e2789586610d6e8b85c8f03e5195baf...53b7df96c91f9c12dcc8a07bcb9ccacbed38856a)
+ * Updates &#x60;aws-actions/configure-aws-credentials&#x60; from 6.2.0 to 6.2.2
+ * - [Release notes](https://github.com/aws-actions/configure-aws-credentials/releases)
+ * - [Changelog](https://github.com/aws-actions/configure-aws-credentials/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/aws-actions/configure-aws-credentials/compare/e7f100cf4c008499ea8adda475de1042d6975c7b...517a711dbcd0e402f90c77e7e2f81e849156e31d)
+ * Updates &#x60;softprops/action-gh-release&#x60; from 3.0.1 to 3.0.2
+ * - [Release notes](https://github.com/softprops/action-gh-release/releases)
+ * - [Changelog](https://github.com/softprops/action-gh-release/blob/master/CHANGELOG.md)
+ * - [Commits](https://github.com/softprops/action-gh-release/compare/718ea10b132b3b2eba29c1007bb80653f286566b...3d0d9888cb7fd7b750713d6e236d1fcb99157228)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: actions/cache
+ * dependency-version: &#x27;6&#x27;
+ * dependency-type: direct:production
+ * update-type: version-update:semver-major
+ * dependency-group: github-actions-dependencies
+ * - dependency-name: docker/login-action
+ * dependency-version: 4.4.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: github-actions-dependencies
+ * - dependency-name: docker/build-push-action
+ * dependency-version: 7.3.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: github-actions-dependencies
+ * - dependency-name: aws-actions/configure-aws-credentials
+ * dependency-version: 6.2.2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: github-actions-dependencies
+ * - dependency-name: softprops/action-gh-release
+ * dependency-version: 3.0.2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: github-actions-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[80b47498f319aab](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/80b47498f319aab) dependabot[bot] *2026-07-25 13:33:39*
+
+**chore(deps): bump the maven-dependencies group with 4 updates (#36)**
+
+ * Bumps the maven-dependencies group with 4 updates: [com.puppycrawl.tools:checkstyle](https://github.com/checkstyle/checkstyle), [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin), [org.pitest:pitest-maven](https://github.com/hcoles/pitest) and [org.codehaus.mojo:exec-maven-plugin](https://github.com/mojohaus/exec-maven-plugin).
+ * Updates &#x60;com.puppycrawl.tools:checkstyle&#x60; from 13.5.0 to 13.6.0
+ * - [Release notes](https://github.com/checkstyle/checkstyle/releases)
+ * - [Commits](https://github.com/checkstyle/checkstyle/compare/checkstyle-13.5.0...checkstyle-13.6.0)
+ * Updates &#x60;org.openrewrite.maven:rewrite-maven-plugin&#x60; from 6.41.0 to 6.42.0
+ * - [Release notes](https://github.com/openrewrite/rewrite-maven-plugin/releases)
+ * - [Commits](https://github.com/openrewrite/rewrite-maven-plugin/compare/v6.41.0...v6.42.0)
+ * Updates &#x60;org.pitest:pitest-maven&#x60; from 1.25.4 to 1.25.5
+ * - [Release notes](https://github.com/hcoles/pitest/releases)
+ * - [Commits](https://github.com/hcoles/pitest/compare/1.25.4...1.25.5)
+ * Updates &#x60;org.codehaus.mojo:exec-maven-plugin&#x60; from 3.5.0 to 3.6.3
+ * - [Release notes](https://github.com/mojohaus/exec-maven-plugin/releases)
+ * - [Commits](https://github.com/mojohaus/exec-maven-plugin/compare/3.5.0...3.6.3)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: com.puppycrawl.tools:checkstyle
+ * dependency-version: 13.6.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.openrewrite.maven:rewrite-maven-plugin
+ * dependency-version: 6.42.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.pitest:pitest-maven
+ * dependency-version: 1.25.5
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.codehaus.mojo:exec-maven-plugin
+ * dependency-version: 3.6.3
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[b7f10a73bd1ed23](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/b7f10a73bd1ed23) dependabot[bot] *2026-06-23 00:08:37*
+
+**chore(deps): bump the github-actions-dependencies group with 2 updates (#35)**
+
+ * Bumps the github-actions-dependencies group with 2 updates: [actions/checkout](https://github.com/actions/checkout) and [softprops/action-gh-release](https://github.com/softprops/action-gh-release).
+ * Updates &#x60;actions/checkout&#x60; from 6 to 7
+ * - [Release notes](https://github.com/actions/checkout/releases)
+ * - [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/actions/checkout/compare/v6...v7)
+ * Updates &#x60;softprops/action-gh-release&#x60; from 3.0.0 to 3.0.1
+ * - [Release notes](https://github.com/softprops/action-gh-release/releases)
+ * - [Changelog](https://github.com/softprops/action-gh-release/blob/master/CHANGELOG.md)
+ * - [Commits](https://github.com/softprops/action-gh-release/compare/b4309332981a82ec1c5618f44dd2e27cc8bfbfda...718ea10b132b3b2eba29c1007bb80653f286566b)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: actions/checkout
+ * dependency-version: &#x27;7&#x27;
+ * dependency-type: direct:production
+ * update-type: version-update:semver-major
+ * dependency-group: github-actions-dependencies
+ * - dependency-name: softprops/action-gh-release
+ * dependency-version: 3.0.1
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: github-actions-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[494c282dcb01ed9](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/494c282dcb01ed9) dependabot[bot] *2026-06-23 00:07:36*
+
+**chore(deps): update hashicorp/aws requirement from ~> 6.50.0 to ~> 6.51.0 (#34)**
+
+ * Updates the requirements on [hashicorp/aws](https://github.com/hashicorp/terraform-provider-aws) to permit the latest version.
+ * Updates &#x60;hashicorp/aws&#x60; to 6.51.0
+ * - [Release notes](https://github.com/hashicorp/terraform-provider-aws/releases)
+ * - [Changelog](https://github.com/hashicorp/terraform-provider-aws/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/hashicorp/terraform-provider-aws/compare/v6.50.0...v6.51.0)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: hashicorp/aws
+ * dependency-version: 6.51.0
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[9626999b414fe2b](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/9626999b414fe2b) dependabot[bot] *2026-06-23 00:06:26*
+
+**Feature/continuous improving (#33)**
+
+ * test: include penetration and performance testing
+ * docs: improve module names
+
+[f701e1b2d6fb33f](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/f701e1b2d6fb33f) Juan Pablo Jimenez Esclusa *2026-06-20 10:23:04*
 
 **chore(deps): bump awsguru/aws-lambda-adapter (#32)**
 

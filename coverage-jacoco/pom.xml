@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.jobtracker</groupId>
+    <groupId>dev.jpje.jobtracker</groupId>
     <artifactId>alexandra-job-tracker</artifactId>
     <version>1.0.0</version>
   </parent>
@@ -18,58 +18,58 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.jobtracker</groupId>
+      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>domain</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
+      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>application</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-persistence</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-persistence</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-auth</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-auth</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-ai</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-ai</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-observability</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-observability</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
+      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>adapter-api</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
+      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>adapter-cli</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
-      <artifactId>infrastructure-cache</artifactId>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-cache</artifactId>
       <version>${project.version}</version>
     </dependency>
 
     <dependency>
-      <groupId>com.jobtracker</groupId>
+      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>bootstrap-server</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.jobtracker</groupId>
+      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>bootstrap-cli</artifactId>
       <version>${project.version}</version>
     </dependency>

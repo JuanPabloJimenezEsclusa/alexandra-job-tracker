@@ -1,11 +1,11 @@
 spring:
   application:
-    group: com.alexandra
+    group: dev.jpje.jobtracker
     name: alexandra-job-tracker
     version: 1.0.0
     admin:
       enabled: true
-      jmx-name: "com.alexandra:type=Admin,name=SpringApplication"
+      jmx-name: "dev.jpje.jobtracker:type=Admin,name=SpringApplication"
   profiles:
     default: dev
     active: ${SPRING_PROFILES_ACTIVE:dev}

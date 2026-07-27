@@ -1,7 +1,0 @@
-info:
-  name: conditions
-  type: folder
-  seq: 11
-
-request:
-  auth: inherit

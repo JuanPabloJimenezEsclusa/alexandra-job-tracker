@@ -6,11 +6,11 @@ WORKDIR /app
 COPY pom.xml ./
 COPY domain/pom.xml domain/
 COPY application/pom.xml application/
-COPY infrastructure-persistence/pom.xml infrastructure-persistence/
-COPY infrastructure-cache/pom.xml infrastructure-cache/
-COPY infrastructure-auth/pom.xml infrastructure-auth/
-COPY infrastructure-ai/pom.xml infrastructure-ai/
-COPY infrastructure-observability/pom.xml infrastructure-observability/
+COPY adapter-persistence/pom.xml adapter-persistence/
+COPY adapter-cache/pom.xml adapter-cache/
+COPY adapter-auth/pom.xml adapter-auth/
+COPY adapter-ai/pom.xml adapter-ai/
+COPY adapter-observability/pom.xml adapter-observability/
 COPY adapter-api/pom.xml adapter-api/
 COPY adapter-cli/pom.xml adapter-cli/
 COPY bootstrap-server/pom.xml bootstrap-server/

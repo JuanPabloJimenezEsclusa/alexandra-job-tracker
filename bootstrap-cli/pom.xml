@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
-    <groupId>com.jobtracker</groupId>
+    <groupId>dev.jpje.jobtracker</groupId>
     <artifactId>alexandra-job-tracker</artifactId>
     <version>1.0.0</version>
   </parent>
@@ -18,7 +18,7 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.jobtracker</groupId>
+      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>adapter-cli</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -88,7 +88,7 @@
         <artifactId>native-maven-plugin</artifactId>
         <configuration>
           <imageName>job-tracker-cli</imageName>
-          <mainClass>com.jobtracker.cli.JobTrackerCliApplication</mainClass>
+          <mainClass>dev.jpje.jobtracker.cli.JobTrackerCliApplication</mainClass>
           <buildArgs combine.children="append">
             <!--
             (compile) Recommendations:

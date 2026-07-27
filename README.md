@@ -41,52 +41,46 @@
 
 ### Modules
 
-| Module                         | Description                                                           |
-|--------------------------------|-----------------------------------------------------------------------|
-| `domain`                       | Pure Java — no framework dependencies. Domain models, ports, services |
-| `application`                  | Use case implementations orchestrating domain logic through ports     |
-| `adapter-api`                  | GraphQL schema, resolvers, DTOs — Spring for GraphQL                  |
-| `adapter-cli`                  | Spring Shell commands, GraphQL HTTP client, session management        |
-| `infrastructure-persistence`   | JPA entities, repositories, Flyway migrations                         |
-| `infrastructure-auth`          | JWT provider, GraphQL auth interceptor                                |
-| `infrastructure-ai`            | Job analysis via DeepSeek LLM (Spring AI)                             |
-| `infrastructure-cache`         | Caffeine cache with hexagonal `CachePort` decorators                  |
-| `infrastructure-observability` | OpenTelemetry, Prometheus, Micrometer                                 |
-| `bootstrap-server`             | Spring Boot application — GraphQL API, JPA, Flyway, AI                |
-| `bootstrap-cli`                | Spring Boot application — Spring Shell CLI client                     |
-| `coverage-jacoco`              | JaCoCo coverage report aggregation + ArchUnit architecture tests      |
-| `browser-extension`            | Chrome extension for capturing LinkedIn/Indeed job postings           |
+| Module                  | Description                                                           |
+|-------------------------|-----------------------------------------------------------------------|
+| `domain`                | Pure Java — no framework dependencies. Domain models, ports, services |
+| `application`           | Use case implementations orchestrating domain logic through ports     |
+| `adapter-api`           | GraphQL schema, resolvers, DTOs — Spring for GraphQL                  |
+| `adapter-cli`           | Spring Shell commands, GraphQL HTTP client, session management        |
+| `adapter-persistence`   | JPA entities, repositories, Flyway migrations                         |
+| `adapter-auth`          | JWT provider, GraphQL auth interceptor                                |
+| `adapter-ai`            | Job analysis via DeepSeek LLM (Spring AI)                             |
+| `adapter-cache`         | Caffeine cache with hexagonal `CachePort` decorators                  |
+| `adapter-observability` | OpenTelemetry, Prometheus, Micrometer                                 |
+| `bootstrap-server`      | Spring Boot application — GraphQL API, JPA, Flyway, AI                |
+| `bootstrap-cli`         | Spring Boot application — Spring Shell CLI client                     |
+| `coverage-jacoco`       | JaCoCo coverage report aggregation + ArchUnit architecture tests      |
+| `browser-extension`     | Chrome extension for capturing LinkedIn/Indeed job postings           |
 
-### Layer Constraints
+### Dependency Graph
 
 ```mermaid
 flowchart LR
-    domain --> application --> infrastructure
-    domain --> application --> adapter
-    infrastructure & adapter --> bootstrap
-    subgraph infrastructure [infrastructure-*]
-        direction LR
-        I1[persistence]
-        I2[auth]
-        I3[ai]
-        I4[cache]
-        I5[observability]
+    subgraph adapters [adapter-*]
+      adapter-api
+      adapter-auth
+      adapter-persistence
+      adapter-ai
+      adapter-cache
+      adapter-observability
+      adapter-cli
     end
-    subgraph adapter [adapter-*]
-        direction LR
-        A1[api]
-        A2[cli]
-    end
-    subgraph bootstrap [bootstrap-*]
-        direction LR
-        B1[server]
-        B2[cli]
-    end
+    application --> domain
+    adapters --> domain
+    bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth & adapter-observability
+    bootstrap-cli --> adapter-cli
 ```
 
-- `domain` is pure Java — zero framework imports. Validated by ArchUnit (13 rules).
-- `adapter-*` and `infrastructure-*` depend on `domain` and `application`.
-- `bootstrap-*` is the composition root — depends on everything, wires adapters.
+- `domain` is pure Java — zero framework imports. Validated by ArchUnit.
+- `adapter-*` depend on `domain`.
+- `application` depends on `domain`.
+- `bootstrap-server` is the composition root — wires all server-side adapters and application.
+- `bootstrap-cli` depends only on `adapter-cli` (HTTP-only client, no domain coupling).
 
 ### CQRS Resolver Architecture
 
@@ -177,7 +171,7 @@ Run the server with the GraalVM tracing agent to generate reachability metadata 
 mvn install -DskipTests && mvn -Ptracing spring-boot:run -pl bootstrap-server
 ```
 
-Exercise all API endpoints, then shut down. The agent writes a `reachability-metadata.json` to `bootstrap-server/src/main/resources/META-INF/native-image/com.jobtracker/bootstrap-server/`.
+Exercise all API endpoints, then shut down. The agent writes a `reachability-metadata.json` to `bootstrap-server/src/main/resources/META-INF/native-image/dev.jpje.jobtracker/bootstrap-server/`.
 
 ### Run
 
@@ -213,20 +207,20 @@ java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost
 
 The server exposes a GraphQL endpoint at `POST /api/graphql` with the following schema:
 
-| Operation                                       | Description                                      |
-|-------------------------------------------------|--------------------------------------------------|
-| `register(username, password)`                    | Create account, returns JWT                        |
-| `login(username, password)`                       | Authenticate, returns JWT                          |
-| `logout`                                          | Invalidate current session                         |
-| `me`                                              | Current user info                                  |
-| `applications(status, source)`                    | List job applications with optional filters        |
-| `createApplication(company, role, source, ...)`   | Track a new application                            |
-| `updateApplicationStatus(id, status)`             | Move through pipeline                              |
-| `deleteApplication(id)`                           | Remove an application                              |
-| `analytics(since)`                                | Aggregated per-status counts and conversion rate   |
-| `jobPostings(source)`                             | List scraped job postings                          |
-| `submitJobPosting(input)`                         | Submit a job posting from raw data                 |
-| `analyzeJobPosting(jobPostingId)`                 | AI-powered job description analysis                |
+| Operation                                        | Description                                       |
+|--------------------------------------------------|---------------------------------------------------|
+| `register(username, password)`                   | Create account, returns JWT                       |
+| `login(username, password)`                      | Authenticate, returns JWT                         |
+| `logout`                                         | Invalidate current session                        |
+| `me`                                             | Current user info                                 |
+| `applications(status, source)`                   | List job applications with optional filters       |
+| `createApplication(company, role, source, ...)`  | Track a new application                           |
+| `updateApplicationStatus(id, status)`            | Move through pipeline                             |
+| `deleteApplication(id)`                          | Remove an application                             |
+| `analytics(since)`                               | Aggregated per-status counts and conversion rate  |
+| `jobPostings(source)`                            | List scraped job postings                         |
+| `submitJobPosting(input)`                        | Submit a job posting from raw data                |
+| `analyzeJobPosting(jobPostingId)`                | AI-powered job description analysis               |
 
 ### Status Pipeline
 
@@ -317,7 +311,7 @@ page.
 |-------------------|---------------------------------|--------------------------------------------------------------------------------|
 | Unit              | JUnit 5 + Mockito               | `mvn clean test`                                                               |
 | Mutation          | PIT                             | `mvn -Ppitest test`                                                            |
-| Architecture      | ArchUnit                        | `mvn clean test -pl coverage-jacoco -am` (13 rules)                            |
+| Architecture      | ArchUnit                        | `mvn clean test -pl coverage-jacoco -am`                                       |
 | Integration       | Spring Boot Test + RestTemplate | `mvn clean verify` → `coverage-jacoco/target/site/jacoco-aggregate/index.html` |
 | AOT compatibility | Spring AOT                      | `mvn -Pnative test -pl bootstrap-server -am`                                   |
 | Checkstyle        | Checkstyle                      | `mvn validate` (Google Java Style, 140 cols, 2-space indent)                   |
@@ -356,19 +350,19 @@ mvn clean verify site site:stage-deploy
 
 ## CI/CD
 
-| Workflow             | Trigger              | What it does                                                             |
-|----------------------|----------------------|--------------------------------------------------------------------------|
-| `ci.yml`             | Push/PR to `develop` | `mvn verify` + SonarCloud + dependency review + AOT check                |
-| `pages.yml`          | Push to `develop`    | `mvn site` → GitHub Pages                                                |
-| `native-release.yml` | Tag `v*`             | Native compile both modules → Docker push (server) + release asset (CLI) |
-| `pen-test.yml`       | Manual / weekly cron | k6 GraphQL/JWT security tests + OWASP ZAP active scan                    |
+| Workflow             | Trigger                  | What it does                                                             |
+|----------------------|--------------------------|--------------------------------------------------------------------------|
+| `ci.yml`             | Push/PR to `develop`     | `mvn verify` + SonarCloud + dependency review + AOT check                |
+| `pages.yml`          | Push to `develop`        | `mvn site` → GitHub Pages                                                |
+| `native-release.yml` | Tag `v*`                 | Native compile both modules → Docker push (server) + release asset (CLI) |
+| `pen-test.yml`       | Manual / weekly cron     | k6 GraphQL/JWT security tests + OWASP ZAP active scan                    |
 | `perf-test.yml`      | Push to `main`/`develop` | k6 load (20 users), spike (100), soak (10 min)                           |
 
 ---
 
 ## Caching
 
-The `infrastructure-cache` module decorates persistence adapters with Caffeine caching:
+The `adapter-cache` module decorates persistence adapters with Caffeine caching:
 
 - **JobApplication**: individual (`jobapp:<id>`) and per-user list (`jobapps:user:<id>`) — evicted
   on create/update/delete

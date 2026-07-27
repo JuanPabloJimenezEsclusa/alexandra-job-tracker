@@ -11,7 +11,7 @@
     <relativePath/>
   </parent>
 
-  <groupId>com.jobtracker</groupId>
+  <groupId>dev.jpje.jobtracker</groupId>
   <artifactId>alexandra-job-tracker</artifactId>
   <version>1.0.0</version>
   <packaging>pom</packaging>
@@ -57,17 +57,17 @@
   <modules>
     <module>domain</module>
     <module>application</module>
-    <module>infrastructure-persistence</module>
-    <module>infrastructure-auth</module>
-    <module>infrastructure-ai</module>
-    <module>infrastructure-observability</module>
+    <module>adapter-persistence</module>
+    <module>adapter-cache</module>
+    <module>adapter-auth</module>
+    <module>adapter-ai</module>
+    <module>adapter-observability</module>
     <module>adapter-api</module>
     <module>adapter-cli</module>
     <module>bootstrap-server</module>
-    <module>infrastructure-cache</module>
+    <module>bootstrap-cli</module>
     <module>coverage-jacoco</module>
     <module>testing-pentest</module>
-    <module>bootstrap-cli</module>
   </modules>
 
   <properties>
