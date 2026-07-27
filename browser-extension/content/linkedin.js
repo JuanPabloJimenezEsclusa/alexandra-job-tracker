@@ -60,7 +60,7 @@ class LinkedInExtractor {
         let el = h2.nextElementSibling;
         while (el && !el.matches('h2')) {
           const t = el.textContent.trim();
-          const m = /^([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ\s.]+?)\s+\d/.exec(t);
+          const m = /^([A-Za-zÀ-ÖØ-öø-ÿ]+?)\s+\d/.exec(t);
           if (m) return m[1].trim();
           el = el.nextElementSibling;
         }

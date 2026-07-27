@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(
   classes = JobTrackerServerApplication.class,
@@ -25,29 +26,9 @@ class ApplicationIntegrationTest {
   @LocalServerPort
   private int port;
 
-  private String url() {
-    return "http://localhost:%s/api/graphql".formatted(port);
-  }
-
-  private HttpHeaders jsonHeaders() {
-    final var headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    return headers;
-  }
-
-  private String registerAndGetToken(String username) {
-    final var body = """
-      {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\") { token } }"}
-      """.formatted(username);
-    final var response = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>(body, jsonHeaders()), String.class);
-    assert response.getBody() != null;
-    return response.getBody().replaceAll(".*\"token\":\"([^\"]+)\".*", "$1");
-  }
-
   @Test
-  void shouldCreateAndListApplications() {
-    final var token = registerAndGetToken("list-user");
+  void shouldCreateApplication() {
+    final var token = registerAndGetToken("create-app-user");
     final var headers = jsonHeaders();
     headers.setBearerAuth(token);
 
@@ -56,6 +37,18 @@ class ApplicationIntegrationTest {
         {"query": "mutation { createApplication(company: \\"Acme\\", role: \\"SWE\\", source: LINKEDIN) { id status } }"}
         """, headers), String.class);
     assertThat(createResp.getBody()).contains("SAVED");
+  }
+
+  @Test
+  void shouldListApplications() {
+    final var token = registerAndGetToken("list-app-user");
+    final var headers = jsonHeaders();
+    headers.setBearerAuth(token);
+
+    rest.exchange(url(), HttpMethod.POST,
+      new HttpEntity<>("""
+        {"query": "mutation { createApplication(company: \\"Acme\\", role: \\"SWE\\", source: LINKEDIN) { id status } }"}
+        """, headers), String.class);
 
     final var listResp = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>("""
@@ -65,8 +58,8 @@ class ApplicationIntegrationTest {
   }
 
   @Test
-  void shouldCreateAndUpdateAndDelete() {
-    final var token = registerAndGetToken("crud-user");
+  void shouldUpdateApplicationStatus() {
+    final var token = registerAndGetToken("update-app-user");
     final var headers = jsonHeaders();
     headers.setBearerAuth(token);
 
@@ -74,15 +67,27 @@ class ApplicationIntegrationTest {
       new HttpEntity<>("""
         {"query": "mutation { createApplication(company: \\"Beta\\", role: \\"PM\\", source: INDEED) { id status } }"}
         """, headers), String.class);
-    assertThat(createResp.getBody()).contains("SAVED");
-    final var appId = createResp.getBody().replaceAll(".*\"id\":\"([^\"]+)\".*", "$1");
-
+    final var node = new ObjectMapper().readTree(createResp.getBody());
+    final var appId = node.findValue("id").asString();
     final var updateResp = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>("""
         {"query": "mutation { updateApplicationStatus(id: \\"%s\\", status: INTERVIEWING) { status } }"}
         """.formatted(appId), headers), String.class);
     assertThat(updateResp.getBody()).contains("INTERVIEWING");
+  }
 
+  @Test
+  void shouldDeleteApplication() {
+    final var token = registerAndGetToken("delete-app-user");
+    final var headers = jsonHeaders();
+    headers.setBearerAuth(token);
+
+    final var createResp = rest.exchange(url(), HttpMethod.POST,
+      new HttpEntity<>("""
+        {"query": "mutation { createApplication(company: \\"Beta\\", role: \\"PM\\", source: INDEED) { id } }"}
+        """, headers), String.class);
+    final var node = new ObjectMapper().readTree(createResp.getBody());
+    final var appId = node.findValue("id").asString();
     final var deleteResp = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>("""
         {"query": "mutation { deleteApplication(id: \\"%s\\") }"}
@@ -106,5 +111,24 @@ class ApplicationIntegrationTest {
         {"query": "{ applications(status: APPLIED) { company } }"}
         """, headers), String.class);
     assertThat(listResp.getBody()).doesNotContain("Gamma");
+  }
+
+  private String url() {
+    return "http://localhost:%s/api/graphql".formatted(port);
+  }
+
+  private HttpHeaders jsonHeaders() {
+    final var headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return headers;
+  }
+
+  private String registerAndGetToken(String username) {
+    final var body = """
+      {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\") { token } }"}
+      """.formatted(username);
+    final var response = rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(body, jsonHeaders()), String.class);
+    final var node = new ObjectMapper().readTree(response.getBody());
+    return node.findValue("token").asString();
   }
 }

@@ -10,6 +10,7 @@ import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.persistence.entity.JobApplicationEntity;
 import dev.jpje.jobtracker.persistence.mapper.JobApplicationMapper;
 import dev.jpje.jobtracker.persistence.repository.JobApplicationJpaRepository;
 import org.jspecify.annotations.Nullable;
@@ -47,14 +48,20 @@ public class JobApplicationPersistenceAdapter implements SaveJobApplicationPort,
   public List<JobApplication> findByUserId(final UserId userId,
                                            @Nullable final ApplicationStatus status,
                                            @Nullable final Source source) {
-    var all = repository.findByUserIdOrderByDateAppliedDesc(userId.value()).stream().map(mapper::toDomain);
-    if (status != null) {
-      all = all.filter(a -> a.status() == status);
+    final List<JobApplicationEntity> entities;
+    if (status != null && source != null) {
+      entities = repository.findByUserIdAndStatusAndSourceOrderByDateAppliedDesc(
+        userId.value(), status.name(), source.name());
+    } else if (status != null) {
+      entities = repository.findByUserIdAndStatusOrderByDateAppliedDesc(
+        userId.value(), status.name());
+    } else if (source != null) {
+      entities = repository.findByUserIdAndSourceOrderByDateAppliedDesc(
+        userId.value(), source.name());
+    } else {
+      entities = repository.findByUserIdOrderByDateAppliedDesc(userId.value());
     }
-    if (source != null) {
-      all = all.filter(a -> a.source() == source);
-    }
-    return all.toList();
+    return entities.stream().map(mapper::toDomain).toList();
   }
 
   @Override

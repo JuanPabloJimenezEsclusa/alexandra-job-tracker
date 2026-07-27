@@ -6,9 +6,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import dev.jpje.jobtracker.domain.model.AuthPayload;
+import dev.jpje.jobtracker.api.dto.AuthPayloadResponse;
 import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.in.AuthenticationPort;
+import dev.jpje.jobtracker.domain.vo.AuthPayload;
+import dev.jpje.jobtracker.domain.vo.Username;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,42 +29,56 @@ class UserMutationResolverTest {
 
   @Test
   void shouldRegister() {
-    final var user = Instancio.of(User.class)
-      .set(field(User::username), "alice")
-      .set(field(User::passwordHash), "hash")
-      .create();
-    final var payload = new AuthPayload("token", user);
-
-    when(authUseCase.register("alice", "secret")).thenReturn(payload);
+    stubRegistration(registrationPayload());
 
     final var result = resolver.register("alice", "secret");
-    assertThat(result.token()).isEqualTo("token");
-    assertThat(result.user().username()).isEqualTo("alice");
 
-    verify(authUseCase).register("alice", "secret");
-    verifyNoMoreInteractions(authUseCase);
+    assertThat(result)
+      .extracting(AuthPayloadResponse::token, r -> r.user().username())
+      .containsExactly("token", "alice");
+    verifyRegistration();
   }
 
   @Test
   void shouldLogin() {
-    final var user = Instancio.of(User.class)
-      .set(field(User::username), "alice")
-      .set(field(User::passwordHash), "hash")
-      .create();
-    final var payload = new AuthPayload("token", user);
-
-    when(authUseCase.login("alice", "secret")).thenReturn(payload);
+    stubLogin(registrationPayload());
 
     final var result = resolver.login("alice", "secret");
-    assertThat(result.token()).isEqualTo("token");
-    assertThat(result.user().username()).isEqualTo("alice");
 
-    verify(authUseCase).login("alice", "secret");
-    verifyNoMoreInteractions(authUseCase);
+    assertThat(result)
+      .extracting(AuthPayloadResponse::token, r -> r.user().username())
+      .containsExactly("token", "alice");
+    verifyLogin();
   }
 
   @Test
   void shouldLogout() {
     assertThat(resolver.logout()).isTrue();
+  }
+
+  private void stubRegistration(final AuthPayload payload) {
+    when(authUseCase.register(Username.of("alice"), "secret")).thenReturn(payload);
+  }
+
+  private void stubLogin(final AuthPayload payload) {
+    when(authUseCase.login(Username.of("alice"), "secret")).thenReturn(payload);
+  }
+
+  private void verifyRegistration() {
+    verify(authUseCase).register(Username.of("alice"), "secret");
+    verifyNoMoreInteractions(authUseCase);
+  }
+
+  private void verifyLogin() {
+    verify(authUseCase).login(Username.of("alice"), "secret");
+    verifyNoMoreInteractions(authUseCase);
+  }
+
+  private static AuthPayload registrationPayload() {
+    final var user = Instancio.of(User.class)
+      .set(field(User::username), Username.of("alice"))
+      .set(field(User::passwordHash), "hash")
+      .create();
+    return new AuthPayload("token", user);
   }
 }

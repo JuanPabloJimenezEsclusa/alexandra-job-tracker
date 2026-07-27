@@ -3,30 +3,28 @@ package dev.jpje.jobtracker.application.usecase;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.domain.event.EventPublisher;
+import dev.jpje.jobtracker.domain.event.UserRegistered;
 import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.out.LoadUserPort;
+import dev.jpje.jobtracker.domain.port.out.PasswordEncoderPort;
 import dev.jpje.jobtracker.domain.port.out.SaveUserPort;
 import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.domain.vo.Username;
 import org.instancio.Instancio;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mindrot.jbcrypt.BCrypt;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -47,102 +45,101 @@ class AuthenticationUseCaseTest {
   private SaveUserPort saveUserPort;
 
   @Mock
+  private PasswordEncoderPort passwordEncoderPort;
+
+  @Mock
   private Clock clock;
 
-  private static String bcryptHash() {
-    return BCrypt.hashpw("correct-password", BCrypt.gensalt());
-  }
+  @Mock
+  private EventPublisher eventPublisher;
 
-  private static Stream<Arguments> registerScenarios() {
-    final var existingUser = Instancio.of(User.class)
-      .set(field(User::username), "existing")
+  private static User userWithUsername(final String username) {
+    return Instancio.of(User.class)
+      .set(field(User::username), Username.of(username))
       .set(field(User::passwordHash), "hash")
       .create();
-    return Stream.of(
-      arguments(null, false),
-      arguments(existingUser, true)
-    );
   }
 
-  private static Stream<Arguments> loginScenarios() {
-    final var hash = bcryptHash();
-    final var matchingUser = Instancio.of(User.class)
-      .set(field(User::username), "alice")
-      .set(field(User::passwordHash), hash)
-      .create();
-    return Stream.of(
-      arguments("alice", "correct-password", matchingUser, false),
-      arguments("alice", "wrong-password", matchingUser, true),
-      arguments("nonexistent", "pass", null, true)
-    );
-  }
-
-  @ParameterizedTest
-  @MethodSource("registerScenarios")
-  void shouldRegisterOrThrow(final @Nullable User existing, final boolean shouldThrow) {
-    // Given
-    when(loadUserPort.findByUsername("alice")).thenReturn(Optional.ofNullable(existing));
-
-    if (shouldThrow) {
-      // When, Then
-      assertThatThrownBy(() -> useCase.register("alice", "pass"))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Username already taken");
-      return;
-    }
-
-    final var token = "jwt-token";
-    when(tokenGeneratorPort.generateToken(any())).thenReturn(token);
+  @Test
+  void shouldRegister() {
+    final var username = Username.of("alice");
+    when(loadUserPort.findByUsername("alice")).thenReturn(Optional.empty());
+    when(passwordEncoderPort.encode("pass")).thenReturn("encoded-pass");
+    when(tokenGeneratorPort.generateToken(any())).thenReturn("jwt-token");
     when(clock.instant()).thenReturn(Instant.EPOCH);
 
-    // When
-    final var payload = useCase.register("alice", "pass");
+    final var payload = useCase.register(username, "pass");
 
-    // Then
-    assertThat(payload.user().username()).isEqualTo("alice");
+    assertThat(payload.user().username().value()).isEqualTo("alice");
+    verify(passwordEncoderPort).encode("pass");
     verify(saveUserPort).save(payload.user());
+    verify(tokenGeneratorPort).generateToken(any());
+    verify(eventPublisher).publish(any(UserRegistered.class));
+    verifyNoMoreInteractions(passwordEncoderPort, tokenGeneratorPort, saveUserPort, eventPublisher);
   }
 
-  @ParameterizedTest
-  @MethodSource("loginScenarios")
-  void shouldLoginOrThrow(final String username, final String password, final @Nullable User existing,
-                          final boolean shouldThrow) {
-    // Given
-    when(loadUserPort.findByUsername(username)).thenReturn(Optional.ofNullable(existing));
+  @Test
+  void shouldRejectDuplicateRegistration() {
+    final var existing = userWithUsername("existing");
+    final var username = Username.of("alice");
+    when(loadUserPort.findByUsername("alice")).thenReturn(Optional.of(existing));
 
-    if (shouldThrow) {
-      // When, Then
-      assertThatThrownBy(() -> useCase.login(username, password))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Invalid credentials");
-      return;
-    }
+    assertThatThrownBy(() -> useCase.register(username, "pass"))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Username already taken");
+    verifyNoMoreInteractions(passwordEncoderPort, tokenGeneratorPort, saveUserPort, eventPublisher);
+  }
 
-    // Given
+  @Test
+  void shouldLogin() {
+    final var matchingUser = userWithUsername("alice");
+    when(loadUserPort.findByUsername("alice")).thenReturn(Optional.of(matchingUser));
+    when(passwordEncoderPort.matches("correct-password", matchingUser.passwordHash())).thenReturn(true);
     when(tokenGeneratorPort.generateToken(any())).thenReturn("jwt-token");
 
-    // When
-    final var payload = useCase.login(username, password);
+    final var payload = useCase.login(Username.of("alice"), "correct-password");
 
-    // Then
-    assertThat(payload.user().username()).isEqualTo(username);
+    assertThat(payload.user().username().value()).isEqualTo("alice");
+    verify(passwordEncoderPort).matches("correct-password", matchingUser.passwordHash());
+    verifyNoMoreInteractions(passwordEncoderPort, tokenGeneratorPort);
+  }
+
+  @Test
+  void shouldRejectLoginWithWrongPassword() {
+    final var matchingUser = userWithUsername("alice");
+    final var username = Username.of("alice");
+    when(loadUserPort.findByUsername("alice")).thenReturn(Optional.of(matchingUser));
+    when(passwordEncoderPort.matches("wrong-password", matchingUser.passwordHash())).thenReturn(false);
+
+    assertThatThrownBy(() -> useCase.login(username, "wrong-password"))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Invalid credentials");
+    verifyNoMoreInteractions(tokenGeneratorPort);
+  }
+
+  @Test
+  void shouldRejectLoginForUnknownUser() {
+    final var username = Username.of("nonexistent");
+    when(loadUserPort.findByUsername("nonexistent")).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> useCase.login(username, "pass"))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("Invalid credentials");
+    verifyNoMoreInteractions(tokenGeneratorPort);
   }
 
   @Test
   void shouldReturnCurrentUser() {
-    // Given
     final var userId = new UserId(UUID.randomUUID());
     final var user = Instancio.of(User.class)
       .set(field(User::id), userId)
-      .set(field(User::username), "alice")
+      .set(field(User::username), Username.of("alice"))
       .set(field(User::passwordHash), "hash")
       .create();
     when(loadUserPort.findById(userId)).thenReturn(Optional.of(user));
 
-    // When
     final var result = useCase.getCurrentUser(userId);
 
-    // Then
     assertThat(result).hasValue(user);
   }
 }

@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(
   classes = JobTrackerServerApplication.class,
@@ -24,26 +25,6 @@ class JobPostingIntegrationTest {
 
   @LocalServerPort
   private int port;
-
-  private String url() {
-    return "http://localhost:%s/api/graphql".formatted(port);
-  }
-
-  private HttpHeaders jsonHeaders() {
-    final var headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    return headers;
-  }
-
-  private String registerAndGetToken(String username) {
-    final var body = """
-      {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\") { token } }"}
-      """.formatted(username);
-    final var response = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>(body, jsonHeaders()), String.class);
-    assert response.getBody() != null;
-    return response.getBody().replaceAll(".*\"token\":\"([^\"]+)\".*", "$1");
-  }
 
   @Test
   void shouldListJobPostings() {
@@ -60,7 +41,7 @@ class JobPostingIntegrationTest {
 
   @Test
   void shouldSubmitJobPosting() {
-    final var token = registerAndGetToken("submit-list-user");
+    final var token = registerAndGetToken("submit-user");
     final var headers = jsonHeaders();
     headers.setBearerAuth(token);
 
@@ -71,7 +52,24 @@ class JobPostingIntegrationTest {
       """;
     final var response = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>(body, headers), String.class);
-    assertThat(response.getBody()).contains("Test Engineer").contains("TestCorp").contains("LINKEDIN");
+    assertThat(response.getBody())
+      .contains("Test Engineer")
+      .contains("TestCorp")
+      .contains("LINKEDIN");
+  }
+
+  @Test
+  void shouldListSubmittedPosting() {
+    final var token = registerAndGetToken("submit-list-user");
+    final var headers = jsonHeaders();
+    headers.setBearerAuth(token);
+
+    final var body = """
+      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id title company source}}",\
+      "variables":{"i":{"url":"https://example.com/job/123","title":"Test Engineer",\
+      "description":"No empty","company":"TestCorp","source":"LINKEDIN"}}}
+      """;
+    rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
 
     final var listResp = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>("""
@@ -98,5 +96,24 @@ class JobPostingIntegrationTest {
         {"query": "{ jobPostings(source: INDEED) { title } }"}
         """, headers), String.class);
     assertThat(response.getBody()).contains("\"jobPostings\":[]");
+  }
+
+  private String url() {
+    return "http://localhost:%s/api/graphql".formatted(port);
+  }
+
+  private HttpHeaders jsonHeaders() {
+    final var headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return headers;
+  }
+
+  private String registerAndGetToken(String username) {
+    final var body = """
+      {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\") { token } }"}
+      """.formatted(username);
+    final var response = rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(body, jsonHeaders()), String.class);
+    final var node = new ObjectMapper().readTree(response.getBody());
+    return node.findValue("token").asString();
   }
 }

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.jpje.jobtracker.domain.model.JobAnalysis;
 import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
+import dev.jpje.jobtracker.domain.vo.JobAnalysis;
 import org.jspecify.annotations.Nullable;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.DefaultChatOptionsBuilder;

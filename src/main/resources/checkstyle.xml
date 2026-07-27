@@ -127,7 +127,7 @@
     <module name="CustomImportOrder">
       <property name="sortImportsInGroupAlphabetically" value="true"/>
       <property name="separateLineBetweenGroups" value="true"/>
-      <property name="standardPackageRegExp" value="^(java|jakarta)\."/>
+      <property name="standardPackageRegExp" value="^(java|javax|jakarta)\."/>
       <property name="thirdPartyPackageRegExp" value="^.*$"/>
       <property name="customImportOrderRules"
                 value="STATIC###STANDARD_JAVA_PACKAGE###THIRD_PARTY_PACKAGE"/>

@@ -12,37 +12,35 @@ import java.util.Objects;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
+import dev.jpje.jobtracker.domain.vo.CompanyName;
+import dev.jpje.jobtracker.domain.vo.Notes;
+import dev.jpje.jobtracker.domain.vo.RoleName;
 import dev.jpje.jobtracker.domain.vo.Source;
+import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 
 public record JobApplication(
   UUID id,
   UserId userId,
-  String company,
-  String role,
+  CompanyName company,
+  RoleName role,
   Source source,
-  @Nullable String postingUrl,
+  @Nullable Url postingUrl,
   ApplicationStatus status,
   Instant dateApplied,
   Instant lastUpdated,
-  @Nullable String notes) {
+  @Nullable Notes notes) {
 
   public JobApplication {
     Objects.requireNonNull(id, "id must not be null");
     Objects.requireNonNull(userId, "userId must not be null");
+    Objects.requireNonNull(company, "company must not be null");
+    Objects.requireNonNull(role, "role must not be null");
     Objects.requireNonNull(source, "source must not be null");
     Objects.requireNonNull(status, "status must not be null");
     Objects.requireNonNull(dateApplied, "dateApplied must not be null");
     Objects.requireNonNull(lastUpdated, "lastUpdated must not be null");
-    requireNonBlank(company, "company must not be blank");
-    requireNonBlank(role, "role must not be blank");
-  }
-
-  private static void requireNonBlank(final String value, final String message) {
-    if (value.isBlank()) {
-      throw new IllegalArgumentException(message);
-    }
   }
 
   private static boolean canTransitionTo(final ApplicationStatus current, final ApplicationStatus target) {
@@ -62,7 +60,7 @@ public record JobApplication(
     return new JobApplication(id, userId, company, role, source, postingUrl, newStatus, dateApplied, lastUpdated, notes);
   }
 
-  public JobApplication withNotes(@Nullable final String notes, final Instant lastUpdated) {
+  public JobApplication withNotes(@Nullable final Notes notes, final Instant lastUpdated) {
     return new JobApplication(id, userId, company, role, source, postingUrl, status, dateApplied, lastUpdated, notes);
   }
 }

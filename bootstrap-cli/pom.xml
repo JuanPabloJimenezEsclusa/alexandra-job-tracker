@@ -44,6 +44,23 @@
     </dependency>
   </dependencies>
 
+  <reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-project-info-reports-plugin</artifactId>
+        <reportSets>
+          <reportSet>
+            <reports>
+              <report>index</report>
+              <report>summary</report>
+            </reports>
+          </reportSet>
+        </reportSets>
+      </plugin>
+    </plugins>
+  </reporting>
+
   <build>
     <plugins>
       <plugin>
@@ -88,7 +105,7 @@
         <artifactId>native-maven-plugin</artifactId>
         <configuration>
           <imageName>job-tracker-cli</imageName>
-          <mainClass>dev.jpje.jobtracker.cli.JobTrackerCliApplication</mainClass>
+          <mainClass>dev.jpje.jobtracker.bootstrap.cli.JobTrackerCliApplication</mainClass>
           <buildArgs combine.children="append">
             <!--
             (compile) Recommendations:

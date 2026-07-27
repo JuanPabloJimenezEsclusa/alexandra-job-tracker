@@ -3,7 +3,8 @@ CREATE TABLE users
   id            UUID PRIMARY KEY,
   username      VARCHAR(100) UNIQUE      NOT NULL,
   password_hash VARCHAR(255)             NOT NULL,
-  created_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
+  created_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  version       BIGINT                   NOT NULL DEFAULT 0
 );
 
 CREATE TABLE applications
@@ -17,7 +18,8 @@ CREATE TABLE applications
   status       VARCHAR(50)              NOT NULL DEFAULT 'SAVED',
   date_applied TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   last_updated TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  notes        TEXT
+  notes        TEXT,
+  version      BIGINT                   NOT NULL DEFAULT 0
 );
 
 CREATE INDEX idx_applications_user_id ON applications (user_id);
@@ -32,6 +34,7 @@ CREATE TABLE job_postings
   company     TEXT         NOT NULL,
   description TEXT,
   posted_at   TIMESTAMP WITH TIME ZONE,
+  version     BIGINT       NOT NULL DEFAULT 0,
   UNIQUE (user_id, url)
 );
 

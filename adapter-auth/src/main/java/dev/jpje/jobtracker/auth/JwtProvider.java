@@ -4,13 +4,13 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
-import java.util.Date;
+import javax.crypto.SecretKey;
 
 import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -38,14 +38,15 @@ public class JwtProvider implements TokenGeneratorPort {
     }
   }
 
-  @SuppressWarnings("java:S2143") // Allow using java.util.Date for JWT claims
   @Override
   public String generateToken(final UserId userId) {
     final var now = clock.instant();
+    final var expirationTime = now.plusMillis(expirationMs);
+
     return Jwts.builder()
       .subject(userId.value().toString())
-      .issuedAt(Date.from(now))  //NOSONAR
-      .expiration(Date.from(now.plusMillis(expirationMs))) //NOSONAR
+      .claim(Claims.ISSUED_AT, now.getEpochSecond())
+      .claim(Claims.EXPIRATION, expirationTime.getEpochSecond())
       .signWith(key)
       .compact();
   }

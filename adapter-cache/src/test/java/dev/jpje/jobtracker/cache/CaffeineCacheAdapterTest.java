@@ -2,26 +2,15 @@ package dev.jpje.jobtracker.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.time.Duration;
-import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 
 class CaffeineCacheAdapterTest {
   private CaffeineCacheAdapter cache;
-
-  private static Stream<Arguments> evictionScenarios() {
-    return Stream.of(
-      arguments("key1", "value1", "evict"),
-      arguments("key2", "value2", "clear")
-    );
-  }
 
   @BeforeEach
   void setUp() {
@@ -55,18 +44,27 @@ class CaffeineCacheAdapterTest {
     assertThat(result).isEmpty();
   }
 
-  @ParameterizedTest(name = "{2} → get({0}) empty")
-  @MethodSource("evictionScenarios")
-  void shouldEvictOrClearKeys(final String key, final String value, final String action) {
+  @ParameterizedTest(name = "evict({0}) → get({0}) empty")
+  @CsvSource({"key1, value1", "key2, value2"})
+  void shouldEvictKeys(final String key, final String value) {
     // Given
     cache.put(key, value);
 
     // When
-    if ("evict".equals(action)) {
-      cache.evict(key);
-    } else {
-      cache.clear();
-    }
+    cache.evict(key);
+
+    // Then
+    assertThat(cache.get(key, String.class)).isEmpty();
+  }
+
+  @ParameterizedTest(name = "clear → get({0}) empty")
+  @CsvSource({"key1, value1", "key2, value2"})
+  void shouldClearAllKeys(final String key, final String value) {
+    // Given
+    cache.put(key, value);
+
+    // When
+    cache.clear();
 
     // Then
     assertThat(cache.get(key, String.class)).isEmpty();
@@ -85,9 +83,9 @@ class CaffeineCacheAdapterTest {
     assertThat(cache.get(key, String.class)).hasValue(newVal);
   }
 
-  @ParameterizedTest(name = "expiry after {1}ms")
-  @CsvSource({"10, 20"})
-  void shouldHandleExpiration(final long ttlMs, final long sleepMs) {
+  @ParameterizedTest(name = "expiry after {0}ms")
+  @CsvSource("10")
+  void shouldHandleExpiration(final long ttlMs) {
     // Given
     var shortCache = new CaffeineCacheAdapter(100, Duration.ofMillis(ttlMs));
     shortCache.put("key", "value");

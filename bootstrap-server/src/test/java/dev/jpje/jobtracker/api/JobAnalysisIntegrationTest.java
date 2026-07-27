@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(
   classes = JobTrackerServerApplication.class,
@@ -24,6 +25,26 @@ class JobAnalysisIntegrationTest {
 
   @LocalServerPort
   private int port;
+
+  @Test
+  void shouldAnalyzeJobPosting() {
+    final var token = registerAndGetToken();
+    final var headers = jsonHeaders();
+    headers.setBearerAuth(token);
+
+    final var submitBody = """
+      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id}}",\
+      "variables":{"i":{"url":"https://example.com/job","title":"Engineer","company":"Acme","description":"Software engineer role","source":"LINKEDIN"}}}
+      """;
+    final var submitResp = rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(submitBody, headers), String.class);
+    final var node = new ObjectMapper().readTree(submitResp.getBody());
+    final var postingId = node.findValue("id").asString();
+    final var response = rest.exchange(url(), HttpMethod.POST,
+      new HttpEntity<>("""
+        {"query": "mutation { analyzeJobPosting(jobPostingId: \\"%s\\") { summary skills fitScore } }"}
+        """.formatted(postingId), jsonHeaders()), String.class);
+    assertThat(response.getBody()).contains("summary").contains("skills").contains("fitScore");
+  }
 
   private String url() {
     return "http://localhost:%s/api/graphql".formatted(port);
@@ -39,31 +60,8 @@ class JobAnalysisIntegrationTest {
     final var body = """
       {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\") { token } }"}
       """.formatted("analysis-user");
-    final var response = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>(body, jsonHeaders()), String.class);
-    assert response.getBody() != null;
-    return response.getBody().replaceAll(".*\"token\":\"([^\"]+)\".*", "$1");
-  }
-
-  @Test
-  void shouldAnalyzeJobPosting() {
-    final var token = registerAndGetToken();
-    final var headers = jsonHeaders();
-    headers.setBearerAuth(token);
-
-    final var submitBody = """
-      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id}}",\
-      "variables":{"i":{"url":"https://example.com/job","title":"Engineer","company":"Acme","description":"Software engineer role","source":"LINKEDIN"}}}
-      """;
-    final var submitResp = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>(submitBody, headers), String.class);
-    assert submitResp.getBody() != null;
-    final var postingId = submitResp.getBody().replaceAll(".*\"id\":\"([^\"]+)\".*", "$1");
-
-    final var response = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>("""
-        {"query": "mutation { analyzeJobPosting(jobPostingId: \\"%s\\") { summary skills fitScore } }"}
-        """.formatted(postingId), jsonHeaders()), String.class);
-    assertThat(response.getBody()).contains("summary").contains("skills").contains("fitScore");
+    final var response = rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(body, jsonHeaders()), String.class);
+    final var node = new ObjectMapper().readTree(response.getBody());
+    return node.findValue("token").asString();
   }
 }

@@ -13,14 +13,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import dev.jpje.jobtracker.domain.model.JobAnalysis;
+import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
+import dev.jpje.jobtracker.api.dto.JobPostingResponse;
 import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.port.in.AnalyzeJobPostingPort;
 import dev.jpje.jobtracker.domain.port.in.SubmitJobPostingPort;
+import dev.jpje.jobtracker.domain.vo.CompanyName;
+import dev.jpje.jobtracker.domain.vo.JobAnalysis;
+import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Source;
+import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
-import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -46,33 +50,38 @@ class JobPostingMutationResolverTest {
     final var jobId = UUID.randomUUID();
     final var analysis = new JobAnalysis("Java role", List.of("Spring", "SQL"), 85.0);
     return Stream.of(
-      arguments(jobId, analysis, null),
-      arguments(jobId, null, "Job posting not found")
+      arguments(jobId, analysis)
     );
   }
 
-  @ParameterizedTest(name = "analyze scenario {index}")
-  @MethodSource("analyzeScenarios")
-  void shouldResolveAnalyzeOrThrow(final UUID jobPostingId,
-                                   final JobAnalysis analysis,
-                                   @Nullable final String errorMessage) {
-    if (errorMessage != null) {
-      when(analyzeUseCase.analyze(jobPostingId)).thenThrow(new IllegalArgumentException(errorMessage));
-      assertThatThrownBy(() -> resolver.analyzeJobPosting(jobPostingId))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage(errorMessage);
-      return;
-    }
+  private static Stream<Arguments> analyzeErrorScenarios() {
+    final var jobId = UUID.randomUUID();
+    return Stream.of(
+      arguments(jobId, "Job posting not found")
+    );
+  }
 
+  @ParameterizedTest(name = "analyze {0}")
+  @MethodSource("analyzeScenarios")
+  void shouldResolveAnalyze(final UUID jobPostingId, final JobAnalysis analysis) {
     when(analyzeUseCase.analyze(jobPostingId)).thenReturn(analysis);
 
-    assertThat(resolver.analyzeJobPosting(jobPostingId))
-      .isNotNull()
-      .extracting(JobAnalysis::summary, JobAnalysis::skills, JobAnalysis::fitScore)
-      .containsExactly("Java role", List.of("Spring", "SQL"), 85.0);
+    assertThat(resolver.analyzeJobPosting(jobPostingId)).isEqualTo(JobAnalysisResponse.from(analysis));
 
     verify(analyzeUseCase).analyze(jobPostingId);
     verifyNoMoreInteractions(analyzeUseCase);
+    verifyNoInteractions(submitUseCase);
+  }
+
+  @ParameterizedTest(name = "analyze error {0}")
+  @MethodSource("analyzeErrorScenarios")
+  void shouldThrowWhenAnalyzeFails(final UUID jobPostingId, final String errorMessage) {
+    when(analyzeUseCase.analyze(jobPostingId)).thenThrow(new IllegalArgumentException(errorMessage));
+
+    assertThatThrownBy(() -> resolver.analyzeJobPosting(jobPostingId))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage(errorMessage);
+
     verifyNoInteractions(submitUseCase);
   }
 
@@ -82,21 +91,23 @@ class JobPostingMutationResolverTest {
     final var posted = Instancio.of(JobPosting.class)
       .set(field(JobPosting::userId), userId)
       .set(field(JobPosting::source), Source.LINKEDIN)
-      .set(field(JobPosting::url), "url")
-      .set(field(JobPosting::title), "title")
-      .set(field(JobPosting::company), "company")
+      .set(field(JobPosting::url), Url.of("https://example.com/job"))
+      .set(field(JobPosting::title), JobTitle.of("title"))
+      .set(field(JobPosting::company), CompanyName.of("company"))
       .set(field(JobPosting::description), "desc")
       .create();
-    final var input = new JobPostingMutationResolver.JobPostingInput("url", "title", "company", "desc", Source.LINKEDIN);
+    final var input = new JobPostingMutationResolver.JobPostingInput("https://example.com/job", "title", "company", "desc", Source.LINKEDIN);
 
-    when(submitUseCase.submit(userId, "url", "title", "company", "desc", Source.LINKEDIN)).thenReturn(posted);
+    when(submitUseCase.submit(userId, Url.of("https://example.com/job"), JobTitle.of("title"),
+      CompanyName.of("company"), "desc", Source.LINKEDIN)).thenReturn(posted);
 
     final var result = resolver.submitJobPosting(userId, input);
-    assertThat(result.source()).isEqualTo(Source.LINKEDIN);
-    assertThat(result.title()).isEqualTo("title");
-    assertThat(result.company()).isEqualTo("company");
+    assertThat(result)
+      .extracting(JobPostingResponse::source, JobPostingResponse::title, JobPostingResponse::company)
+      .containsExactly(Source.LINKEDIN, "title", "company");
 
-    verify(submitUseCase).submit(userId, "url", "title", "company", "desc", Source.LINKEDIN);
+    verify(submitUseCase).submit(userId, Url.of("https://example.com/job"), JobTitle.of("title"),
+      CompanyName.of("company"), "desc", Source.LINKEDIN);
     verifyNoMoreInteractions(submitUseCase);
     verifyNoInteractions(analyzeUseCase);
   }

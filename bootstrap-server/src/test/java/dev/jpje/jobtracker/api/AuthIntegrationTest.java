@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(
   classes = JobTrackerServerApplication.class,
@@ -25,16 +26,6 @@ class AuthIntegrationTest {
   @LocalServerPort
   private int port;
 
-  private String url() {
-    return "http://localhost:%s/api/graphql".formatted(port);
-  }
-
-  private HttpHeaders jsonHeaders() {
-    final var headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    return headers;
-  }
-
   @Test
   void shouldRegister() {
     final var body = """
@@ -42,8 +33,11 @@ class AuthIntegrationTest {
       """;
     final var response = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>(body, jsonHeaders()), String.class);
-    assertThat(response.getStatusCode().value()).isBetween(200, 201);
-    assertThat(response.getBody()).contains("token").contains("alice");
+    assertThat(response).matches(r ->
+      r.getStatusCode().is2xxSuccessful()
+        && r.getBody() != null
+        && r.getBody().contains("token")
+        && r.getBody().contains("alice"));
   }
 
   @Test
@@ -84,10 +78,8 @@ class AuthIntegrationTest {
       new HttpEntity<>("""
         {"query": "mutation { register(username: \\"dave\\", password: \\"pass\\") { token } }"}
         """, jsonHeaders()), String.class);
-    final var json = registerResp.getBody();
-    assert json != null;
-    final var token = json.replaceAll(".*\"token\":\"([^\"]+)\".*", "$1");
-
+    final var node = new ObjectMapper().readTree(registerResp.getBody());
+    final var token = node.findValue("token").asString();
     final var headers = jsonHeaders();
     headers.setBearerAuth(token);
     final var response = rest.exchange(url(), HttpMethod.POST,
@@ -113,5 +105,15 @@ class AuthIntegrationTest {
         {"query": "mutation { logout }"}
         """, jsonHeaders()), String.class);
     assertThat(response.getBody()).contains("\"logout\":true");
+  }
+
+  private String url() {
+    return "http://localhost:%s/api/graphql".formatted(port);
+  }
+
+  private HttpHeaders jsonHeaders() {
+    final var headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return headers;
   }
 }

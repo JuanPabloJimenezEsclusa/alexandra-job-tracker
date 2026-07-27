@@ -8,10 +8,15 @@ import static org.mockito.Mockito.when;
 
 import java.util.UUID;
 
+import dev.jpje.jobtracker.api.dto.JobApplicationResponse;
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.port.in.TrackJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
+import dev.jpje.jobtracker.domain.vo.CompanyName;
+import dev.jpje.jobtracker.domain.vo.Notes;
+import dev.jpje.jobtracker.domain.vo.RoleName;
 import dev.jpje.jobtracker.domain.vo.Source;
+import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
@@ -35,23 +40,24 @@ class ApplicationMutationResolverTest {
     final var app = Instancio.of(JobApplication.class)
       .set(field(JobApplication::userId), userId)
       .set(field(JobApplication::status), ApplicationStatus.SAVED)
-      .set(field(JobApplication::company), "Acme")
-      .set(field(JobApplication::role), "Engineer")
+      .set(field(JobApplication::company), CompanyName.of("Acme"))
+      .set(field(JobApplication::role), RoleName.of("Engineer"))
       .set(field(JobApplication::source), Source.LINKEDIN)
-      .set(field(JobApplication::postingUrl), "url")
-      .set(field(JobApplication::notes), "notes")
+      .set(field(JobApplication::postingUrl), Url.of("https://example.com/job"))
+      .set(field(JobApplication::notes), Notes.of("notes"))
       .create();
 
-    when(useCase.create(userId, "Acme", "Engineer",
-      Source.LINKEDIN, "url", "notes")).thenReturn(app);
+    when(useCase.create(userId, CompanyName.of("Acme"), RoleName.of("Engineer"),
+      Source.LINKEDIN, Url.of("https://example.com/job"), Notes.of("notes"))).thenReturn(app);
 
     final var result = resolver.createApplication(userId, "Acme", "Engineer",
-      Source.LINKEDIN, "url", "notes");
-    assertThat(result.company()).isEqualTo("Acme");
-    assertThat(result.role()).isEqualTo("Engineer");
-    assertThat(result.source()).isEqualTo(Source.LINKEDIN);
+      Source.LINKEDIN, "https://example.com/job", "notes");
+    assertThat(result)
+      .extracting(JobApplicationResponse::company, JobApplicationResponse::role, JobApplicationResponse::source)
+      .containsExactly("Acme", "Engineer", Source.LINKEDIN);
 
-    verify(useCase).create(userId, "Acme", "Engineer", Source.LINKEDIN, "url", "notes");
+    verify(useCase).create(userId, CompanyName.of("Acme"), RoleName.of("Engineer"),
+      Source.LINKEDIN, Url.of("https://example.com/job"), Notes.of("notes"));
     verifyNoMoreInteractions(useCase);
   }
 
@@ -63,20 +69,21 @@ class ApplicationMutationResolverTest {
       .set(field(JobApplication::id), id)
       .set(field(JobApplication::userId), userId)
       .set(field(JobApplication::status), ApplicationStatus.INTERVIEWING)
-      .set(field(JobApplication::company), "Acme")
-      .set(field(JobApplication::role), "Engineer")
+      .set(field(JobApplication::company), CompanyName.of("Acme"))
+      .set(field(JobApplication::role), RoleName.of("Engineer"))
       .set(field(JobApplication::source), Source.LINKEDIN)
-      .set(field(JobApplication::postingUrl), "url")
-      .set(field(JobApplication::notes), "notes")
+      .set(field(JobApplication::postingUrl), Url.of("https://example.com/job"))
+      .set(field(JobApplication::notes), Notes.of("notes"))
       .create();
 
-    when(useCase.updateStatus(id, ApplicationStatus.INTERVIEWING, "notes")).thenReturn(app);
+    when(useCase.updateStatus(id, ApplicationStatus.INTERVIEWING, Notes.of("notes"))).thenReturn(app);
 
     final var result = resolver.updateApplicationStatus(id, ApplicationStatus.INTERVIEWING, "notes");
-    assertThat(result.status()).isEqualTo(ApplicationStatus.INTERVIEWING);
-    assertThat(result.company()).isEqualTo("Acme");
+    assertThat(result)
+      .extracting(JobApplicationResponse::status, JobApplicationResponse::company)
+      .containsExactly(ApplicationStatus.INTERVIEWING, "Acme");
 
-    verify(useCase).updateStatus(id, ApplicationStatus.INTERVIEWING, "notes");
+    verify(useCase).updateStatus(id, ApplicationStatus.INTERVIEWING, Notes.of("notes"));
     verifyNoMoreInteractions(useCase);
   }
 

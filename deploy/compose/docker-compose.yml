@@ -56,7 +56,7 @@ services:
       start_period: 30s
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.152.0-nightly.286fff0
+    image: otel/opentelemetry-collector-contrib:0.157.0
     container_name: alexandra-otel-collector
     hostname: otel-collector
     restart: unless-stopped

@@ -12,6 +12,7 @@ import java.util.stream.Stream;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -25,28 +26,45 @@ import reactor.core.publisher.Mono;
 
 class MdcLoggingInterceptorTest {
 
+  private static final int REQUEST_ID_LENGTH = 8;
+  private static final int TRUNCATED_OPERATION_LENGTH = 80;
+
   private MdcLoggingInterceptor interceptor;
 
-  private static Stream<Arguments> mdcScenarios() {
-    final var shortDoc = "{ me }";
-    final var longDoc = """
+  private static Stream<Arguments> requestIdScenarios() {
+    return Stream.of(
+      arguments(named("short document", new HttpHeaders()), "{ me }"),
+      arguments(named("long document", new HttpHeaders()), longDocument())
+    );
+  }
+
+  private static Stream<Arguments> operationScenarios() {
+    return Stream.of(
+      arguments(named("short operation", new HttpHeaders()), "{ me { username } }")
+    );
+  }
+
+  private static Stream<Arguments> truncationScenarios() {
+    return Stream.of(
+      arguments(new HttpHeaders(), longDocument())
+    );
+  }
+
+  private static Stream<Arguments> hasAuthScenarios() {
+    final var headersWithAuth = new HttpHeaders();
+    headersWithAuth.setBearerAuth("some-token");
+    return Stream.of(
+      arguments(named("with bearer token", headersWithAuth), "true"),
+      arguments(named("without bearer token", new HttpHeaders()), null)
+    );
+  }
+
+  private static String longDocument() {
+    return """
       mutation {
         createApplication(company: "VeryLongCompanyNameThatExceedsTheMaxLength", role: "Engineer", source: LINKEDIN) { id }
       }
       """;
-    final var headersWithAuth = new HttpHeaders();
-    headersWithAuth.setBearerAuth("some-token");
-    return Stream.of(
-      arguments(named("should set requestId", new HttpHeaders()), shortDoc, "requestId", null),
-      arguments(named("should set operation", new HttpHeaders()), "{ me { username } }", "operation", "{ me { username } }"),
-      arguments(named("should truncate long operation", new HttpHeaders()), longDoc, "operation", null),
-      arguments(named("should set hasAuth when Bearer token present", headersWithAuth), shortDoc, "hasAuth", "true"),
-      arguments(named("should not set hasAuth without Bearer token", new HttpHeaders()), shortDoc, "hasAuth", null)
-    );
-  }
-
-  private static Stream<Arguments> clearMdcScenarios() {
-    return Stream.of(arguments("preExisting", "value"));
   }
 
   @BeforeEach
@@ -60,38 +78,62 @@ class MdcLoggingInterceptorTest {
     MDC.clear();
   }
 
-  @ParameterizedTest(name = "{0} → MDC[{2}]={3}")
-  @MethodSource("mdcScenarios")
-  void shouldSetMdcContext(final HttpHeaders headers, final String document,
-                           final String mdcKey, final String expectedValue) {
+  @ParameterizedTest(name = "{0} → MDC[requestId]")
+  @MethodSource("requestIdScenarios")
+  void shouldSetRequestId(final HttpHeaders headers, final String document) {
     // Given
     final var captured = new AtomicReference<String>();
-    final var chain = capturingChain(captured, mdcKey);
 
     // When
-    interceptor.intercept(mockRequest(headers, document), chain).block();
+    interceptor.intercept(mockRequest(headers, document), capturingChain(captured, "requestId")).block();
 
     // Then
-    if (expectedValue != null) {
-      if (mdcKey.equals("operation") && captured.get() != null && captured.get().length() == 80) {
-        assertThat(captured.get()).hasSize(80);
-      } else {
-        assertThat(captured.get()).isEqualTo(expectedValue);
-      }
-    } else if (mdcKey.equals("requestId")) {
-      assertThat(captured.get()).isNotNull().hasSize(8);
-    } else if (mdcKey.equals("operation")) {
-      assertThat(captured.get()).hasSize(80);
-    } else {
-      assertThat(captured.get()).isNull();
-    }
+    assertThat(captured.get()).isNotNull().hasSize(REQUEST_ID_LENGTH);
   }
 
-  @ParameterizedTest(name = "should clear MDC after request")
-  @MethodSource("clearMdcScenarios")
-  void shouldClearMdcAfterRequest(final String preExistingKey, final String preExistingValue) {
+  @ParameterizedTest(name = "{0} → MDC[operation]={1}")
+  @MethodSource("operationScenarios")
+  void shouldSetOperation(final HttpHeaders headers, final String document) {
     // Given
-    MDC.put(preExistingKey, preExistingValue);
+    final var captured = new AtomicReference<String>();
+
+    // When
+    interceptor.intercept(mockRequest(headers, document), capturingChain(captured, "operation")).block();
+
+    // Then
+    assertThat(captured.get()).isEqualTo(document);
+  }
+
+  @ParameterizedTest(name = "{0} → MDC[operation] truncated to {1} chars")
+  @MethodSource("truncationScenarios")
+  void shouldTruncateLongOperation(final HttpHeaders headers, final String document) {
+    // Given
+    final var captured = new AtomicReference<String>();
+
+    // When
+    interceptor.intercept(mockRequest(headers, document), capturingChain(captured, "operation")).block();
+
+    // Then
+    assertThat(captured.get()).hasSize(TRUNCATED_OPERATION_LENGTH);
+  }
+
+  @ParameterizedTest(name = "{0} → MDC[hasAuth]={1}")
+  @MethodSource("hasAuthScenarios")
+  void shouldSetHasAuth(final HttpHeaders headers, final String expectedValue) {
+    // Given
+    final var captured = new AtomicReference<String>();
+
+    // When
+    interceptor.intercept(mockRequest(headers, "{ me }"), capturingChain(captured, "hasAuth")).block();
+
+    // Then
+    assertThat(captured.get()).isEqualTo(expectedValue);
+  }
+
+  @Test
+  void shouldClearMdcAfterRequest() {
+    // Given
+    MDC.put("preExisting", "value");
 
     // When
     interceptor.intercept(mockRequest(new HttpHeaders(), "{ me }"), passingChain()).block();

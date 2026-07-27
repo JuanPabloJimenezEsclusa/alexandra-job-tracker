@@ -61,7 +61,6 @@
     <module>adapter-cache</module>
     <module>adapter-auth</module>
     <module>adapter-ai</module>
-    <module>adapter-observability</module>
     <module>adapter-api</module>
     <module>adapter-cli</module>
     <module>bootstrap-server</module>
@@ -81,7 +80,7 @@
     <jbcrypt.version>0.4</jbcrypt.version>
     <spring-shell.version>4.0.3</spring-shell.version>
     <graphql-java-extended-scalars.version>24.0</graphql-java-extended-scalars.version>
-    <opentelemetry-exporter-otlp.version>1.64.0</opentelemetry-exporter-otlp.version>
+    <opentelemetry.version>1.64.0</opentelemetry.version>
     <LatencyUtils.version>2.0.3</LatencyUtils.version>
     <caffeine.version>3.2.0</caffeine.version>
     <jspecify.version>1.0.1</jspecify.version>
@@ -383,26 +382,12 @@
             <generateSitemap>true</generateSitemap>
             <stagingDirectory>${project.build.directory}/site-staging</stagingDirectory>
             <attributes>
-              <reporting.outputEncoding>${project.reporting.outputEncoding}
-              </reporting.outputEncoding>
-              <project.build.sourceEncoding>${project.build.sourceEncoding}
-              </project.build.sourceEncoding>
+              <reporting.outputEncoding>${project.reporting.outputEncoding}</reporting.outputEncoding>
+              <project.build.sourceEncoding>${project.build.sourceEncoding}</project.build.sourceEncoding>
               <currentYear>${currentYear}</currentYear>
               <inceptionYear>${inceptionYear}</inceptionYear>
             </attributes>
           </configuration>
-          <dependencies>
-            <dependency>
-              <groupId>io.github.devacfr.maven.skins</groupId>
-              <artifactId>reflow-maven-skin</artifactId>
-              <version>${reflow-maven-skin.version}</version>
-            </dependency>
-            <dependency>
-              <groupId>io.github.devacfr.maven.skins</groupId>
-              <artifactId>reflow-velocity-tools</artifactId>
-              <version>${reflow-maven-skin.version}</version>
-            </dependency>
-          </dependencies>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>

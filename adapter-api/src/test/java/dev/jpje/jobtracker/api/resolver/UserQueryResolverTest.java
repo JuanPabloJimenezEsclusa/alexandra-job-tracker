@@ -13,6 +13,7 @@ import dev.jpje.jobtracker.api.dto.UserResponse;
 import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.in.AuthenticationPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.domain.vo.Username;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,7 +35,7 @@ class UserQueryResolverTest {
     final var userId = new UserId(UUID.randomUUID());
     final var user = Instancio.of(User.class)
       .set(field(User::id), userId)
-      .set(field(User::username), "alice")
+      .set(field(User::username), Username.of("alice"))
       .set(field(User::passwordHash), "hash")
       .create();
 

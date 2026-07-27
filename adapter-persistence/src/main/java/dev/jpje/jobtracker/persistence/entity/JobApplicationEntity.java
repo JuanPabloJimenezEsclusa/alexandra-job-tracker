@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -22,14 +23,18 @@ public class JobApplicationEntity {
   private String role;
   @Column(nullable = false)
   private String source;
-  @Nullable private String postingUrl;
+  @Nullable
+  private String postingUrl;
   @Column(nullable = false)
   private String status;
   @Column(nullable = false)
   private Instant dateApplied;
   @Column(nullable = false)
   private Instant lastUpdated;
-  @Nullable private String notes;
+  @Nullable
+  private String notes;
+  @Version
+  private Long version;
 
   public UUID getId() {
     return id;
@@ -109,7 +114,11 @@ public class JobApplicationEntity {
     return notes;
   }
 
-  public void setNotes(String notes) {
+  public void setNotes(@Nullable String notes) {
     this.notes = notes;
+  }
+
+  public Long getVersion() {
+    return version;
   }
 }

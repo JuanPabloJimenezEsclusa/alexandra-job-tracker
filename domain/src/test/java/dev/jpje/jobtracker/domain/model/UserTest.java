@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.domain.vo.Username;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -21,16 +22,15 @@ class UserTest {
     final var id = new UserId(UUID.randomUUID());
     final var now = Instant.EPOCH;
     return Stream.of(
-      arguments(named("null id", ""), null, "alice", "hash", now),
-      arguments(named("null createdAt", ""), id, "alice", "hash", null),
-      arguments(named("blank username", ""), id, "", "hash", now),
-      arguments(named("blank passwordHash", ""), id, "alice", "", now)
+      arguments(named("null id", ""), null, Username.of("alice"), "hash", now),
+      arguments(named("null createdAt", ""), id, Username.of("alice"), "hash", null),
+      arguments(named("blank passwordHash", ""), id, Username.of("alice"), "", now)
     );
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("invalidInputs")
-  void shouldRejectInvalidInputs(final String unused, final UserId id, final String username,
+  void shouldRejectInvalidInputs(final String unused, final UserId id, final Username username,
                                   final String passwordHash, final Instant createdAt) {
     assertThatThrownBy(() -> new User(id, username, passwordHash, createdAt))
       .isInstanceOf(RuntimeException.class);
@@ -43,9 +43,9 @@ class UserTest {
     final var now = Instant.EPOCH;
 
     // When, then
-    assertThat(new User(id, "alice", "hash", now))
+    assertThat(new User(id, Username.of("alice"), "hash", now))
       .returns(id, User::id)
-      .returns("alice", User::username)
+      .returns(Username.of("alice"), User::username)
       .returns("hash", User::passwordHash)
       .returns(now, User::createdAt);
   }

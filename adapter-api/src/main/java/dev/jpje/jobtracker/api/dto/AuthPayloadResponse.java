@@ -2,7 +2,7 @@ package dev.jpje.jobtracker.api.dto;
 
 import java.util.Objects;
 
-import dev.jpje.jobtracker.domain.model.AuthPayload;
+import dev.jpje.jobtracker.domain.vo.AuthPayload;
 
 public record AuthPayloadResponse(String token, UserResponse user) {
 

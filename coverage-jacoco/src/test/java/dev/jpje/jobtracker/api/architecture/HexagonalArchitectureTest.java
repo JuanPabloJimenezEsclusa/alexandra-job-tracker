@@ -25,7 +25,7 @@ class HexagonalArchitectureTest {
   private static final String ADAPTER_AUTH = "dev.jpje.jobtracker.auth..";
   private static final String ADAPTER_AI = "dev.jpje.jobtracker.ai..";
   private static final String ADAPTER_CACHE = "dev.jpje.jobtracker.cache..";
-  private static final String ADAPTER_OBSERVABILITY = "dev.jpje.jobtracker.observability..";
+
 
   // --- Common allowed packages (applied to all layers) ---
 
@@ -53,7 +53,7 @@ class HexagonalArchitectureTest {
   static final ArchRule DOMAIN_MUST_NOT_DEPEND_ON_INFRASTRUCTURE = noClasses()
     .that().resideInAPackage(DOMAIN)
     .should().dependOnClassesThat().resideInAnyPackage(
-      "..persistence..", "..auth..", "..ai..", "..cache..", "..observability..")
+      "..persistence..", "..auth..", "..ai..", "..cache..")
     .as("Domain must not depend on infrastructure")
     .because("infrastructure details must not leak into the domain");
 
@@ -70,7 +70,7 @@ class HexagonalArchitectureTest {
     .that().resideInAPackage(DOMAIN)
     .should().dependOnClassesThat().resideInAnyPackage(
       "..application..", "..api..", "..cli..",
-      "..persistence..", "..auth..", "..ai..", "..cache..", "..observability..")
+      "..persistence..", "..auth..", "..ai..", "..cache..")
     .allowEmptyShould(true)
     .as("Domain must not depend on application, adapters, or infrastructure")
     .because("domain is the innermost layer with no outgoing dependencies to other layers");
@@ -89,7 +89,7 @@ class HexagonalArchitectureTest {
   static final ArchRule APPLICATION_DEPENDENCIES = classes()
     .that().resideInAPackage(APPLICATION)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
-      concat(DOMAIN, APPLICATION, "org.mindrot.jbcrypt.."))
+      concat(DOMAIN, APPLICATION))
     .as("Application module dependencies")
     .because("application depends on domain types and standard libraries");
 
@@ -97,7 +97,7 @@ class HexagonalArchitectureTest {
   static final ArchRule ADAPTER_API_DEPENDENCIES = classes()
     .that().resideInAPackage(ADAPTER_API)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
-      concat(DOMAIN, APPLICATION, ADAPTER_API,
+      concat(DOMAIN, APPLICATION, ADAPTER_API, ADAPTER_AUTH,
         "org.springframework..",
         "org.springframework.boot..",
         "graphql..",
@@ -138,8 +138,7 @@ class HexagonalArchitectureTest {
         "io.jsonwebtoken..",
         "jakarta.servlet..",
         "javax.crypto..",
-        "graphql..",
-        "reactor.core..",
+        "org.mindrot.jbcrypt..",
         "org.springframework.."))
     .as("Auth module dependencies")
     .because("auth implements JWT token generation and GraphQL auth interceptor");
@@ -163,18 +162,6 @@ class HexagonalArchitectureTest {
         "org.springframework.(stereotype|context|beans|cache|boot).."))
     .as("Cache module dependencies")
     .because("cache decorates persistence adapters with Caffeine");
-
-  @ArchTest
-  static final ArchRule ADAPTER_OBSERVABILITY_DEPENDENCIES = classes()
-    .that().resideInAPackage(ADAPTER_OBSERVABILITY)
-    .should().onlyDependOnClassesThat().resideInAnyPackage(
-      concat(ADAPTER_OBSERVABILITY,
-        "io.micrometer..",
-        "io.opentelemetry..",
-        "org.springframework..",
-        "org.springframework.boot.."))
-    .as("Observability module dependencies")
-    .because("observability configures Micrometer and OpenTelemetry");
 
   // --- Helper ---
 

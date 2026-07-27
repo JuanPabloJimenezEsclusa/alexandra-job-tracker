@@ -3,11 +3,14 @@ package dev.jpje.jobtracker.api.resolver;
 import java.util.Objects;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
 import dev.jpje.jobtracker.api.dto.JobPostingResponse;
-import dev.jpje.jobtracker.domain.model.JobAnalysis;
 import dev.jpje.jobtracker.domain.port.in.AnalyzeJobPostingPort;
 import dev.jpje.jobtracker.domain.port.in.SubmitJobPostingPort;
+import dev.jpje.jobtracker.domain.vo.CompanyName;
+import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Source;
+import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -31,16 +34,16 @@ public class JobPostingMutationResolver {
                                               @Argument("input") final JobPostingInput raw) {
     Objects.requireNonNull(userId, "Authentication required");
     return JobPostingResponse.from(submitUseCase.submit(userId,
-      StringSanitizer.sanitize(raw.url()),
-      StringSanitizer.sanitize(raw.title()),
-      StringSanitizer.sanitize(raw.company()),
+      Url.of(StringSanitizer.sanitize(raw.url())),
+      JobTitle.of(StringSanitizer.sanitize(raw.title())),
+      CompanyName.of(StringSanitizer.sanitize(raw.company())),
       StringSanitizer.sanitize(raw.description()),
       raw.source()));
   }
 
   @MutationMapping
-  public JobAnalysis analyzeJobPosting(@Argument final UUID jobPostingId) {
-    return analyzeUseCase.analyze(jobPostingId);
+  public JobAnalysisResponse analyzeJobPosting(@Argument final UUID jobPostingId) {
+    return JobAnalysisResponse.from(analyzeUseCase.analyze(jobPostingId));
   }
 
   public record JobPostingInput(

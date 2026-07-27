@@ -10,7 +10,11 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
+import dev.jpje.jobtracker.domain.vo.CompanyName;
+import dev.jpje.jobtracker.domain.vo.Notes;
+import dev.jpje.jobtracker.domain.vo.RoleName;
 import dev.jpje.jobtracker.domain.vo.Source;
+import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -44,22 +48,18 @@ class JobApplicationTest {
     final var uid = UserId.generate();
     final var now = Instant.EPOCH;
     return Stream.of(
-      arguments(named("null id", ""), null, uid, "Acme", "SWE", Source.LINKEDIN, "url",
-        ApplicationStatus.SAVED, now, now, null),
-      arguments(named("null userId", ""), UUID.randomUUID(), null, "Acme", "SWE", Source.LINKEDIN, "url",
-        ApplicationStatus.SAVED, now, now, null),
-      arguments(named("null source", ""), UUID.randomUUID(), uid, "Acme", "SWE", null, "url",
-        ApplicationStatus.SAVED, now, now, null),
-      arguments(named("null status", ""), UUID.randomUUID(), uid, "Acme", "SWE", Source.LINKEDIN, "url",
-        null, now, now, null),
-      arguments(named("null dateApplied", ""), UUID.randomUUID(), uid, "Acme", "SWE", Source.LINKEDIN, "url",
-        ApplicationStatus.SAVED, null, now, null),
-      arguments(named("null lastUpdated", ""), UUID.randomUUID(), uid, "Acme", "SWE", Source.LINKEDIN, "url",
-        ApplicationStatus.SAVED, now, null, null),
-      arguments(named("blank company", ""), UUID.randomUUID(), uid, "", "SWE", Source.LINKEDIN, "url",
-        ApplicationStatus.SAVED, now, now, null),
-      arguments(named("blank role", ""), UUID.randomUUID(), uid, "Acme", "", Source.LINKEDIN, "url",
-        ApplicationStatus.SAVED, now, now, null)
+      arguments(named("null id", ""), null, uid, CompanyName.of("Acme"), RoleName.of("SWE"),
+        Source.LINKEDIN, Url.of("https://linkedin.com/j/1"), ApplicationStatus.SAVED, now, now, null),
+      arguments(named("null userId", ""), UUID.randomUUID(), null, CompanyName.of("Acme"), RoleName.of("SWE"),
+        Source.LINKEDIN, Url.of("https://linkedin.com/j/1"), ApplicationStatus.SAVED, now, now, null),
+      arguments(named("null source", ""), UUID.randomUUID(), uid, CompanyName.of("Acme"), RoleName.of("SWE"),
+        null, Url.of("https://linkedin.com/j/1"), ApplicationStatus.SAVED, now, now, null),
+      arguments(named("null status", ""), UUID.randomUUID(), uid, CompanyName.of("Acme"), RoleName.of("SWE"),
+        Source.LINKEDIN, Url.of("https://linkedin.com/j/1"), null, now, now, null),
+      arguments(named("null dateApplied", ""), UUID.randomUUID(), uid, CompanyName.of("Acme"), RoleName.of("SWE"),
+        Source.LINKEDIN, Url.of("https://linkedin.com/j/1"), ApplicationStatus.SAVED, null, now, null),
+      arguments(named("null lastUpdated", ""), UUID.randomUUID(), uid, CompanyName.of("Acme"), RoleName.of("SWE"),
+        Source.LINKEDIN, Url.of("https://linkedin.com/j/1"), ApplicationStatus.SAVED, now, null, null)
     );
   }
 
@@ -68,8 +68,8 @@ class JobApplicationTest {
   void shouldTransitionToValidStatus(final ApplicationStatus from, final ApplicationStatus to) {
     // Given
     final var now = Instant.EPOCH;
-    final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), "Acme", "SWE",
-      Source.LINKEDIN, "https://linkedin.com/jobs/1", from,
+    final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), CompanyName.of("Acme"), RoleName.of("SWE"),
+      Source.LINKEDIN, Url.of("https://linkedin.com/jobs/1"), from,
       now, now, null);
 
     // When, then
@@ -82,8 +82,8 @@ class JobApplicationTest {
   void shouldNotTransitionToInvalidStatus(final ApplicationStatus from, final ApplicationStatus to) {
     // Given
     final var now = Instant.EPOCH;
-    final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), "Acme", "SWE",
-      Source.LINKEDIN, "https://linkedin.com/jobs/1", from,
+    final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), CompanyName.of("Acme"), RoleName.of("SWE"),
+      Source.LINKEDIN, Url.of("https://linkedin.com/jobs/1"), from,
       now, now, null);
 
     // When, then
@@ -94,10 +94,10 @@ class JobApplicationTest {
   @ParameterizedTest(name = "{0}")
   @MethodSource("invalidInputs")
   void shouldRejectInvalidInputs(final String unused, final UUID id, final UserId userId,
-                                  final String company, final String role, final Source source,
-                                  final String postingUrl, final ApplicationStatus status,
+                                  final CompanyName company, final RoleName role, final Source source,
+                                  final Url postingUrl, final ApplicationStatus status,
                                   final Instant dateApplied, final Instant lastUpdated,
-                                  final String notes) {
+                                  final Notes notes) {
     assertThatThrownBy(() -> new JobApplication(id, userId, company, role, source, postingUrl,
       status, dateApplied, lastUpdated, notes))
       .isInstanceOf(RuntimeException.class);

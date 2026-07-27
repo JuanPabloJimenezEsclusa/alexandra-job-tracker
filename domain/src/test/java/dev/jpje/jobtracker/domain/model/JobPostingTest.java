@@ -9,7 +9,10 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.domain.vo.CompanyName;
+import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Source;
+import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,21 +26,23 @@ class JobPostingTest {
     final var uid = UserId.generate();
     final var now = Instant.EPOCH;
     return Stream.of(
-      arguments(named("null id", null), uid, "url", Source.LINKEDIN, "t", "c", "d", now),
-      arguments(named("null userId", id), null, "url", Source.LINKEDIN, "t", "c", "d", now),
-      arguments(named("null source", id), uid, "url", null, "t", "c", "d", now),
-      arguments(named("null postedAt", id), uid, "url", Source.LINKEDIN, "t", "c", "d", null),
-      arguments(named("blank url", id), uid, "  ", Source.LINKEDIN, "t", "c", "d", now),
-      arguments(named("blank title", id), uid, "url", Source.LINKEDIN, "", "c", "d", now),
-      arguments(named("blank description", id), uid, "url", Source.LINKEDIN, "t", "c", "", now),
-      arguments(named("blank company", id), uid, "url", Source.LINKEDIN, "t", "  ", "d", now)
+      arguments(named("null id", null), uid, Url.of("https://example.com"), Source.LINKEDIN,
+        JobTitle.of("t"), CompanyName.of("c"), "d", now),
+      arguments(named("null userId", id), null, Url.of("https://example.com"), Source.LINKEDIN,
+        JobTitle.of("t"), CompanyName.of("c"), "d", now),
+      arguments(named("null source", id), uid, Url.of("https://example.com"), null,
+        JobTitle.of("t"), CompanyName.of("c"), "d", now),
+      arguments(named("null postedAt", id), uid, Url.of("https://example.com"), Source.LINKEDIN,
+        JobTitle.of("t"), CompanyName.of("c"), "d", null),
+      arguments(named("blank description", id), uid, Url.of("https://example.com"), Source.LINKEDIN,
+        JobTitle.of("t"), CompanyName.of("c"), "", now)
     );
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("invalidInputs")
-  void shouldRejectInvalidInputs(final Object id, final UserId userId, final String url,
-                                   final Source source, final String title, final String company,
+  void shouldRejectInvalidInputs(final Object id, final UserId userId, final Url url,
+                                   final Source source, final JobTitle title, final CompanyName company,
                                    final String description, final Instant postedAt) {
     assertThatThrownBy(() -> new JobPosting((UUID) id, userId, url, source, title, company, description, postedAt))
       .isInstanceOf(RuntimeException.class);
@@ -51,13 +56,14 @@ class JobPostingTest {
     final var now = Instant.EPOCH;
 
     // When, then
-    assertThat(new JobPosting(id, uid, "url", Source.LINKEDIN, "title", "company", "desc", now))
+    assertThat(new JobPosting(id, uid, Url.of("https://example.com"), Source.LINKEDIN,
+      JobTitle.of("title"), CompanyName.of("company"), "desc", now))
       .returns(id, JobPosting::id)
       .returns(uid, JobPosting::userId)
-      .returns("url", JobPosting::url)
+      .returns(Url.of("https://example.com"), JobPosting::url)
       .returns(Source.LINKEDIN, JobPosting::source)
-      .returns("title", JobPosting::title)
-      .returns("company", JobPosting::company)
+      .returns(JobTitle.of("title"), JobPosting::title)
+      .returns(CompanyName.of("company"), JobPosting::company)
       .returns("desc", JobPosting::description)
       .returns(now, JobPosting::postedAt);
   }

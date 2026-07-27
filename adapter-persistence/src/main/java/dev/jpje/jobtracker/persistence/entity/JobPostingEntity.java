@@ -4,6 +4,7 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -25,6 +26,8 @@ public class JobPostingEntity {
   @Column(columnDefinition = "TEXT")
   private String description;
   private Instant postedAt;
+  @Version
+  private Long version;
 
   public UUID getId() {
     return id;
@@ -88,5 +91,9 @@ public class JobPostingEntity {
 
   public void setPostedAt(final Instant postedAt) {
     this.postedAt = postedAt;
+  }
+
+  public Long getVersion() {
+    return version;
   }
 }

@@ -21,10 +21,10 @@ public record JobPostingResponse(
     Objects.requireNonNull(posting, "posting must not be null");
     return new JobPostingResponse(
       posting.id(),
-      posting.url(),
+      posting.url().value(),
       posting.source(),
-      posting.title(),
-      posting.company(),
+      posting.title().value(),
+      posting.company().value(),
       posting.description(),
       posting.postedAt());
   }

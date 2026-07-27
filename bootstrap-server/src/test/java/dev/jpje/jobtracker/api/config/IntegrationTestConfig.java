@@ -6,8 +6,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import dev.jpje.jobtracker.domain.model.JobAnalysis;
 import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
+import dev.jpje.jobtracker.domain.vo.JobAnalysis;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;

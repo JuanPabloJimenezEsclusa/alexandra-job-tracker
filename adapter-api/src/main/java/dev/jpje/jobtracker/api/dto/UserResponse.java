@@ -10,6 +10,6 @@ public record UserResponse(UUID id, String username, Instant createdAt) {
 
   public static UserResponse from(final User user) {
     Objects.requireNonNull(user, "user must not be null");
-    return new UserResponse(user.id().value(), user.username(), user.createdAt());
+    return new UserResponse(user.id().value(), user.username().value(), user.createdAt());
   }
 }

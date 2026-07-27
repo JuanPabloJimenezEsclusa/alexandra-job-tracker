@@ -451,7 +451,7 @@
       "type": "dev.jpje.jobtracker.application.usecase.ListJobPostingsUseCase"
     },
     {
-      "type": "dev.jpje.jobtracker.auth.GraphQlAuthInterceptor",
+      "type": "dev.jpje.jobtracker.api.interceptor.GraphQlAuthInterceptor",
       "methods": [
         {
           "name": "<init>",
@@ -15135,7 +15135,7 @@
       "glob": "com/jobtracker/auth"
     },
     {
-      "glob": "com/jobtracker/auth/GraphQlAuthInterceptor.class"
+      "glob": "com/jobtracker/api/interceptor/GraphQlAuthInterceptor.class"
     },
     {
       "glob": "com/jobtracker/auth/JwtProvider.class"

@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.RestTemplate;
+import tools.jackson.databind.ObjectMapper;
 
 @SpringBootTest(
   classes = JobTrackerServerApplication.class,
@@ -24,26 +25,6 @@ class AnalyticsIntegrationTest {
 
   @LocalServerPort
   private int port;
-
-  private String url() {
-    return "http://localhost:%s/api/graphql".formatted(port);
-  }
-
-  private HttpHeaders jsonHeaders() {
-    final var headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
-    return headers;
-  }
-
-  private String registerAndGetToken() {
-    final var body = """
-      {"query": "mutation { register(username: \\"analytics-user\\", password: \\"pass\\") { token } }"}
-      """;
-    final var response = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>(body, jsonHeaders()), String.class);
-    assert response.getBody() != null;
-    return response.getBody().replaceAll(".*\"token\":\"([^\"]+)\".*", "$1");
-  }
 
   @Test
   void shouldReturnAnalytics() {
@@ -61,5 +42,24 @@ class AnalyticsIntegrationTest {
         {"query": "{ analytics { totalApplications perStatus { saved } } }"}
         """, headers), String.class);
     assertThat(response.getBody()).contains("\"totalApplications\"").contains("\"saved\"");
+  }
+
+  private String url() {
+    return "http://localhost:%s/api/graphql".formatted(port);
+  }
+
+  private HttpHeaders jsonHeaders() {
+    final var headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    return headers;
+  }
+
+  private String registerAndGetToken() {
+    final var body = """
+      {"query": "mutation { register(username: \\"analytics-user\\", password: \\"pass\\") { token } }"}
+      """;
+    final var response = rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(body, jsonHeaders()), String.class);
+    final var node = new ObjectMapper().readTree(response.getBody());
+    return node.findValue("token").asString();
   }
 }

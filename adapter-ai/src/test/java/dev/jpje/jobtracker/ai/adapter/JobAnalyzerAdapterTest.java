@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.domain.vo.JobAnalysis;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -129,9 +130,9 @@ class JobAnalyzerAdapterTest {
     final var result = adapter.analyze("some job description");
 
     // Then
-    assertThat(result.summary()).isEqualTo(expectedSummary);
-    assertThat(result.skills()).containsExactlyElementsOf(expectedSkills);
-    assertThat(result.fitScore()).isEqualTo(expectedFitScore);
+    assertThat(result)
+      .extracting(JobAnalysis::summary, JobAnalysis::skills, JobAnalysis::fitScore)
+      .containsExactly(expectedSummary, expectedSkills, expectedFitScore);
   }
 
   @ParameterizedTest(name = "{0}")
@@ -145,9 +146,10 @@ class JobAnalyzerAdapterTest {
     final var result = adapter.analyze("any description");
 
     // Then
-    assertThat(result.summary()).startsWith(expectedSummaryPrefix);
-    assertThat(result.skills()).isEmpty();
-    assertThat(result.fitScore()).isZero();
+    assertThat(result).matches(r ->
+      r.summary().startsWith(expectedSummaryPrefix)
+        && r.skills().isEmpty()
+        && r.fitScore() == 0.0);
   }
 
   private void stubChatClient(final String response) {

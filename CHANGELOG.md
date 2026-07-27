@@ -5,6 +5,106 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**fix(hexagonal): add JobAnalysisResponse DTO to fix boundary violation**
+
+ * fix(hexagonal): move GraphQlAuthInterceptor to adapter-api
+ * fix(hexagonal): consolidate adapter-observability into bootstrap-server
+ * fix(hexagonal): resolve package collision between adapter-cli and bootstrap-cli
+ * feat(hexagonal): add PasswordEncoderPort to isolate BCrypt from application layer
+ * feat(ddd): add value objects Url, CompanyName, JobTitle, RoleName, Username, Notes
+ * feat(ddd): replace primitive strings with value objects in domain models
+ * feat(ddd): update port interfaces to use value objects
+ * refactor(ddd): move JobAnalysis to domain/vo and AuthPayload to application/dto
+ * feat(ddd): propagate value objects through use cases, adapters, mappers, and DTOs
+ * feat(ddd): add optimistic concurrency @Version to JPA entities
+ * feat(ddd): add domain events and JobPostingService domain service
+ * refactor(ddd): delegate posting creation to JobPostingService and publish domain events
+ * refactor(ddd): push application filtering from in-memory to database queries
+ * docs: document DDD tactical patterns and updated structure
+ * test(archunit): update rules for hexagonal + DDD compliance
+ * fix: remove @Version 0L initialization to fix JPA optimistic lock on insert
+ * fix: remove @Version 0L initialization to fix JPA optimistic lock on insert
+
+[8d59f05a6037003](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/8d59f05a6037003) juan.pablo.jimenez.esclusa *2026-08-07 23:42:37*
+
+**refactor(architecture): apply port- adapter name convention to hexagonal**
+
+
+[790b25bc96f77f0](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/790b25bc96f77f0) juan.pablo.jimenez.esclusa *2026-08-07 10:33:19*
+
+**chore(deps): bump the maven-dependencies group with 2 updates (#53)**
+
+ * Bumps the maven-dependencies group with 2 updates: [org.jspecify:jspecify](https://github.com/jspecify/jspecify) and [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin).
+ * Updates &#x60;org.jspecify:jspecify&#x60; from 1.0.0 to 1.0.1
+ * - [Release notes](https://github.com/jspecify/jspecify/releases)
+ * - [Commits](https://github.com/jspecify/jspecify/compare/v1.0.0...v1.0.1)
+ * Updates &#x60;org.openrewrite.maven:rewrite-maven-plugin&#x60; from 6.44.0 to 6.45.0
+ * - [Release notes](https://github.com/openrewrite/rewrite-maven-plugin/releases)
+ * - [Commits](https://github.com/openrewrite/rewrite-maven-plugin/compare/v6.44.0...v6.45.0)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: org.jspecify:jspecify
+ * dependency-version: 1.0.1
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.openrewrite.maven:rewrite-maven-plugin
+ * dependency-version: 6.45.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[9b182ce2c0fc886](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/9b182ce2c0fc886) dependabot[bot] *2026-08-07 10:32:20*
+
+**chore(deps): update hashicorp/aws requirement from ~> 6.56.0 to ~> 6.57.1 (#51)**
+
+ * Updates the requirements on [hashicorp/aws](https://github.com/hashicorp/terraform-provider-aws) to permit the latest version.
+ * Updates &#x60;hashicorp/aws&#x60; to 6.57.1
+ * - [Release notes](https://github.com/hashicorp/terraform-provider-aws/releases)
+ * - [Changelog](https://github.com/hashicorp/terraform-provider-aws/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/hashicorp/terraform-provider-aws/compare/v6.56.0...v6.57.1)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: hashicorp/aws
+ * dependency-version: 6.57.1
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[214a28626e036ea](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/214a28626e036ea) dependabot[bot] *2026-08-07 10:09:22*
+
+**chore(deps): bump the github-actions-dependencies group with 2 updates (#52)**
+
+ * Bumps the github-actions-dependencies group with 2 updates: [actions/setup-java](https://github.com/actions/setup-java) and [docker/login-action](https://github.com/docker/login-action).
+ * Updates &#x60;actions/setup-java&#x60; from 5 to 5.6.0
+ * - [Release notes](https://github.com/actions/setup-java/releases)
+ * - [Commits](https://github.com/actions/setup-java/compare/v5...v5.6.0)
+ * Updates &#x60;docker/login-action&#x60; from 4.5.1 to 4.6.0
+ * - [Release notes](https://github.com/docker/login-action/releases)
+ * - [Commits](https://github.com/docker/login-action/compare/abd2ef45e78c5afb21d64d4ca52ee8550d9572c7...dbcb813823bdd20940b903addbd779551569679f)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: actions/setup-java
+ * dependency-version: 5.6.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: github-actions-dependencies
+ * - dependency-name: docker/login-action
+ * dependency-version: 4.6.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: github-actions-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[ceb68a40bc6042a](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/ceb68a40bc6042a) dependabot[bot] *2026-08-07 09:38:35*
+
 **chore(deps): bump the maven-dependencies group with 3 updates (#50)**
 
  * Bumps the maven-dependencies group with 3 updates: [com.puppycrawl.tools:checkstyle](https://github.com/checkstyle/checkstyle), [org.openrewrite.maven:rewrite-maven-plugin](https://github.com/openrewrite/rewrite-maven-plugin) and [org.pitest:pitest-maven](https://github.com/hcoles/pitest).

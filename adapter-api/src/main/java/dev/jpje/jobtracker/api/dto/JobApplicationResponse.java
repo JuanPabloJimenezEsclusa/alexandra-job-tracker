@@ -22,15 +22,17 @@ public record JobApplicationResponse(
 
   public static JobApplicationResponse from(final JobApplication app) {
     Objects.requireNonNull(app, "app must not be null");
+    final var postingUrl = app.postingUrl();
+    final var notes = app.notes();
     return new JobApplicationResponse(
       app.id(),
-      app.company(),
-      app.role(),
+      app.company().value(),
+      app.role().value(),
       app.source(),
-      app.postingUrl(),
+      postingUrl != null ? postingUrl.value() : null,
       app.status(),
       app.dateApplied(),
       app.lastUpdated(),
-      app.notes());
+      notes != null ? notes.value() : null);
   }
 }

@@ -17,23 +17,24 @@ public class UserPersistenceAdapter implements SaveUserPort, LoadUserPort {
   private final UserJpaRepository repository;
   private final UserMapper mapper = new UserMapper();
 
-  public UserPersistenceAdapter(UserJpaRepository repository) {
+  public UserPersistenceAdapter(final UserJpaRepository repository) {
     this.repository = repository;
   }
 
   @Override
   @Transactional
-  public void save(User user) {
-    repository.save(mapper.toEntity(user));
+  public void save(final User user) {
+    final var entity = mapper.toEntity(user);
+    repository.save(entity);
   }
 
   @Override
-  public Optional<User> findByUsername(String username) {
+  public Optional<User> findByUsername(final String username) {
     return repository.findByUsername(username).map(mapper::toDomain);
   }
 
   @Override
-  public Optional<User> findById(UserId id) {
+  public Optional<User> findById(final UserId id) {
     return repository.findById(id.value()).map(mapper::toDomain);
   }
 }
