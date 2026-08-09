@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class UserPersistenceAdapter implements SaveUserPort, LoadUserPort {
   private final UserJpaRepository repository;
-  private final UserMapper mapper = new UserMapper();
 
   public UserPersistenceAdapter(final UserJpaRepository repository) {
     this.repository = repository;
@@ -24,17 +23,16 @@ public class UserPersistenceAdapter implements SaveUserPort, LoadUserPort {
   @Override
   @Transactional
   public void save(final User user) {
-    final var entity = mapper.toEntity(user);
-    repository.save(entity);
+    repository.save(UserMapper.toEntity(user));
   }
 
   @Override
   public Optional<User> findByUsername(final String username) {
-    return repository.findByUsername(username).map(mapper::toDomain);
+    return repository.findByUsername(username).map(UserMapper::toDomain);
   }
 
   @Override
   public Optional<User> findById(final UserId id) {
-    return repository.findById(id.value()).map(mapper::toDomain);
+    return repository.findById(id.value()).map(UserMapper::toDomain);
   }
 }

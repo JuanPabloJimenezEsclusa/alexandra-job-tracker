@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
+import org.jspecify.annotations.Nullable;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -26,7 +28,7 @@ public class JobPostingEntity {
   @Column(columnDefinition = "TEXT")
   private String description;
   private Instant postedAt;
-  @Version
+  @Version @Nullable
   private Long version;
 
   public UUID getId() {
@@ -93,7 +95,7 @@ public class JobPostingEntity {
     this.postedAt = postedAt;
   }
 
-  public Long getVersion() {
+  public @Nullable Long getVersion() {
     return version;
   }
 }

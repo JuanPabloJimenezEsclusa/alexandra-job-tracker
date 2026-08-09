@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class JobPostingPersistenceAdapter implements SaveJobPostingPort, LoadJobPostingPort {
   private final JobPostingJpaRepository repository;
-  private final JobPostingMapper mapper = new JobPostingMapper();
 
   public JobPostingPersistenceAdapter(final JobPostingJpaRepository repository) {
     this.repository = repository;
@@ -26,19 +25,19 @@ public class JobPostingPersistenceAdapter implements SaveJobPostingPort, LoadJob
   @Override
   @Transactional
   public void save(final JobPosting posting) {
-    repository.save(mapper.toEntity(posting));
+    repository.save(JobPostingMapper.toEntity(posting));
   }
 
   @Override
   public Optional<JobPosting> findById(final UUID id) {
-    return repository.findById(id).map(mapper::toDomain);
+    return repository.findById(id).map(JobPostingMapper::toDomain);
   }
 
   @Override
   public List<JobPosting> findByUserId(final UserId userId) {
     return repository.findByUserId(userId.value())
       .stream()
-      .map(mapper::toDomain)
+      .map(JobPostingMapper::toDomain)
       .toList();
   }
 }

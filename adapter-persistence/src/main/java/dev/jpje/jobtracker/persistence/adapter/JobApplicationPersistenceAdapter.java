@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class JobApplicationPersistenceAdapter implements SaveJobApplicationPort, LoadJobApplicationPort {
   private final JobApplicationJpaRepository repository;
-  private final JobApplicationMapper mapper = new JobApplicationMapper();
 
   public JobApplicationPersistenceAdapter(final JobApplicationJpaRepository repository) {
     this.repository = repository;
@@ -30,7 +29,7 @@ public class JobApplicationPersistenceAdapter implements SaveJobApplicationPort,
   @Override
   @Transactional
   public void save(final JobApplication application) {
-    repository.save(mapper.toEntity(application));
+    repository.save(JobApplicationMapper.toEntity(application));
   }
 
   @Override
@@ -41,7 +40,7 @@ public class JobApplicationPersistenceAdapter implements SaveJobApplicationPort,
 
   @Override
   public Optional<JobApplication> findById(final UUID id) {
-    return repository.findById(id).map(mapper::toDomain);
+    return repository.findById(id).map(JobApplicationMapper::toDomain);
   }
 
   @Override
@@ -61,11 +60,12 @@ public class JobApplicationPersistenceAdapter implements SaveJobApplicationPort,
     } else {
       entities = repository.findByUserIdOrderByDateAppliedDesc(userId.value());
     }
-    return entities.stream().map(mapper::toDomain).toList();
+    return entities.stream().map(JobApplicationMapper::toDomain).toList();
   }
 
   @Override
   public List<JobApplication> findAllByUserId(final UserId userId) {
-    return repository.findByUserIdOrderByDateAppliedDesc(userId.value()).stream().map(mapper::toDomain).toList();
+    return repository.findByUserIdOrderByDateAppliedDesc(userId.value()).stream()
+      .map(JobApplicationMapper::toDomain).toList();
   }
 }

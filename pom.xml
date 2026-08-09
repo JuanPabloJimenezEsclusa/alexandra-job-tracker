@@ -75,6 +75,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <spring-ai.version>2.0.1</spring-ai.version>
+    <spring-ai-agent-utils.version>0.10.0</spring-ai-agent-utils.version>
     <archunit.version>1.5.0</archunit.version>
     <jjwt.version>0.13.0</jjwt.version>
     <jbcrypt.version>0.4</jbcrypt.version>
@@ -351,6 +352,7 @@
                       <exclude>io.micrometer:micrometer-core</exclude>
                       <exclude>io.micrometer:micrometer-observation</exclude>
                       <exclude>org.jetbrains.kotlin:kotlin-reflect</exclude>
+                      <exclude>org.jetbrains:annotations</exclude>
                       <exclude>io.opentelemetry:opentelemetry-sdk-metrics</exclude>
                       <exclude>io.opentelemetry:opentelemetry-exporter-otlp</exclude>
                       <exclude>io.opentelemetry:opentelemetry-exporter-otlp-common</exclude>

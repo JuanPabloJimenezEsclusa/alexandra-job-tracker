@@ -5,17 +5,24 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
 import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.out.LoadJobPostingPort;
+import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.JobAnalysis;
 import dev.jpje.jobtracker.domain.vo.JobTitle;
@@ -30,9 +37,23 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class AnalyzeJobPostingUseCaseTest {
 
+  private static final Clock FIXED_CLOCK = Clock.fixed(Instant.now().plusSeconds(60L),
+    ZoneOffset.UTC);
+
+  private static JobAnalysis validAnalysis() {
+    return Instancio.of(JobAnalysis.class)
+      .set(field(JobAnalysis::fitScore), 85.0)
+      .set(field(JobAnalysis::companyRating), 4.2)
+      .set(field(JobAnalysis::companyType), "enterprise")
+      .set(field(JobAnalysis::salaryMin), 90000.0)
+      .set(field(JobAnalysis::salaryMax), 130000.0)
+      .set(field(JobAnalysis::salaryCurrency), "USD")
+      .create();
+  }
+
   private static Stream<Arguments> analysisScenarios() {
-    var userId = UserId.generate();
-    var posting = Instancio.of(JobPosting.class)
+    final var userId = UserId.generate();
+    final var posting = Instancio.of(JobPosting.class)
       .set(field(JobPosting::userId), userId)
       .set(field(JobPosting::source), Source.LINKEDIN)
       .set(field(JobPosting::url), Url.of("https://example.com/job"))
@@ -40,25 +61,32 @@ class AnalyzeJobPostingUseCaseTest {
       .set(field(JobPosting::company), CompanyName.of("Acme"))
       .set(field(JobPosting::description), "We need a Java developer with Spring experience")
       .create();
-    var analysis = new JobAnalysis("Java role", List.of("Java", "Spring"), 90.0);
     return Stream.of(
-      arguments(named("found posting", posting), analysis)
+      arguments(named("found posting", posting), validAnalysis())
     );
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("analysisScenarios")
-  void shouldAnalyzePosting(final JobPosting posting, final JobAnalysis expectedAnalysis) {
+  void shouldAnalyzeAndPersistPosting(final JobPosting posting, final JobAnalysis expectedAnalysis) {
     // Given
     final var loadPort = mock(LoadJobPostingPort.class);
     final var analysisPort = mock(JobAnalysisPort.class);
-    final var useCase = new AnalyzeJobPostingUseCase(loadPort, analysisPort);
+    final var savePort = mock(SaveJobAnalysisPort.class);
+    final var useCase = new AnalyzeJobPostingUseCase(loadPort, analysisPort, savePort, FIXED_CLOCK);
 
     when(loadPort.findById(posting.id())).thenReturn(Optional.of(posting));
     when(analysisPort.analyze(posting.description())).thenReturn(expectedAnalysis);
 
-    // When, then
-    assertThat(useCase.analyze(posting.id())).isEqualTo(expectedAnalysis);
+    // When
+    final var result = useCase.analyze(posting.userId(), posting.id());
+
+    // Then
+    assertThat(result)
+      .extracting(JobAnalysisRecord::jobPostingId, JobAnalysisRecord::userId,
+        JobAnalysisRecord::analysis, JobAnalysisRecord::createdAt)
+      .containsExactly(posting.id(), posting.userId(), expectedAnalysis, FIXED_CLOCK.instant());
+    verify(savePort).saveOrReplace(any(JobAnalysisRecord.class));
   }
 
   @Test
@@ -66,14 +94,17 @@ class AnalyzeJobPostingUseCaseTest {
     // Given
     final var loadPort = mock(LoadJobPostingPort.class);
     final var analysisPort = mock(JobAnalysisPort.class);
-    final var useCase = new AnalyzeJobPostingUseCase(loadPort, analysisPort);
+    final var savePort = mock(SaveJobAnalysisPort.class);
+    final var useCase = new AnalyzeJobPostingUseCase(loadPort, analysisPort, savePort, FIXED_CLOCK);
+    final var userId = UserId.generate();
     final var randomUUID = UUID.randomUUID();
 
     when(loadPort.findById(randomUUID)).thenReturn(Optional.empty());
 
     // When, then
-    assertThatThrownBy(() -> useCase.analyze(randomUUID))
+    assertThatThrownBy(() -> useCase.analyze(userId, randomUUID))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Job posting not found");
+    verify(savePort, never()).saveOrReplace(any());
   }
 }

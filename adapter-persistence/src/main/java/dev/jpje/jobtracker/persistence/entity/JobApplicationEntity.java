@@ -33,7 +33,7 @@ public class JobApplicationEntity {
   private Instant lastUpdated;
   @Nullable
   private String notes;
-  @Version
+  @Version @Nullable
   private Long version;
 
   public UUID getId() {
@@ -118,7 +118,7 @@ public class JobApplicationEntity {
     this.notes = notes;
   }
 
-  public Long getVersion() {
+  public @Nullable Long getVersion() {
     return version;
   }
 }

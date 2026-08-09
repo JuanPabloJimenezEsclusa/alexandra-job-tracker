@@ -15,7 +15,10 @@ type Query {
   me: User
   applications(status: ApplicationStatus, source: Source): [JobApplication!]!
   analytics(since: Instant): Analytics!
-  jobPostings(source: Source): [JobPosting!]! }
+  jobPostings(source: Source): [JobPosting!]!
+  analyses: [JobAnalysis!]!
+  analysis(id: ID!): JobAnalysis
+}
 
 type Mutation {
   register(username: String!, password: String!): AuthPayload!
@@ -25,12 +28,14 @@ type Mutation {
   updateApplicationStatus(id: ID!, status: ApplicationStatus!, notes: String): JobApplication!
   deleteApplication(id: ID!): Boolean!
   submitJobPosting(input: SubmitJobInput!): JobPosting!
-  analyzeJobPosting(jobPostingId: ID!): JobAnalysis! }
+  analyzeJobPosting(jobPostingId: ID!): JobAnalysis!
+  deleteAnalysis(id: ID!): Boolean!
+}
 
 type AuthPayload { token: String! user: User! }
 type User { id: ID! username: String! createdAt: Instant! }
 type JobApplication { id: ID! company: String! role: String! source: Source! postingUrl: String status: ApplicationStatus! dateApplied: Instant! lastUpdated: Instant! notes: String }
 type JobPosting { id: ID! url: String! source: Source! title: String! company: String! description: String postedAt: Instant }
-type JobAnalysis { summary: String! skills: [String!]! fitScore: Float! }
+type JobAnalysis { id: ID! jobPostingId: ID! summary: String! seniority: String! softSkills: [String!]! technicalSkills: [String!]! fitScore: Float! companyRating: Float! companyType: String! salaryMin: Float! salaryMax: Float! salaryCurrency: String! createdAt: Instant! }
 type Analytics { totalApplications: Int! perStatus: StatusCounts! conversionRate: Float! }
 type StatusCounts { saved: Int! applied: Int! interviewing: Int! offer: Int! accepted: Int! rejected: Int! withdrawn: Int! }

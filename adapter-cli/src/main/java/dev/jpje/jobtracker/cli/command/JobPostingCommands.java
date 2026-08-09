@@ -26,7 +26,7 @@ public class JobPostingCommands {
     description = "Analyze a job posting.",
     group = "Posting",
     help = """
-      Analyzes a job posting by its ID and returns a summary, key skills, and fit score.
+      Analyzes a job posting by its ID and returns a summary, key skills, fit score, company info and salary range.
       
       Example usage:
         - analyze -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a
@@ -41,7 +41,10 @@ public class JobPostingCommands {
       description = "jq expression to filter output") @Nullable final String jq) {
     final var result = client.execute("""
         mutation($id: ID!) {
-          analyzeJobPosting(jobPostingId: $id) { summary skills fitScore }
+          analyzeJobPosting(jobPostingId: $id) {
+            id jobPostingId summary seniority softSkills technicalSkills fitScore
+            companyRating companyType salaryMin salaryMax salaryCurrency createdAt
+          }
         }""",
       Map.of("id", id));
     final var data = result.get("data");
@@ -49,6 +52,65 @@ public class JobPostingCommands {
       return result.toPrettyString();
     }
     return jqProcessor.process(data.get("analyzeJobPosting"), jq);
+  }
+
+  @Command(
+    name = "analyses",
+    alias = {"al"},
+    description = "List saved job analyses.",
+    group = "Posting",
+    help = """
+      Lists all saved analyses for the current user.
+      
+      Example usage:
+        - analyses
+        - al -j ".[].summary"
+      """)
+  public String analyses(
+    @Option(
+      longName = "jq", shortName = 'j',
+      description = "jq expression to filter output") @Nullable final String jq) {
+    final var result = client.execute("""
+        query {
+          analyses {
+            id jobPostingId summary seniority softSkills technicalSkills fitScore
+            companyRating companyType salaryMin salaryMax salaryCurrency createdAt
+          }
+        }""",
+      Map.of());
+    final var data = result.get("data");
+    if (data == null || data.isNull()) {
+      return result.toPrettyString();
+    }
+    return jqProcessor.process(data.get("analyses"), jq);
+  }
+
+  @Command(
+    name = "delete-analysis",
+    alias = {"dal"},
+    description = "Delete a saved analysis by its ID.",
+    group = "Posting",
+    help = """
+      Deletes a saved analysis by its ID.
+      
+      Example usage:
+        - delete-analysis -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a
+        - dal -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a
+      """)
+  public String deleteAnalysis(
+    @Option(
+      longName = "id", shortName = 'i',
+      description = "Analysis ID to delete", required = true) final String id) {
+    final var result = client.execute("""
+        mutation($id: ID!) {
+          deleteAnalysis(id: $id)
+        }""",
+      Map.of("id", id));
+    final var data = result.get("data");
+    if (data == null || data.isNull()) {
+      return result.toPrettyString();
+    }
+    return "Deleted analysis: " + id;
   }
 
   @Command(

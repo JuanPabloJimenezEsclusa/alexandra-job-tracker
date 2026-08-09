@@ -54,7 +54,7 @@ public class UserEntity {
     return createdAt;
   }
 
-  public Long getVersion() {
+  public @Nullable Long getVersion() {
     return version;
   }
 }

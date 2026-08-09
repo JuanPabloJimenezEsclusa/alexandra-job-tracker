@@ -6,6 +6,7 @@
 *.iml
 **/target
 **/*.md
+!**/SKILL.md
 .venv
 node_modules
 browser-extension

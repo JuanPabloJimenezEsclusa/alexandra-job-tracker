@@ -39,3 +39,25 @@ CREATE TABLE job_postings
 );
 
 CREATE INDEX idx_job_postings_user_id ON job_postings (user_id);
+
+CREATE TABLE job_analyses
+(
+  id               UUID PRIMARY KEY,
+  job_posting_id   UUID                     NOT NULL REFERENCES job_postings (id),
+  user_id          UUID                     NOT NULL REFERENCES users (id),
+  summary          TEXT                     NOT NULL,
+  seniority        VARCHAR(50)              NOT NULL,
+  soft_skills      TEXT                     NOT NULL DEFAULT '',
+  technical_skills TEXT                     NOT NULL DEFAULT '',
+  fit_score        DOUBLE PRECISION         NOT NULL,
+  company_rating   DOUBLE PRECISION         NOT NULL DEFAULT 0,
+  company_type     VARCHAR(50)              NOT NULL DEFAULT '',
+  salary_min       DOUBLE PRECISION         NOT NULL DEFAULT 0,
+  salary_max       DOUBLE PRECISION         NOT NULL DEFAULT 0,
+  salary_currency  VARCHAR(10)              NOT NULL DEFAULT 'USD',
+  created_at       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
+  version          BIGINT                   NOT NULL DEFAULT 0,
+  UNIQUE (job_posting_id)
+);
+
+CREATE INDEX idx_job_analyses_user_id ON job_analyses (user_id);

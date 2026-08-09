@@ -1,7 +1,7 @@
 info:
-  name: mutation.analyzeJobPosting
+  name: query.analysis
   type: graphql
-  seq: 8
+  seq: 14
 
 graphql:
   method: POST
@@ -11,21 +11,21 @@ graphql:
       value: application/json
   body:
     query: |
-      mutation($jobPostingId: ID!) { 
-        analyzeJobPosting(jobPostingId: $jobPostingId) {
+      query($id: ID!) {
+        analysis(id: $id) {
           id, jobPostingId, summary, seniority, softSkills, technicalSkills,
           fitScore, companyRating, companyType, salaryMin, salaryMax, salaryCurrency, createdAt
         }
       }
     variables: |-
       {
-        "jobPostingId": "{{jobPostingId}}"
+        "id": "{{analysisId}}"
       }
   auth: inherit
 
 runtime:
   variables:
-    - name: jobPostingId
+    - name: analysisId
       value: "00000000-0000-0000-0000-000000000000"
 
 settings:

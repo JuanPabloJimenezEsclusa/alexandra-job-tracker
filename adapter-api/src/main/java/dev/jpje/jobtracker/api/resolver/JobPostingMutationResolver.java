@@ -6,6 +6,7 @@ import java.util.UUID;
 import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
 import dev.jpje.jobtracker.api.dto.JobPostingResponse;
 import dev.jpje.jobtracker.domain.port.in.AnalyzeJobPostingPort;
+import dev.jpje.jobtracker.domain.port.in.ManageJobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.in.SubmitJobPostingPort;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.JobTitle;
@@ -22,11 +23,14 @@ import org.springframework.stereotype.Controller;
 public class JobPostingMutationResolver {
   private final SubmitJobPostingPort submitUseCase;
   private final AnalyzeJobPostingPort analyzeUseCase;
+  private final ManageJobAnalysisPort manageAnalysisUseCase;
 
   public JobPostingMutationResolver(final SubmitJobPostingPort submitUseCase,
-                                     final AnalyzeJobPostingPort analyzeUseCase) {
+                                     final AnalyzeJobPostingPort analyzeUseCase,
+                                     final ManageJobAnalysisPort manageAnalysisUseCase) {
     this.submitUseCase = submitUseCase;
     this.analyzeUseCase = analyzeUseCase;
+    this.manageAnalysisUseCase = manageAnalysisUseCase;
   }
 
   @MutationMapping
@@ -42,8 +46,16 @@ public class JobPostingMutationResolver {
   }
 
   @MutationMapping
-  public JobAnalysisResponse analyzeJobPosting(@Argument final UUID jobPostingId) {
-    return JobAnalysisResponse.from(analyzeUseCase.analyze(jobPostingId));
+  public JobAnalysisResponse analyzeJobPosting(@ContextValue(required = false) @Nullable final UserId userId,
+                                               @Argument final UUID jobPostingId) {
+    Objects.requireNonNull(userId, "Authentication required");
+    return JobAnalysisResponse.from(analyzeUseCase.analyze(userId, jobPostingId));
+  }
+
+  @MutationMapping
+  public boolean deleteAnalysis(@Argument final UUID id) {
+    manageAnalysisUseCase.delete(id);
+    return true;
   }
 
   public record JobPostingInput(

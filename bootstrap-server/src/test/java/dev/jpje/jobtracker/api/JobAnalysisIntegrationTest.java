@@ -21,13 +21,19 @@ import tools.jackson.databind.ObjectMapper;
 @Import(IntegrationTestConfig.class)
 class JobAnalysisIntegrationTest {
 
+  private static final String MOCKED_SUMMARY = "Mocked analysis";
+  private static final double MOCKED_FIT_SCORE = 85.0;
+  private static final String MOCKED_COMPANY_TYPE = "enterprise";
+  private static final String MOCKED_SALARY_CURRENCY = "USD";
+  private static final String USERNAME = "analysis-user";
+
   private final RestTemplate rest = new RestTemplate();
 
   @LocalServerPort
   private int port;
 
   @Test
-  void shouldAnalyzeJobPosting() {
+  void shouldAnalyzeAndRetrieveJobPosting() {
     final var token = registerAndGetToken();
     final var headers = jsonHeaders();
     headers.setBearerAuth(token);
@@ -39,11 +45,38 @@ class JobAnalysisIntegrationTest {
     final var submitResp = rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(submitBody, headers), String.class);
     final var node = new ObjectMapper().readTree(submitResp.getBody());
     final var postingId = node.findValue("id").asString();
+    final var query = "{\"query\": \"mutation { analyzeJobPosting(jobPostingId: \\\"%s\\\") { "
+      + "id summary seniority softSkills technicalSkills fitScore companyRating companyType "
+      + "salaryMin salaryMax salaryCurrency } }\", \"variables\": {}}";
     final var response = rest.exchange(url(), HttpMethod.POST,
+      new HttpEntity<>(query.formatted(postingId), headers), String.class);
+    final var analysis = new ObjectMapper().readTree(response.getBody());
+    final var analysisId = analysis.findValue("id").asString();
+    assertThat(analysis.findValue("summary").asString()).as("analyzed summary").isEqualTo(MOCKED_SUMMARY);
+    assertThat(analysis.findValue("fitScore").asDouble()).as("analyzed fit score").isEqualTo(MOCKED_FIT_SCORE);
+    assertThat(analysis.findValue("companyType").asString()).as("analyzed company type")
+      .isEqualTo(MOCKED_COMPANY_TYPE);
+    assertThat(analysis.findValue("salaryCurrency").asString()).as("analyzed salary currency")
+      .isEqualTo(MOCKED_SALARY_CURRENCY);
+
+    final var listResp = rest.exchange(url(), HttpMethod.POST,
       new HttpEntity<>("""
-        {"query": "mutation { analyzeJobPosting(jobPostingId: \\"%s\\") { summary skills fitScore } }"}
-        """.formatted(postingId), jsonHeaders()), String.class);
-    assertThat(response.getBody()).contains("summary").contains("skills").contains("fitScore");
+        {"query": "query { analyses { id jobPostingId summary fitScore } }"}
+        """, headers), String.class);
+    assertThat(listResp.getBody()).as("saved analysis listed")
+      .contains(analysisId).contains(MOCKED_SUMMARY);
+
+    final var deleteResp = rest.exchange(url(), HttpMethod.POST,
+      new HttpEntity<>("""
+        {"query": "mutation { deleteAnalysis(id: \\"%s\\") }"}
+        """.formatted(analysisId), headers), String.class);
+    assertThat(deleteResp.getBody()).as("delete mutation result").contains("true");
+
+    final var afterDelete = rest.exchange(url(), HttpMethod.POST,
+      new HttpEntity<>("""
+        {"query": "query { analyses { id } }"}
+        """, headers), String.class);
+    assertThat(afterDelete.getBody()).as("deleted analysis absent from list").doesNotContain(analysisId);
   }
 
   private String url() {
@@ -59,7 +92,7 @@ class JobAnalysisIntegrationTest {
   private String registerAndGetToken() {
     final var body = """
       {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\") { token } }"}
-      """.formatted("analysis-user");
+      """.formatted(USERNAME);
     final var response = rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(body, jsonHeaders()), String.class);
     final var node = new ObjectMapper().readTree(response.getBody());
     return node.findValue("token").asString();

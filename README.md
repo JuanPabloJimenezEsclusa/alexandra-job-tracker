@@ -72,19 +72,19 @@ dependencies, validated at build time by ArchUnit.
 
 ### Modules
 
-| Module               | Layer     | Description                                                       |
-|----------------------|-----------|-------------------------------------------------------------------|
-| `domain`             | Core      | Pure Java — domain models, value objects, ports, domain services  |
-| `application`        | Core      | Use cases orchestrating domain logic through inbound ports        |
-| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs — Spring for GraphQL         |
-| `adapter-cli`        | Inbound   | Spring Shell commands, HTTP GraphQL client, session management    |
-| `adapter-persistence`| Outbound  | JPA entities, repositories, mappers, Flyway migrations            |
-| `adapter-auth`       | Outbound  | JWT provider, GraphQL auth interceptor, bcrypt password hashing   |
-| `adapter-ai`         | Outbound  | Job description analysis via DeepSeek (Spring AI)                 |
-| `adapter-cache`      | Outbound  | Caffeine cache with hexagonal `CachePort` decorators              |
-| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API — wires use cases, adapters, events       |
-| `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI — standalone HTTP client                    |
-| `coverage-jacoco`    | Testing   | JaCoCo aggregated coverage reports + ArchUnit architecture tests  |
+| Module               | Layer     | Description                                                      |
+|----------------------|-----------|------------------------------------------------------------------|
+| `domain`             | Core      | Pure Java — domain models, value objects, ports, domain services |
+| `application`        | Core      | Use cases orchestrating domain logic through inbound ports       |
+| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs — Spring for GraphQL        |
+| `adapter-cli`        | Inbound   | Spring Shell commands, HTTP GraphQL client, session management   |
+| `adapter-persistence`| Outbound  | JPA entities, repositories, mappers, Flyway migrations           |
+| `adapter-auth`       | Outbound  | JWT provider, GraphQL auth interceptor, bcrypt password hashing  |
+| `adapter-ai`         | Outbound  | Job analysis via Spring AI + skill-based prompts                 |
+| `adapter-cache`      | Outbound  | Caffeine cache with hexagonal `CachePort` decorators             |
+| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API — wires use cases, adapters, events      |
+| `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI — standalone HTTP client                   |
+| `coverage-jacoco`    | Testing   | JaCoCo aggregated coverage reports + ArchUnit architecture tests |
 | `testing-pentest`    | Testing   | k6 GraphQL security tests + OWASP ZAP active scan                |
 
 > **browser-extension** — Chrome extension for capturing LinkedIn/Indeed job postings
@@ -131,18 +131,19 @@ flowchart LR
 All GraphQL resolvers follow **Command Query Responsibility Segregation** — every
 endpoint is either a `QueryResolver` (read) or `MutationResolver` (write).
 
-| Query Resolver              | Endpoint             |
-|-----------------------------|----------------------|
-| `UserQueryResolver`         | `me`                 |
-| `ApplicationQueryResolver`  | `applications`       |
-| `JobPostingQueryResolver`   | `jobPostings`        |
-| `AnalyticsQueryResolver`    | `analytics`          |
+| Query Resolver              | Endpoint               |
+|-----------------------------|------------------------|
+| `UserQueryResolver`         | `me`                   |
+| `ApplicationQueryResolver`  | `applications`         |
+| `JobPostingQueryResolver`   | `jobPostings`          |
+| `JobAnalysisQueryResolver`  | `analyses`, `analysis` |
+| `AnalyticsQueryResolver`    | `analytics`            |
 
-| Mutation Resolver             | Endpoint                                              |
-|-------------------------------|-------------------------------------------------------|
-| `UserMutationResolver`        | `register`, `login`, `logout`                         |
-| `ApplicationMutationResolver` | `createApplication`, `updateApplicationStatus`, `delete` |
-| `JobPostingMutationResolver`  | `submitJobPosting`, `analyzeJobPosting`               |
+| Mutation Resolver             | Endpoint                                                            |
+|-------------------------------|---------------------------------------------------------------------|
+| `UserMutationResolver`        | `register`, `login`, `logout`                                       |
+| `ApplicationMutationResolver` | `createApplication`, `updateApplicationStatus`, `deleteApplication` |
+| `JobPostingMutationResolver`  | `submitJobPosting`, `analyzeJobPosting`, `deleteAnalysis`           |
 
 ### Data Flow
 
@@ -225,7 +226,7 @@ to `bootstrap-server/src/main/resources/META-INF/native-image/`.
 ### Run
 
 ```bash
-# Docker Compose (server + PostgreSQL + OpenTelemetry + Grafana)
+# Docker Compose (server + OpenTelemetry + Grafana observability stack)
 docker compose -f deploy/compose/docker-compose.yml up -d
 
 # Standalone server (embedded H2, no telemetry)
@@ -235,10 +236,10 @@ java -jar bootstrap-server/target/bootstrap-server-*.jar
 java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost:8880/api
 
 # Native server
-./bootstrap-server/target/bootstrap-server-*-native --spring.profiles.active=loc
+./bootstrap-server/target/job-tracker-server --spring.profiles.active=loc
 
 # Native CLI
-./bootstrap-cli/target/bootstrap-cli-*-native --server.url=http://localhost:8880/api
+./bootstrap-cli/target/job-tracker-cli --server.url=http://localhost:8880/api
 ```
 
 ---
@@ -259,9 +260,12 @@ passed in the `Authorization: Bearer <token>` header.
 | `updateApplicationStatus(id, status)`            | Move through pipeline                         |
 | `deleteApplication(id)`                          | Remove an application                         |
 | `analytics(since)`                               | Per-status counts and conversion rate         |
-| `jobPostings(source)`                            | List scraped job postings                     |
+| `jobPostings(source)`                            | List submitted job postings                   |
 | `submitJobPosting(input)`                        | Submit a job posting from raw data            |
-| `analyzeJobPosting(jobPostingId)`                | AI-powered job description analysis           |
+| `analyzeJobPosting(jobPostingId)`                | AI analysis — summary, skills, fit score, company rating/type, salary range; persisted |
+| `analyses`                                       | List saved analyses for the current user      |
+| `analysis(id)`                                   | Fetch a single saved analysis                 |
+| `deleteAnalysis(id)`                             | Remove a saved analysis                       |
 
 ### Status Pipeline
 
@@ -299,8 +303,10 @@ the user's home directory.
 | `delete`        | `d`   | Remove an application                      |
 | `analytics`     | `an`  | Per-status counts and conversion rate      |
 | `submit-job`    | `sj`  | Submit a job posting (URL or manual entry) |
-| `postings`      | `po`  | List scraped job postings                  |
+| `postings`      | `po`  | List submitted job postings                  |
 | `analyze`       | `anlz`| AI analysis of a job posting               |
+| `analyses`      | `al`  | List saved analyses                        |
+| `delete-analysis` | `dal`| Delete a saved analysis                  |
 
 ```bash
 # Examples
@@ -320,6 +326,8 @@ submit-job \
   --source LINKEDIN
 postings -s LINKEDIN -j ".[].title"
 analyze -i <posting-id> -j ".fitScore"
+analyses -j ".[].companyType"
+delete-analysis -i <analysis-id>
 ```
 
 ---

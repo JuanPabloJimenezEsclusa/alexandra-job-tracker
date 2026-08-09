@@ -8,6 +8,7 @@ import dev.jpje.jobtracker.application.usecase.AnalyzeJobPostingUseCase;
 import dev.jpje.jobtracker.application.usecase.AuthenticationUseCase;
 import dev.jpje.jobtracker.application.usecase.GetAnalyticsUseCase;
 import dev.jpje.jobtracker.application.usecase.ListJobPostingsUseCase;
+import dev.jpje.jobtracker.application.usecase.ManageJobAnalysisUseCase;
 import dev.jpje.jobtracker.application.usecase.SubmitJobPostingUseCase;
 import dev.jpje.jobtracker.application.usecase.TrackJobApplicationUseCase;
 import dev.jpje.jobtracker.domain.event.EventPublisher;
@@ -16,13 +17,16 @@ import dev.jpje.jobtracker.domain.port.in.AnalyzeJobPostingPort;
 import dev.jpje.jobtracker.domain.port.in.AuthenticationPort;
 import dev.jpje.jobtracker.domain.port.in.GetAnalyticsPort;
 import dev.jpje.jobtracker.domain.port.in.ListJobPostingsPort;
+import dev.jpje.jobtracker.domain.port.in.ManageJobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.in.SubmitJobPostingPort;
 import dev.jpje.jobtracker.domain.port.in.TrackJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.out.LoadJobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.out.LoadJobPostingPort;
 import dev.jpje.jobtracker.domain.port.out.LoadUserPort;
 import dev.jpje.jobtracker.domain.port.out.PasswordEncoderPort;
+import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.out.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.port.out.SaveUserPort;
@@ -72,18 +76,27 @@ public class UseCaseConfig {
 
   @Bean
   AnalyzeJobPostingPort analyzeJobPostingUseCase(
+      final Clock clock,
       final LoadJobPostingPort loadPort,
       final JobAnalysisPort analysisPort,
+      final SaveJobAnalysisPort saveAnalysisPort,
       final Timer analyzeJobDurationTimer) {
-    final var impl = new AnalyzeJobPostingUseCase(loadPort, analysisPort);
-    return jobPostingId -> {
+    final var impl = new AnalyzeJobPostingUseCase(loadPort, analysisPort, saveAnalysisPort, clock);
+    return (userId, jobPostingId) -> {
       final var sample = Timer.start();
       try {
-        return impl.analyze(jobPostingId);
+        return impl.analyze(userId, jobPostingId);
       } finally {
         sample.stop(analyzeJobDurationTimer);
       }
     };
+  }
+
+  @Bean
+  ManageJobAnalysisPort manageJobAnalysisUseCase(
+      final LoadJobAnalysisPort loadAnalysisPort,
+      final SaveJobAnalysisPort saveAnalysisPort) {
+    return new ManageJobAnalysisUseCase(loadAnalysisPort, saveAnalysisPort);
   }
 
   @Bean

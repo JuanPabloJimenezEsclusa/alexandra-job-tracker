@@ -43,12 +43,19 @@ class JobAnalyzerAdapterTest {
           "technical_skills": ["Java", "Spring"],
           "soft_skills": ["Teamwork"],
           "fit_score": 85.0,
-          "seniority": "senior"
+          "seniority": "senior",
+          "company_rating": 4.2,
+          "company_type": "enterprise",
+          "salary_min": 90000.0,
+          "salary_max": 130000.0,
+          "salary_currency": "USD"
         }
         """),
         "Java backend role",
-        List.of("Java", "Spring", "Teamwork"),
-        85.0),
+        "senior",
+        List.of("Teamwork"),
+        List.of("Java", "Spring"),
+        85.0, 4.2, "enterprise", 90000.0, 130000.0, "USD"),
       arguments(named("partial JSON with only summary and fit_score",
         """
         {
@@ -57,8 +64,10 @@ class JobAnalyzerAdapterTest {
         }
         """),
         "Only summary provided",
+        "",
         List.of(),
-        50.0),
+        List.of(),
+        50.0, 0.0, "unknown", 0.0, 0.0, "USD"),
       arguments(named("merge technical and soft skills",
         """
         {
@@ -66,12 +75,19 @@ class JobAnalyzerAdapterTest {
           "technical_skills": ["Java", "Spring", "React", "AWS"],
           "soft_skills": ["Communication", "Leadership"],
           "fit_score": 90.0,
-          "seniority": "senior"
+          "seniority": "senior",
+          "company_rating": 3.8,
+          "company_type": "mid-size",
+          "salary_min": 70000.0,
+          "salary_max": 100000.0,
+          "salary_currency": "EUR"
         }
         """),
         "Full stack role",
-        List.of("Java", "Spring", "React", "AWS", "Communication", "Leadership"),
-        90.0),
+        "senior",
+        List.of("Communication", "Leadership"),
+        List.of("Java", "Spring", "React", "AWS"),
+        90.0, 3.8, "mid-size", 70000.0, 100000.0, "EUR"),
       arguments(named("only technical skills",
         """
         {
@@ -79,12 +95,19 @@ class JobAnalyzerAdapterTest {
           "technical_skills": ["Go", "Postgres"],
           "soft_skills": [],
           "fit_score": 70.0,
-          "seniority": "mid"
+          "seniority": "mid",
+          "company_rating": 2.9,
+          "company_type": "startup",
+          "salary_min": 60000.0,
+          "salary_max": 85000.0,
+          "salary_currency": "USD"
         }
         """),
         "Backend role",
+        "mid",
+        List.of(),
         List.of("Go", "Postgres"),
-        70.0),
+        70.0, 2.9, "startup", 60000.0, 85000.0, "USD"),
       arguments(named("only soft skills",
         """
         {
@@ -96,8 +119,54 @@ class JobAnalyzerAdapterTest {
         }
         """),
         "People role",
+        "lead",
         List.of("Communication", "Empathy"),
-        40.0)
+        List.of(),
+        40.0, 0.0, "unknown", 0.0, 0.0, "USD"),
+      arguments(named("JSON with prose prefix and suffix",
+        """
+        Based on the job description, here is my analysis:
+        {
+          "summary": "Java backend role",
+          "technical_skills": ["Java", "Spring"],
+          "soft_skills": ["Teamwork"],
+          "fit_score": 85.0,
+          "seniority": "senior",
+          "company_rating": 4.2,
+          "company_type": "enterprise",
+          "salary_min": 90000.0,
+          "salary_max": 130000.0,
+          "salary_currency": "USD"
+        }
+        I hope this helps!
+        """),
+        "Java backend role",
+        "senior",
+        List.of("Teamwork"),
+        List.of("Java", "Spring"),
+        85.0, 4.2, "enterprise", 90000.0, 130000.0, "USD"),
+      arguments(named("JSON inside markdown code fences",
+        """
+        ```json
+        {
+          "summary": "Java backend role",
+          "technical_skills": ["Java", "Spring"],
+          "soft_skills": ["Teamwork"],
+          "fit_score": 85.0,
+          "seniority": "senior",
+          "company_rating": 4.2,
+          "company_type": "enterprise",
+          "salary_min": 90000.0,
+          "salary_max": 130000.0,
+          "salary_currency": "USD"
+        }
+        ```
+        """),
+        "Java backend role",
+        "senior",
+        List.of("Teamwork"),
+        List.of("Java", "Spring"),
+        85.0, 4.2, "enterprise", 90000.0, 130000.0, "USD")
     );
   }
 
@@ -112,53 +181,62 @@ class JobAnalyzerAdapterTest {
   @BeforeEach
   void setUp() {
     when(builder.defaultSystem(anyString())).thenReturn(builder);
+    when(builder.defaultTools(any())).thenReturn(builder);
     when(builder.defaultOptions(any())).thenReturn(builder);
     when(builder.build()).thenReturn(chatClient);
-    adapter = new JobAnalyzerAdapter(builder, new ClassPathResource("prompts/job-analysis.st"));
+    adapter = new JobAnalyzerAdapter(builder, new ClassPathResource("prompts/job-analysis.st"),
+      new ClassPathResource("skills"));
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("validResponses")
   void shouldParseResponse(final String response,
                            final String expectedSummary,
-                           final List<String> expectedSkills,
-                           final double expectedFitScore) {
-    // Given
-    stubChatClient(response);
-
-    // When
-    final var result = adapter.analyze("some job description");
-
-    // Then
-    assertThat(result)
-      .extracting(JobAnalysis::summary, JobAnalysis::skills, JobAnalysis::fitScore)
-      .containsExactly(expectedSummary, expectedSkills, expectedFitScore);
+                           final String expectedSeniority,
+                           final List<String> expectedSoftSkills,
+                           final List<String> expectedTechnicalSkills,
+                           final double expectedFitScore,
+                           final double expectedCompanyRating,
+                           final String expectedCompanyType,
+                           final double expectedSalaryMin,
+                           final double expectedSalaryMax,
+                           final String expectedSalaryCurrency) {
+    assertThat(analyze(response))
+      .extracting(JobAnalysis::summary, JobAnalysis::seniority,
+        JobAnalysis::softSkills, JobAnalysis::technicalSkills, JobAnalysis::fitScore,
+        JobAnalysis::companyRating, JobAnalysis::companyType,
+        JobAnalysis::salaryMin, JobAnalysis::salaryMax, JobAnalysis::salaryCurrency)
+      .containsExactly(expectedSummary, expectedSeniority,
+        expectedSoftSkills, expectedTechnicalSkills, expectedFitScore,
+        expectedCompanyRating, expectedCompanyType,
+        expectedSalaryMin, expectedSalaryMax, expectedSalaryCurrency);
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("invalidResponses")
-  void shouldReturnFallbackForInvalidResponse(final String response,
-                                              final String expectedSummaryPrefix) {
-    // Given
-    stubChatClient(response);
-
-    // When
-    final var result = adapter.analyze("any description");
-
-    // Then
-    assertThat(result).matches(r ->
+  void shouldReturnFallbackForInvalidResponse(final String response, final String expectedSummaryPrefix) {
+    assertThat(analyze(response)).matches(r ->
       r.summary().startsWith(expectedSummaryPrefix)
-        && r.skills().isEmpty()
-        && r.fitScore() == 0.0);
+        && r.seniority().isEmpty()
+        && r.softSkills().isEmpty()
+        && r.technicalSkills().isEmpty()
+        && r.fitScore() == 0.0
+        && r.companyRating() == 0.0
+        && r.companyType().equals("unknown")
+        && r.salaryMin() == 0.0
+        && r.salaryMax() == 0.0
+        && r.salaryCurrency().equals("USD"));
   }
 
-  private void stubChatClient(final String response) {
-    var requestSpec = mock(ChatClient.ChatClientRequestSpec.class);
-    var callSpec = mock(ChatClient.CallResponseSpec.class);
+  private JobAnalysis analyze(final String response) {
+    final var requestSpec = mock(ChatClient.ChatClientRequestSpec.class);
+    final var callSpec = mock(ChatClient.CallResponseSpec.class);
 
     when(chatClient.prompt()).thenReturn(requestSpec);
     when(requestSpec.user(any(Consumer.class))).thenReturn(requestSpec);
     when(requestSpec.call()).thenReturn(callSpec);
     when(callSpec.content()).thenReturn(response);
+
+    return adapter.analyze("some job description");
   }
 }

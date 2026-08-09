@@ -10,8 +10,12 @@ import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.persistence.entity.JobApplicationEntity;
 
-public class JobApplicationMapper {
-  public JobApplication toDomain(final JobApplicationEntity entity) {
+public final class JobApplicationMapper {
+
+  private JobApplicationMapper() {
+  }
+
+  public static JobApplication toDomain(final JobApplicationEntity entity) {
     final var postingUrl = entity.getPostingUrl();
     return new JobApplication(entity.getId(), new UserId(entity.getUserId()),
       CompanyName.of(entity.getCompany()), RoleName.of(entity.getRole()),
@@ -23,7 +27,7 @@ public class JobApplicationMapper {
   }
 
   @SuppressWarnings("java:S4449") // false positives
-  public JobApplicationEntity toEntity(final JobApplication domain) {
+  public static JobApplicationEntity toEntity(final JobApplication domain) {
     final var entity = new JobApplicationEntity();
     entity.setId(domain.id());
     entity.setUserId(domain.userId().value());

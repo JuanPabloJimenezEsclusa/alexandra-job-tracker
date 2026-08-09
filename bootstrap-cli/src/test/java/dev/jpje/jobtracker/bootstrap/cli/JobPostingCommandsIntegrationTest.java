@@ -84,7 +84,11 @@ class JobPostingCommandsIntegrationTest extends BaseCliIntegrationTest {
           {
             "data": {
               "analyzeJobPosting": {
-                "summary": "Java role", "skills": ["Java"], "fitScore": 85.0
+                "id": "a1111111-1111-1111-1111-111111111111",
+                "jobPostingId": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+                "summary": "Java role", "seniority": "mid", "softSkills": [], "technicalSkills": ["Java"], "fitScore": 85.0,
+                "companyRating": 4.2, "companyType": "enterprise", "salaryMin": 90000.0, "salaryMax": 130000.0, "salaryCurrency": "USD",
+                "createdAt": "2026-01-01T00:00:00Z"
               }
             }
           }
@@ -96,7 +100,40 @@ class JobPostingCommandsIntegrationTest extends BaseCliIntegrationTest {
           {"errors": [{"message": "Analyze failed"}], "data": null}
           """,
         "anlz -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-        "Analyze failed")
+        "Analyze failed"),
+      arguments(named("list analyses with data", "analyses"),
+        """
+          {
+            "data": {
+              "analyses": [{
+                "id": "a1111111-1111-1111-1111-111111111111",
+                "jobPostingId": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+                "summary": "Java role",
+                "seniority": "mid",
+                "softSkills": ["Teamwork"],
+                "technicalSkills": ["Java"],
+                "fitScore": 85.0,
+                "companyType": "enterprise",
+                "salaryMin": 90000.0,
+                "salaryMax": 130000.0,
+                "salaryCurrency": "USD",
+                "createdAt": "2026-01-01T00:00:00Z"
+              }]
+            }
+          }
+          """,
+        "al",
+        "Java role"),
+      arguments(named("delete analysis", "deleteAnalysis"),
+        """
+          {
+            "data": {
+              "deleteAnalysis": true
+            }
+          }
+          """,
+        "dal -i a1111111-1111-1111-1111-111111111111",
+        "Deleted analysis: a1111111-1111-1111-1111-111111111111")
     );
   }
 
