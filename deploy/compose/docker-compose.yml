@@ -56,7 +56,7 @@ services:
       start_period: 30s
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.157.0
+    image: otel/opentelemetry-collector-contrib:0.158.0
     container_name: alexandra-otel-collector
     hostname: otel-collector
     restart: unless-stopped
@@ -67,7 +67,7 @@ services:
     <<: *default-resources
 
   prometheus:
-    image: prom/prometheus:v3.13.1
+    image: prom/prometheus:v3.13.2
     container_name: alexandra-prometheus
     hostname: prometheus
     restart: unless-stopped
@@ -95,7 +95,7 @@ services:
     <<: *default-resources
 
   loki:
-    image: grafana/loki:3.7.4
+    image: grafana/loki:3.7.6
     container_name: alexandra-loki
     hostname: loki
     restart: unless-stopped
@@ -119,7 +119,7 @@ services:
     <<: *default-resources
 
   grafana:
-    image: grafana/grafana:13.1.1
+    image: grafana/grafana:13.1.2
     container_name: alexandra-grafana
     hostname: grafana
     restart: unless-stopped
