@@ -19,7 +19,7 @@ SEPARATOR="\n ################################################## \n"
 
 NEON_PASSWORD="${NEON_PASSWORD:-}"
 JWT_SECRET="${JWT_SECRET:-}"
-DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:-}"
+LLM_API_KEY="${LLM_API_KEY:-}"
 # shellcheck disable=SC2016
 HOSTED_ZONE_ID="$(aws route53 list-hosted-zones --query 'HostedZones[?Name==`jpje.net.`].Id' --output text | sed 's|/hostedzone/||')"
 DOMAIN_NAME="${DOMAIN_NAME:-ajt.jpje.net}"
@@ -33,7 +33,7 @@ main() {
     -var "image_uri=" \
     -var "neon_password=${NEON_PASSWORD}" \
     -var "jwt_secret=${JWT_SECRET}" \
-    -var "deepseek_api_key=${DEEPSEEK_API_KEY}" \
+    -var "llm_api_key=${LLM_API_KEY}" \
     -var "hosted_zone_id=${HOSTED_ZONE_ID}" \
     -var "domain_name=${DOMAIN_NAME}" \
     -var "region=${REGION}"

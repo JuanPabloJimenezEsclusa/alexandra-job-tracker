@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.event.EventPublisher;
 import dev.jpje.jobtracker.domain.event.JobApplicationStatusChanged;
+import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.port.in.TrackJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
@@ -44,9 +45,8 @@ public class TrackJobApplicationUseCase implements TrackJobApplicationPort {
                                @Nullable final Notes notes) {
     final var now = clock.instant();
     final var app = new JobApplication(UUID.randomUUID(), userId, company, role, source, postingUrl,
-      ApplicationStatus.SAVED, now, now, notes);
-    savePort.save(app);
-    return app;
+      ApplicationStatus.SAVED, now, now, notes, null);
+    return savePort.save(app);
   }
 
   @Override
@@ -54,14 +54,14 @@ public class TrackJobApplicationUseCase implements TrackJobApplicationPort {
                                       final ApplicationStatus newStatus,
                                       @Nullable final Notes notes) {
     final var app = loadPort.findById(applicationId)
-      .orElseThrow(() -> new IllegalArgumentException("Application not found"));
+      .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
     final var now = clock.instant();
     final var previousStatus = app.status();
-    var updated = app.withStatus(newStatus, now);
+    var toSave = app.withStatus(newStatus, now);
     if (notes != null) {
-      updated = updated.withNotes(notes, now);
+      toSave = toSave.withNotes(notes, now);
     }
-    savePort.save(updated);
+    final var updated = savePort.save(toSave);
     eventPublisher.publish(new JobApplicationStatusChanged(
       updated.id(), updated.userId(), previousStatus, newStatus, now));
     return updated;

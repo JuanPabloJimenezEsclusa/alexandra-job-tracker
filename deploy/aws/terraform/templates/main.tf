@@ -54,19 +54,83 @@ resource "aws_iam_role_policy" "ecr_pull" {
   })
 }
 
+resource "aws_iam_role_policy" "events" {
+  name = "events-policy"
+  role = aws_iam_role.lambda_exec.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = ["sns:Publish"]
+        Resource = [aws_sns_topic.job_events.arn]
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = [aws_sqs_queue.job_analysis.arn]
+      }
+    ]
+  })
+}
+
+#################################################################################################
+# Events (SNS + SQS)
+#################################################################################################
+
+resource "aws_sns_topic" "job_events" {
+  name         = "ajt-job-events"
+  display_name = "AJT Job Events"
+  # Non-sensitive job posting metadata only — AWS-managed KMS is sufficient.
+  kms_master_key_id = "alias/aws/sns"
+}
+
+resource "aws_sqs_queue" "job_analysis" {
+  name                       = "ajt-job-analysis"
+  visibility_timeout_seconds = 120
+  # Non-sensitive job posting metadata only — AWS-managed KMS is sufficient.
+  kms_master_key_id = "alias/aws/sqs"
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.job_analysis_dlq.arn
+    maxReceiveCount     = 3
+  })
+}
+
+resource "aws_sqs_queue" "job_analysis_dlq" {
+  name = "ajt-job-analysis-dlq"
+  # Non-sensitive job posting metadata only — AWS-managed KMS is sufficient.
+  kms_master_key_id = "alias/aws/sqs"
+}
+
+resource "aws_sns_topic_subscription" "job_events_to_sqs" {
+  topic_arn = aws_sns_topic.job_events.arn
+  protocol  = "sqs"
+  endpoint  = aws_sqs_queue.job_analysis.arn
+}
+
+resource "aws_lambda_event_source_mapping" "job_analysis" {
+  event_source_arn = aws_sqs_queue.job_analysis.arn
+  function_name    = aws_lambda_function.this.arn
+  batch_size       = 1
+}
+
 #################################################################################################
 # Lambda
 #################################################################################################
 
 resource "aws_lambda_function" "this" {
-  function_name   = "ajt-serverless"
-  description     = "Spring Boot native-image job tracker (GraalVM)"
-  package_type    = "Image"
-  image_uri       = var.image_uri
-  role            = aws_iam_role.lambda_exec.arn
-  memory_size     = 1024
-  timeout         = 60
-  publish         = true
+  function_name = "ajt-serverless"
+  description   = "Spring Boot native-image job tracker (GraalVM)"
+  package_type  = "Image"
+  image_uri     = var.image_uri
+  role          = aws_iam_role.lambda_exec.arn
+  memory_size   = 1024
+  timeout       = 60
+  publish       = true
 
   ephemeral_storage {
     size = 512
@@ -74,14 +138,16 @@ resource "aws_lambda_function" "this" {
 
   environment {
     variables = {
-      NEON_PASSWORD                 = var.neon_password
-      JWT_SECRET                    = var.jwt_secret
-      DEEPSEEK_API_KEY              = var.deepseek_api_key
-      SPRING_PROFILES_ACTIVE        = "aws"
-      LOGGING_LEVEL_ROOT            = "WARN"
-      LOGGING_LEVEL_COM_JOBTRACKER  = "INFO"
-      AWS_LAMBDA_SERVER_PORT        = "8080"
-      SERVER_PORT                   = "8080"
+      NEON_PASSWORD                = var.neon_password
+      JWT_SECRET                   = var.jwt_secret
+      LLM_API_KEY                  = var.llm_api_key
+      SNS_TOPIC_ARN                = aws_sns_topic.job_events.arn
+      SQS_QUEUE_URL                = aws_sqs_queue.job_analysis.id
+      SPRING_PROFILES_ACTIVE       = "aws"
+      LOGGING_LEVEL_ROOT           = "WARN"
+      LOGGING_LEVEL_COM_JOBTRACKER = "INFO"
+      AWS_LAMBDA_SERVER_PORT       = "8080"
+      SERVER_PORT                  = "8080"
     }
   }
 
@@ -155,7 +221,7 @@ resource "aws_apigatewayv2_stage" "this" {
 
   access_log_settings {
     destination_arn = aws_cloudwatch_log_group.api_gateway.arn
-    format         = "$$context.requestId $$context.httpMethod $$context.routeKey $$context.status $$context.protocol $$context.responseLength"
+    format          = "$$context.requestId $$context.httpMethod $$context.routeKey $$context.status $$context.protocol $$context.responseLength"
   }
 }
 

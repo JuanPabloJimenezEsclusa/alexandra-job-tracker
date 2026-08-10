@@ -8,6 +8,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
+import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
+import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import graphql.ErrorType;
 import graphql.GraphQLError;
 import graphql.execution.ResultPath;
@@ -27,16 +30,22 @@ class GraphQlExceptionResolverTest {
 
   private static Stream<Arguments> exceptionMapping() {
     return Stream.of(
+      arguments(named("resource not found", new ResourceNotFoundException("Application not found")),
+        "Application not found", ErrorType.ValidationError, "NOT_FOUND", "DOMAIN"),
+      arguments(named("resource already exists", new ResourceAlreadyExistsException("Username already taken")),
+        "Username already taken", ErrorType.ValidationError, "CONFLICT", "DOMAIN"),
+      arguments(named("invalid state transition", new InvalidStateTransitionException("Invalid transition")),
+        "Invalid transition", ErrorType.InvalidSyntax, "INVALID_STATE", "DOMAIN"),
       arguments(named("illegal argument", new IllegalArgumentException("Invalid input")),
         "Invalid input", ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION"),
       arguments(named("illegal state", new IllegalStateException("Invalid state transition")),
         "Invalid state transition", ErrorType.InvalidSyntax, "INVALID_STATE", "STATE_ERROR"),
       arguments(named("runtime failure", new RuntimeException("Unexpected failure")),
-        "Unexpected failure", ErrorType.DataFetchingException, "INTERNAL_ERROR", "UNEXPECTED"),
+        "Internal server error", ErrorType.DataFetchingException, "INTERNAL_ERROR", "UNEXPECTED"),
       arguments(named("null pointer", new NullPointerException("Authentication required")),
         "Authentication required", ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION"),
       arguments(named("null message", new NullPointerException()),
-        "Internal server error", ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION")
+        "Invalid input", ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION")
     );
   }
 

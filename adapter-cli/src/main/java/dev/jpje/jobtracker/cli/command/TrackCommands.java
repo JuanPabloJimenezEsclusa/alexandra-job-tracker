@@ -29,8 +29,8 @@ public class TrackCommands {
       Adds a new job application with the specified company, role, source, and optional posting URL and notes.
       
       Example usage:
-        - add -c "Acme Corp" -r 'Software Engineer' -s LINKEDIN
-        - a -c 'Beta Inc' -r 'Data Scientist' -s INDEED -u 'https://example.com/job/123' -n 'Applied on 2026-01-15'
+        - add -c "Acme Corp" -r "Software Engineer" -s LINKEDIN
+        - a -c "Beta Inc" -r "Data Scientist" -s INDEED -u "https://example.com/job/123" -n "Applied on 2026-01-15"
       """)
   public String add(
     @Option(
@@ -131,7 +131,7 @@ public class TrackCommands {
       
        Example usage:
         - update -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s WITHDRAWN
-        - u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s APPLIED -n 'Followed up via email on May 3rd'
+        - u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s APPLIED -n "Followed up via email on May 3rd"
       """)
   public String update(
     @Option(

@@ -76,6 +76,7 @@
 
     <spring-ai.version>2.0.1</spring-ai.version>
     <spring-ai-agent-utils.version>0.10.0</spring-ai-agent-utils.version>
+    <spring-cloud-aws.version>4.1.0</spring-cloud-aws.version>
     <archunit.version>1.5.0</archunit.version>
     <jjwt.version>0.13.0</jjwt.version>
     <jbcrypt.version>0.4</jbcrypt.version>
@@ -134,6 +135,14 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+      <dependency>
+        <groupId>io.awspring.cloud</groupId>
+        <artifactId>spring-cloud-aws-dependencies</artifactId>
+        <version>${spring-cloud-aws.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
       <dependency>
         <groupId>org.springframework.shell</groupId>
         <artifactId>spring-shell-starter</artifactId>
@@ -363,6 +372,7 @@
                       <exclude>io.prometheus:prometheus-metrics-core</exclude>
                       <exclude>io.prometheus:prometheus-metrics-exposition-formats</exclude>
                       <exclude>io.prometheus:prometheus-metrics-tracer-common</exclude>
+                      <exclude>org.apache.httpcomponents.core5:httpcore5</exclude>
                     </excludes>
                   </requireUpperBoundDeps>
                   <requireMavenVersion>

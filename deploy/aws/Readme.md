@@ -60,7 +60,7 @@ Image tag auto-derives from git SHA (`git-abc1234`). Each deploy publishes a new
 ```bash
 # First-time setup (build + push + deploy)
 export NEON_PASSWORD='...'
-export DEEPSEEK_API_KEY='sk-...'
+export LLM_API_KEY='sk-...'
 ./cloud-formation/start.sh buildImage
 
 # Incremental deploy (image already in ECR)
@@ -78,7 +78,7 @@ cd terraform
 IMAGE_URI="$(aws ecr describe-repositories ...):git-abc1234" \
   NEON_PASSWORD='...' \
   JWT_SECRET='...' \
-  DEEPSEEK_API_KEY='sk-...' \
+  LLM_API_KEY='sk-...' \
   HOSTED_ZONE_ID='Z...' \
   ./init-aws-plan.sh    # validate + plan
 
@@ -98,8 +98,9 @@ The Terraform workspace is self-contained in `terraform/templates/` (provider, v
 | API auth | JWT (app-layer, validated by Spring Security) |
 | Lambda URL | Public (auth decisions delegated to app) |
 | API Gateway | Public with rate limiting (20 burst, 5/s) |
-| Secrets | Env vars — `NEON_PASSWORD`, `JWT_SECRET`, `DEEPSEEK_API_KEY` |
+| Secrets | Env vars — `NEON_PASSWORD`, `JWT_SECRET`, `LLM_API_KEY` |
 | IAM | Least-privilege — only Lambda execution + ECR pull |
+| Encryption at rest | SNS topic: AWS-managed KMS (`alias/aws/sns`). SQS queues: customer-managed KMS (`alias/ajt-job-analysis-kms`) |
 | Database | SSL enforced, password auth, IP-restricted by Neon |
 
 ## Lambda configuration
@@ -123,6 +124,17 @@ aws logs filter-log-events --log-group-name /aws/lambda/ajt-serverless \
 
 # Tail live
 aws logs tail /aws/lambda/ajt-serverless --follow
+
+# Queue depth (async analysis backlog)
+aws sqs get-queue-attributes --queue-url <JOB_ANALYSIS_QUEUE_URL> \
+  --attribute-names ApproximateNumberOfMessages
+
+# Messages stuck in DLQ (analysis failed 3 times)
+aws sqs get-queue-attributes --queue-url <JOB_ANALYSIS_DLQ_URL> \
+  --attribute-names ApproximateNumberOfMessages
+
+# Drain DLQ back to main queue after fixing the cause
+aws sqs purge-queue --queue-url <JOB_ANALYSIS_DLQ_URL>
 ```
 
 ### Debug
@@ -161,11 +173,35 @@ CI/CD pattern — add this step before deploying a new Lambda image:
 |----------|---------|
 | Lambda (1M req/mo + 512k GB-s) | Free tier |
 | API Gateway (1M req/mo) | Free tier |
+| SNS (100k publishes/mo) | Free tier |
+| SQS (1M requests/mo) | Free tier |
+| KMS (customer-managed key) | ~$1.00 |
 | ECR (~500MB private) | ~$0.05 |
 | Route53 hosted zone | $0.50 |
 | CloudWatch Logs | ~$0.50 |
 | Neon PostgreSQL | Free tier |
-| **Total** | **~$1.05** |
+| **Total** | **~$2.05** |
+
+### Async event flow (SNS + SQS)
+
+`submitJobPosting` publishes a `JobPostingCreated` event to SNS, tagged with an
+`eventType` message attribute. An SNS subscription (with a filter policy for
+`eventType=JobPostingCreated`) delivers matching events to an SQS queue. A
+background poller thread inside the Lambda container consumes the queue and
+creates the tracking application and runs the AI analysis asynchronously:
+
+```
+submitJobPosting (HTTP) → SNS topic ─(filter: eventType=JobPostingCreated)─→ SQS queue
+                                                                             ↓ (in-process poller)
+                                                                  ├─ create tracking (SAVED)
+                                                                  └─ AI analysis → persisted
+```
+
+The HTTP call returns immediately; the analysis runs on a background thread so it
+never competes with the request timeout. The poller only starts when the `sns`
+event transport is active (AWS profile). Failures are retried up to 3 times by
+SQS before landing in the dead-letter queue (`ajt-job-analysis-dlq`); duplicate
+events are acknowledged without reprocessing.
 
 ### Rollback
 
@@ -210,6 +246,10 @@ Both IaC paths create the same resource set:
 - **Lambda alias `live`** — API Gateway routes here, not `$LATEST`. Rollback = alias pointer change
 - **Lambda URL** — Public function URL pointing to `$LATEST` (for testing/debugging)
 - **API Gateway HTTP API** — `$default` route, `AWS_PROXY` to `live` alias, throttled 20/5
+- **SNS topic `ajt-job-events`** — publishes `JobPostingCreated` events, SSE with AWS-managed KMS (`alias/aws/sns`)
+- **SQS queue `ajt-job-analysis`** — async analysis workload, visibility timeout 120s, DLQ after 3 failures, SSE with customer-managed KMS
+- **SQS DLQ `ajt-job-analysis-dlq`** — dead-letter queue for failed events
+- **KMS key `alias/ajt-job-analysis-kms`** — customer-managed, key rotation enabled, grants SNS `kms:Decrypt`/`kms:GenerateDataKey` for queue delivery
 - **ACM certificate** — DNS-validated for `ajt.jpje.net`
 - **API Gateway domain name** — Regional endpoint, TLS 1.2
 - **Route53 records** — DNS validation CNAME + A alias to API Gateway domain
@@ -220,10 +260,13 @@ Templates: CloudFormation (`cloud-formation/ajt-serverless-stack.yml`) | Terrafo
 ## Links
 
 1. [AWS CloudFormation](https://eu-west-1.console.aws.amazon.com/cloudformation/home?region=eu-west-1)
-2. [AWS ECR (private)](https://eu-west-1.console.aws.amazon.com/ecr/repositories/private/546053716955/ajt-serverless?region=eu-west-1)
+2. [AWS ECR (private)](https://eu-west-1.console.aws.amazon.com/ecr/repositories/private/546053716955/ajt-serverless)
 3. [AWS Lambda](https://eu-west-1.console.aws.amazon.com/lambda/home?region=eu-west-1)
 4. [AWS API Gateway](https://eu-west-1.console.aws.amazon.com/apigateway/home?region=eu-west-1)
 5. [AWS CloudWatch Logs](https://eu-west-1.console.aws.amazon.com/cloudwatch/home?region=eu-west-1)
 6. [AWS Certificate Manager](https://eu-west-1.console.aws.amazon.com/acm/home?region=eu-west-1)
 7. [AWS Route53](https://console.aws.amazon.com/route53/home?region=eu-west-1#HostedZones:)
-8. [Neon Console](https://console.neon.tech)
+8. [AWS SNS](https://eu-west-1.console.aws.amazon.com/sns/v3/home?region=eu-west-1)
+9. [AWS SQS](https://eu-west-1.console.aws.amazon.com/sqs/home?region=eu-west-1)
+10. [AWS KMS](https://eu-west-1.console.aws.amazon.com/kms/home?region=eu-west-1)
+11. [Neon Console](https://console.neon.tech)

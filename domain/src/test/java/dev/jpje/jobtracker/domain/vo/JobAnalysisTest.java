@@ -14,30 +14,53 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class JobAnalysisTest {
 
+  private static final double FULL_FIT_SCORE = 85.0;
+  private static final double FULL_COMPANY_RATING = 4.2;
+  private static final double FULL_SALARY_MIN = 90000.0;
+  private static final double FULL_SALARY_MAX = 130000.0;
+
+  private static final double EMPTY_FIT_SCORE = 0.0;
+  private static final double EMPTY_COMPANY_RATING = 0.0;
+  private static final double EMPTY_SALARY_MIN = 0.0;
+  private static final double EMPTY_SALARY_MAX = 0.0;
+
+  private static final double SINGLE_SKILL_FIT_SCORE = 100.0;
+  private static final double SINGLE_SKILL_COMPANY_RATING = 3.0;
+  private static final double SINGLE_SKILL_SALARY_MIN = 60000.0;
+  private static final double SINGLE_SKILL_SALARY_MAX = 90000.0;
+
+  private static final double MIN_FIT_SCORE = 0.0;
+  private static final double MID_FIT_SCORE = 50.0;
+  private static final double MAX_FIT_SCORE = 100.0;
+
+  private static final double MIN_COMPANY_RATING = 0.0;
+  private static final double MID_COMPANY_RATING = 2.5;
+  private static final double MAX_COMPANY_RATING = 5.0;
+
   private static Stream<Arguments> validAnalysis() {
     return Stream.of(
       arguments(named("full analysis", "Great role"), "senior", List.of("Java", "Spring"),
-        List.of("Teamwork"), 85.0, 4.2, "enterprise", 90000.0, 130000.0, "USD"),
-      arguments(named("empty analysis", ""), "", List.of(), List.of(), 0.0, 0.0, "unknown",
-        0.0, 0.0, "USD"),
+        List.of("Teamwork"), FULL_FIT_SCORE, FULL_COMPANY_RATING, "enterprise", FULL_SALARY_MIN, FULL_SALARY_MAX, "USD"),
+      arguments(named("empty analysis", ""), "", List.of(), List.of(), EMPTY_FIT_SCORE, EMPTY_COMPANY_RATING, "unknown",
+        EMPTY_SALARY_MIN, EMPTY_SALARY_MAX, "USD"),
       arguments(named("single skill", "Needs experience"), "mid", List.of("Kubernetes"),
-        List.of(), 100.0, 3.0, "startup", 60000.0, 90000.0, "EUR")
+        List.of(), SINGLE_SKILL_FIT_SCORE, SINGLE_SKILL_COMPANY_RATING, "startup", SINGLE_SKILL_SALARY_MIN, SINGLE_SKILL_SALARY_MAX, "EUR")
     );
   }
 
   private static Stream<Arguments> fitScoreBoundaries() {
     return Stream.of(
-      arguments(named("minimum", 0.0)),
-      arguments(named("midpoint", 50.0)),
-      arguments(named("maximum", 100.0))
+      arguments(named("minimum", MIN_FIT_SCORE)),
+      arguments(named("midpoint", MID_FIT_SCORE)),
+      arguments(named("maximum", MAX_FIT_SCORE))
     );
   }
 
   private static Stream<Arguments> companyRatingBoundaries() {
     return Stream.of(
-      arguments(named("minimum", 0.0)),
-      arguments(named("midpoint", 2.5)),
-      arguments(named("maximum", 5.0))
+      arguments(named("minimum", MIN_COMPANY_RATING)),
+      arguments(named("midpoint", MID_COMPANY_RATING)),
+      arguments(named("maximum", MAX_COMPANY_RATING))
     );
   }
 

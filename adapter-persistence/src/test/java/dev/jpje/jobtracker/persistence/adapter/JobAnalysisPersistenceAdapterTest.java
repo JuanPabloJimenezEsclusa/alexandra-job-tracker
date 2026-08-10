@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.instancio.Select.field;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,24 +36,25 @@ class JobAnalysisPersistenceAdapterTest {
 
   @Test
   void shouldSaveOrReplaceRecord() {
-    final var record = record();
+    final var jobAnalysisRecord = jobAnalysisRecord();
 
-    assertThatCode(() -> adapter.saveOrReplace(record)).doesNotThrowAnyException();
-    verify(repository).deleteByJobPostingId(record.jobPostingId());
-    verify(repository).save(any(JobAnalysisEntity.class));
+    assertThatCode(() -> adapter.saveOrReplace(jobAnalysisRecord)).as("saveOrReplace does not throw")
+      .doesNotThrowAnyException();
+    verify(repository, description("existing analysis deleted by posting")).deleteByJobPostingId(jobAnalysisRecord.jobPostingId());
+    verify(repository, description("replacement analysis persisted")).save(any(JobAnalysisEntity.class));
   }
 
   @Test
   void shouldDeleteById() {
     final var id = UUID.randomUUID();
 
-    assertThatCode(() -> adapter.delete(id)).doesNotThrowAnyException();
-    verify(repository).deleteById(id);
+    assertThatCode(() -> adapter.delete(id)).as("delete does not throw").doesNotThrowAnyException();
+    verify(repository, description("repository delete invoked")).deleteById(id);
   }
 
   @Test
   void shouldFindById() {
-    final var entity = entity();
+    final var entity = jobAnalysisEntity();
     when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
 
     assertThat(adapter.findById(entity.getId())).contains(expected(entity));
@@ -60,7 +62,7 @@ class JobAnalysisPersistenceAdapterTest {
 
   @Test
   void shouldFindByJobPostingId() {
-    final var entity = entity();
+    final var entity = jobAnalysisEntity();
     when(repository.findByJobPostingId(entity.getJobPostingId())).thenReturn(Optional.of(entity));
 
     assertThat(adapter.findByJobPostingId(entity.getJobPostingId())).contains(expected(entity));
@@ -69,7 +71,7 @@ class JobAnalysisPersistenceAdapterTest {
   @Test
   void shouldFindByUserId() {
     final var userId = UserId.generate();
-    final var entity = entity(userId);
+    final var entity = jobAnalysisEntity(userId);
     when(repository.findByUserIdOrderByCreatedAtDesc(userId.value())).thenReturn(List.of(entity));
 
     assertThat(adapter.findByUserId(userId)).containsExactly(expected(entity));
@@ -85,16 +87,16 @@ class JobAnalysisPersistenceAdapterTest {
       entity.getCreatedAt());
   }
 
-  private static JobAnalysisRecord record() {
+  private static JobAnalysisRecord jobAnalysisRecord() {
     return new JobAnalysisRecord(UUID.randomUUID(), UUID.randomUUID(), UserId.generate(),
-      analysis(), Instant.EPOCH);
+      jobAnalysis(), Instant.EPOCH);
   }
 
-  private static JobAnalysisEntity entity() {
-    return entity(UserId.generate());
+  private static JobAnalysisEntity jobAnalysisEntity() {
+    return jobAnalysisEntity(UserId.generate());
   }
 
-  private static JobAnalysisEntity entity(final UserId userId) {
+  private static JobAnalysisEntity jobAnalysisEntity(final UserId userId) {
     final var entity = new JobAnalysisEntity();
     entity.setId(UUID.randomUUID());
     entity.setJobPostingId(UUID.randomUUID());
@@ -113,7 +115,7 @@ class JobAnalysisPersistenceAdapterTest {
     return entity;
   }
 
-  private static JobAnalysis analysis() {
+  private static JobAnalysis jobAnalysis() {
     return Instancio.of(JobAnalysis.class)
       .set(field(JobAnalysis::fitScore), 85.0)
       .set(field(JobAnalysis::companyRating), 4.2)

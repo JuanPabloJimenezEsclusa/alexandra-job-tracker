@@ -1,6 +1,7 @@
 package dev.jpje.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -41,11 +42,12 @@ class AnalyticsQueryResolverTest {
 
     final var result = resolver.analytics(userId, null);
     assertThat(result)
+      .as("analytics should expose totals, conversion and per-status counts")
       .extracting(AnalyticsResponse::totalApplications, AnalyticsResponse::conversionRate,
         r -> r.perStatus().saved())
       .containsExactly(EXPECTED_TOTAL, EXPECTED_CONVERSION, EXPECTED_SAVED);
 
-    verify(useCase).getAnalytics(userId, null);
+    verify(useCase, description("analytics should be fetched once")).getAnalytics(userId, null);
     verifyNoMoreInteractions(useCase);
   }
 }

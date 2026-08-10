@@ -6,114 +6,73 @@ import dev.jpje.jobtracker.api.config.IntegrationTestConfig;
 import dev.jpje.jobtracker.server.JobTrackerServerApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.web.client.RestTemplate;
-import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
 
 @SpringBootTest(
   classes = JobTrackerServerApplication.class,
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(IntegrationTestConfig.class)
-class JobPostingIntegrationTest {
+class JobPostingIntegrationTest extends GraphQlIntegrationTestBase {
 
-  private final RestTemplate rest = new RestTemplate();
-
-  @LocalServerPort
-  private int port;
+  private static final String SUBMIT_BODY = """
+    {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id title company source}}",\
+    "variables":{"i":{"url":"https://example.com/job/%s","title":"%s",\
+    "description":"No empty","company":"%s","source":"%s"}}}
+    """;
 
   @Test
   void shouldListJobPostings() {
-    final var token = registerAndGetToken("jp-list-user");
-    final var headers = jsonHeaders();
-    headers.setBearerAuth(token);
-
-    final var response = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>("""
-        {"query": "{ jobPostings { id title company } }"}
-        """, headers), String.class);
-    assertThat(response.getBody()).contains("\"jobPostings\":[]");
+    final var headers = authHeaders("jp-list-user");
+    final var postings = graphql(headers, """
+      {"query": "{ jobPostings { id title company } }"}
+      """);
+    assertThat(postings.findValues("title")).as("no postings for new user").isEmpty();
   }
 
   @Test
   void shouldSubmitJobPosting() {
-    final var token = registerAndGetToken("submit-user");
-    final var headers = jsonHeaders();
-    headers.setBearerAuth(token);
-
-    final var body = """
-      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id title company source}}",\
-      "variables":{"i":{"url":"https://example.com/job/123","title":"Test Engineer",\
-      "description":"No empty","company":"TestCorp","source":"LINKEDIN"}}}
-      """;
-    final var response = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>(body, headers), String.class);
-    assertThat(response.getBody())
-      .contains("Test Engineer")
-      .contains("TestCorp")
-      .contains("LINKEDIN");
+    final var headers = authHeaders("submit-user");
+    final var submitted = graphql(headers, submitBody("test-engineer", "Test Engineer", "TestCorp", "LINKEDIN"));
+    assertThat(submitted.findValues("title")).as("submitted posting title")
+      .extracting(JsonNode::asString).contains("Test Engineer");
+    assertThat(submitted.findValues("company")).as("submitted posting company")
+      .extracting(JsonNode::asString).contains("TestCorp");
+    assertThat(submitted.findValues("source")).as("submitted posting source")
+      .extracting(JsonNode::asString).contains("LINKEDIN");
   }
 
   @Test
   void shouldListSubmittedPosting() {
-    final var token = registerAndGetToken("submit-list-user");
-    final var headers = jsonHeaders();
-    headers.setBearerAuth(token);
+    final var headers = authHeaders("submit-list-user");
+    graphql(headers, submitBody("listed-job", "Listed Engineer", "ListedCorp", "LINKEDIN"));
 
-    final var body = """
-      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id title company source}}",\
-      "variables":{"i":{"url":"https://example.com/job/123","title":"Test Engineer",\
-      "description":"No empty","company":"TestCorp","source":"LINKEDIN"}}}
-      """;
-    rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(body, headers), String.class);
-
-    final var listResp = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>("""
-        {"query": "{ jobPostings { title company } }"}
-        """, headers), String.class);
-    assertThat(listResp.getBody()).contains("Test Engineer");
+    final var postings = graphql(headers, """
+      {"query": "{ jobPostings { title company } }"}
+      """);
+    assertThat(postings.findValues("title")).as("submitted posting listed")
+      .extracting(JsonNode::asString).contains("Listed Engineer");
   }
 
   @Test
   void shouldFilterPostingsBySource() {
-    final var token = registerAndGetToken("jp-filter-user");
+    final var headers = authHeaders("jp-filter-user");
+    graphql(headers, submitBody("linkedin-job", "LinkedIn Job", "LinkedCorp", "LINKEDIN"));
+
+    final var postings = graphql(headers, """
+      {"query": "{ jobPostings(source: INDEED) { title } }"}
+      """);
+    assertThat(postings.findValues("title")).as("postings filtered by source").isEmpty();
+  }
+
+  private HttpHeaders authHeaders(final String username) {
     final var headers = jsonHeaders();
-    headers.setBearerAuth(token);
-
-    final var submitBody = """
-      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id}}",\
-      "variables":{"i":{"url":"https://linkedin.com/job/1","title":"LinkedIn Job",\
-      "description":"No empty","company":"LinkedCorp","source":"LINKEDIN"}}}
-      """;
-    rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(submitBody, headers), String.class);
-
-    final var response = rest.exchange(url(), HttpMethod.POST,
-      new HttpEntity<>("""
-        {"query": "{ jobPostings(source: INDEED) { title } }"}
-        """, headers), String.class);
-    assertThat(response.getBody()).contains("\"jobPostings\":[]");
-  }
-
-  private String url() {
-    return "http://localhost:%s/api/graphql".formatted(port);
-  }
-
-  private HttpHeaders jsonHeaders() {
-    final var headers = new HttpHeaders();
-    headers.setContentType(MediaType.APPLICATION_JSON);
+    headers.setBearerAuth(registerAndGetToken(username));
     return headers;
   }
 
-  private String registerAndGetToken(String username) {
-    final var body = """
-      {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\") { token } }"}
-      """.formatted(username);
-    final var response = rest.exchange(url(), HttpMethod.POST, new HttpEntity<>(body, jsonHeaders()), String.class);
-    final var node = new ObjectMapper().readTree(response.getBody());
-    return node.findValue("token").asString();
+  private static String submitBody(final String url, final String title, final String company, final String source) {
+    return SUBMIT_BODY.formatted(url, title, company, source);
   }
 }

@@ -22,6 +22,17 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class AnalyticsCalculatorTest {
 
+  private static final int MULTIPLE_STATUSES_EXPECTED_TOTAL = 4;
+  private static final double MULTIPLE_STATUSES_EXPECTED_CONVERSION = 25.0;
+  private static final int EMPTY_LIST_EXPECTED_TOTAL = 0;
+  private static final double EMPTY_LIST_EXPECTED_CONVERSION = 0.0;
+  private static final int ONLY_SAVED_EXPECTED_TOTAL = 1;
+  private static final double ONLY_SAVED_EXPECTED_CONVERSION = 0.0;
+  private static final int ALL_ACCEPTED_EXPECTED_TOTAL = 2;
+  private static final double ALL_ACCEPTED_EXPECTED_CONVERSION = 100.0;
+  private static final int HALF_ACCEPTED_EXPECTED_TOTAL = 2;
+  private static final double HALF_ACCEPTED_EXPECTED_CONVERSION = 50.0;
+
   private static Stream<Arguments> analyticsScenarios() {
     var uid = UserId.generate();
     return Stream.of(
@@ -30,17 +41,17 @@ class AnalyticsCalculatorTest {
         app(uid, ApplicationStatus.REJECTED),
         app(uid, ApplicationStatus.INTERVIEWING),
         app(uid, ApplicationStatus.APPLIED))
-      ), 4, 25.0),
-      arguments(named("empty list", List.of()), 0, 0.0),
-      arguments(named("only saved", List.of(app(uid, ApplicationStatus.SAVED))), 1, 0.0),
+      ), MULTIPLE_STATUSES_EXPECTED_TOTAL, MULTIPLE_STATUSES_EXPECTED_CONVERSION),
+      arguments(named("empty list", List.of()), EMPTY_LIST_EXPECTED_TOTAL, EMPTY_LIST_EXPECTED_CONVERSION),
+      arguments(named("only saved", List.of(app(uid, ApplicationStatus.SAVED))), ONLY_SAVED_EXPECTED_TOTAL, ONLY_SAVED_EXPECTED_CONVERSION),
       arguments(named("all accepted", List.of(
         app(uid, ApplicationStatus.ACCEPTED),
         app(uid, ApplicationStatus.ACCEPTED)
-      )), 2, 100.0),
+      )), ALL_ACCEPTED_EXPECTED_TOTAL, ALL_ACCEPTED_EXPECTED_CONVERSION),
       arguments(named("half accepted", List.of(
         app(uid, ApplicationStatus.ACCEPTED),
         app(uid, ApplicationStatus.OFFER)
-      )), 2, 50.0)
+      )), HALF_ACCEPTED_EXPECTED_TOTAL, HALF_ACCEPTED_EXPECTED_CONVERSION)
     );
   }
 

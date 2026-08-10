@@ -109,10 +109,10 @@ flowchart LR
     end
 
     application --> domain
-    adapters --> domain
-    adapter-api --> application
     adapter-cli -.-> |HTTP| adapter-api
     bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth
+    adapter-api & adapter-persistence & adapter-ai & adapter-cache & adapter-auth --> domain
+    adapter-api --> adapter-auth
     bootstrap-cli --> adapter-cli
 ```
 
@@ -172,7 +172,7 @@ flowchart LR
 
     subgraph storage [Infrastructure]
         DB[("H2 / PostgreSQL")]
-        LLM["DeepSeek LLM"]
+        LLM["OpenAi LLM"]
     end
 
     CLI --> |HTTP| QR & MR
@@ -211,17 +211,6 @@ mvn install -DskipTests
 mvn -Pnative native:compile -pl bootstrap-server -DskipTests    # Server binary
 mvn -Pnative native:compile -pl bootstrap-cli -DskipTests       # CLI binary
 ```
-
-#### AOT Tracing Agent
-
-Generate reachability metadata for native compilation (requires GraalVM JDK):
-
-```bash
-mvn install -DskipTests && mvn -Ptracing spring-boot:run -pl bootstrap-server
-```
-
-Exercise all endpoints, then shut down. The agent writes `reachability-metadata.json`
-to `bootstrap-server/src/main/resources/META-INF/native-image/`.
 
 ### Run
 
@@ -373,13 +362,13 @@ Coverage reports are available at:
 
 ## Configuration
 
-| Property                                | Default                               | Description                                   |
-|-----------------------------------------|---------------------------------------|-----------------------------------------------|
-| `jwt.secret`                            | `change-me-...`                       | Signing key (min 32 chars, use `JWT_SECRET`)   |
-| `spring.ai.openai.api-key`              | `sk-placeholder`                      | DeepSeek key (use `DEEPSEEK_API_KEY`)          |
-| `cache.max-size`                        | `1000`                                | Caffeine max entries                           |
-| `cache.default-ttl-seconds`             | `300`                                 | Cache time-to-live                             |
-| `server.url` (CLI)                      | `http://localhost:8880/api`           | GraphQL API base URL                           |
+| Property                                | Default                               | Description                                  |
+|-----------------------------------------|---------------------------------------|----------------------------------------------|
+| `jwt.secret`                            | `change-me-...`                       | Signing key (min 32 chars, use `JWT_SECRET`) |
+| `spring.ai.openai.api-key`              | `sk-placeholder`                      | LLM key (use `LLM_API_KEY`)             |
+| `cache.max-size`                        | `1000`                                | Caffeine max entries                         |
+| `cache.default-ttl-seconds`             | `300`                                 | Cache time-to-live                           |
+| `server.url` (CLI)                      | `http://localhost:8880/api`           | GraphQL API base URL                         |
 
 **Spring profiles:**
 

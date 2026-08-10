@@ -2,7 +2,7 @@ package dev.jpje.jobtracker.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -47,8 +47,8 @@ class CachingJobPostingAdapterTest {
     final var posting = jobPosting();
     primeByIdCache(posting.id(), posting);
 
-    assertThat(adapter.findById(posting.id())).hasValue(posting);
-    verify(loadDelegate, times(1)).findById(posting.id());
+    assertThat(adapter.findById(posting.id())).as("cached posting should be returned").hasValue(posting);
+    verify(loadDelegate, description("load delegate should be hit only on cache miss")).findById(posting.id());
   }
 
   @Test
@@ -65,8 +65,8 @@ class CachingJobPostingAdapterTest {
     final var posting = jobPosting(userId);
     primeListCache(userId, List.of(posting));
 
-    assertThat(adapter.findByUserId(userId)).containsExactly(posting);
-    verify(loadDelegate, times(1)).findByUserId(userId);
+    assertThat(adapter.findByUserId(userId)).as("cached list should be returned").containsExactly(posting);
+    verify(loadDelegate, description("load delegate should be hit only on cache miss")).findByUserId(userId);
   }
 
   @Test
@@ -84,8 +84,8 @@ class CachingJobPostingAdapterTest {
 
     adapter.save(posting);
 
-    assertThat(cache.asMap()).containsKey("jobpost:" + posting.id());
-    verify(saveDelegate).save(posting);
+    assertThat(cache.asMap()).as("saved posting should be cached").containsKey("jobpost:" + posting.id());
+    verify(saveDelegate, description("save should be delegated")).save(posting);
   }
 
   private void primeByIdCache(final UUID id, final JobPosting posting) {

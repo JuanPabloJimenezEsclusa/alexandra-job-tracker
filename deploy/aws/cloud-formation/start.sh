@@ -7,14 +7,15 @@ set -o errtrace
 set -o nounset
 if [[ "${DEBUG:-}" == "true" ]]; then set -o xtrace; fi
 
-cd "$(dirname "$0")"
-workspace="$(pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+workspace="${SCRIPT_DIR}"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../../.." && pwd)"
 
 # Load .env file if present (optional local overrides)
-if [[ -f ../.env ]]; then
+if [[ -f "${SCRIPT_DIR}/../.env" ]]; then
   set -o allexport
   # shellcheck disable=SC1091
-  source ../.env
+  source "${SCRIPT_DIR}/../.env"
   set +o allexport
 fi
 
@@ -57,13 +58,13 @@ __require_jwt_secret() {
   fi
 }
 
-__require_deepseek_key() {
-  if [[ -z "${DEEPSEEK_API_KEY:-}" ]]; then
-    echo "DEEPSEEK_API_KEY is required (or set to 'sk-placeholder' to skip AI)."
-    echo -n "Enter DeepSeek API key: "
-    read -rs DEEPSEEK_API_KEY
+__require_llm_key() {
+  if [[ -z "${LLM_API_KEY:-}" ]]; then
+    echo "LLM_API_KEY is required (or set to 'sk-placeholder' to skip AI)."
+    echo -n "Enter LLM API key: "
+    read -rs LLM_API_KEY
     echo
-    export DEEPSEEK_API_KEY
+    export LLM_API_KEY
   fi
 }
 
@@ -85,7 +86,7 @@ __validate() {
   __require_aws_cli
   __require_neon_pass
   __require_jwt_secret
-  __require_deepseek_key
+  __require_llm_key
   __require_hosted_zone
 }
 
@@ -111,10 +112,15 @@ __create_ecr_repository() {
 __build_image() {
   echo -e "${SEPARATOR}🐳 Build Lambda Docker image${SEPARATOR}"
   cd "${workspace}"
+  if [[ ! -f "${REPO_ROOT}/mvnw" || ! -f "${REPO_ROOT}/pom.xml" ]]; then
+    echo "Error: repo root not found at ${REPO_ROOT} (missing mvnw/pom.xml)."
+    echo "Expected repository layout: deploy/aws/cloud-formation/start.sh inside the job-tracker repo."
+    exit 1
+  fi
   # Authenticate with public ECR for the Lambda Web Adapter base image
   aws ecr-public get-login-password --region us-east-1 | \
     docker login --username AWS --password-stdin public.ecr.aws
-  docker build -f ../Dockerfile.native -t "${ECR_REPOSITORY}:${ECR_IMAGE_TAG}" "${workspace}/../.."
+  docker build -f "${SCRIPT_DIR}/../Dockerfile.native" -t "${ECR_REPOSITORY}:${ECR_IMAGE_TAG}" "${REPO_ROOT}"
 }
 
 __login_ecr() {
@@ -161,7 +167,7 @@ __deploy_stack() {
       ImageUri="${IMAGE_URI}" \
       NeonPass="${NEON_PASSWORD}" \
       JwtSecret="${JWT_SECRET}" \
-      DeepSeekApiKey="${DEEPSEEK_API_KEY}" \
+      LLMApiKey="${LLM_API_KEY}" \
       HostedZoneId="${HOSTED_ZONE_ID}" \
     --capabilities CAPABILITY_NAMED_IAM \
     --region "${REGION}" \

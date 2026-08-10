@@ -14,6 +14,12 @@ spring:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: true
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate.ddl-auto: validate
@@ -26,7 +32,7 @@ spring:
     validate-on-migrate: false
   ai:
     openai:
-      api-key: ${DEEPSEEK_API_KEY:sk-placeholder}
+      api-key: ${LLM_API_KEY:sk-placeholder}
       base-url: https://api.deepseek.com
       chat:
         model: deepseek-chat
@@ -42,6 +48,10 @@ spring:
       max-age: 3600
     graphiql:
       enabled: true
+  cloud:
+    aws:
+      region:
+        static: eu-west-1
 
 server:
   port: 8880
@@ -52,11 +62,14 @@ server:
 info:
   app:
     name: ${spring.application.name}
-    title: ${spring.application.title}
     version: ${spring.application.version}
 
 jwt:
   secret: ${JWT_SECRET:change-me-in-production-at-least-32-chars-long!!}
+
+ajt:
+  events:
+    transport: spring
 
 management:
   endpoints:
@@ -74,11 +87,21 @@ management:
     env:
       enabled: true
   metrics:
+    distribution:
+      percentiles-histogram:
+        jobtracker.submit.duration: true
+        jobtracker.ai.analyze.duration: true
+        http.server.requests: true
     tags:
       application: alexandra-job-tracker
 
 otel:
   enabled: false
+
+logging:
+  level:
+    root: INFO
+    dev.jpje.jobtracker.server.event: DEBUG
 
 ---
 
@@ -91,12 +114,6 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
   jpa:
     show-sql: true
 
@@ -132,6 +149,12 @@ spring:
     show-sql: false
   main:
     banner-mode: "off"
+
+ajt:
+  events:
+    transport: sns
+    sns-topic: "${SNS_TOPIC_ARN:}"
+    sqs-queue: "${SQS_QUEUE_URL:}"
 
 management:
   endpoints:

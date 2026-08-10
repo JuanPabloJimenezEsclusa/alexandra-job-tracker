@@ -32,22 +32,22 @@ public final class JobAnalysisMapper {
       entity.getCreatedAt());
   }
 
-  public static JobAnalysisEntity toEntity(final JobAnalysisRecord record) {
+  public static JobAnalysisEntity toEntity(final JobAnalysisRecord jobAnalysisRecord) {
     final var entity = new JobAnalysisEntity();
-    entity.setId(record.id());
-    entity.setJobPostingId(record.jobPostingId());
-    entity.setUserId(record.userId().value());
-    entity.setSummary(record.analysis().summary());
-    entity.setSeniority(record.analysis().seniority());
-    entity.setSoftSkills(toCsv(record.analysis().softSkills()));
-    entity.setTechnicalSkills(toCsv(record.analysis().technicalSkills()));
-    entity.setFitScore(record.analysis().fitScore());
-    entity.setCompanyRating(record.analysis().companyRating());
-    entity.setCompanyType(record.analysis().companyType());
-    entity.setSalaryMin(record.analysis().salaryMin());
-    entity.setSalaryMax(record.analysis().salaryMax());
-    entity.setSalaryCurrency(record.analysis().salaryCurrency());
-    entity.setCreatedAt(record.createdAt());
+    entity.setId(jobAnalysisRecord.id());
+    entity.setJobPostingId(jobAnalysisRecord.jobPostingId());
+    entity.setUserId(jobAnalysisRecord.userId().value());
+    entity.setSummary(jobAnalysisRecord.analysis().summary());
+    entity.setSeniority(jobAnalysisRecord.analysis().seniority());
+    entity.setSoftSkills(toCsv(jobAnalysisRecord.analysis().softSkills()));
+    entity.setTechnicalSkills(toCsv(jobAnalysisRecord.analysis().technicalSkills()));
+    entity.setFitScore(jobAnalysisRecord.analysis().fitScore());
+    entity.setCompanyRating(jobAnalysisRecord.analysis().companyRating());
+    entity.setCompanyType(jobAnalysisRecord.analysis().companyType());
+    entity.setSalaryMin(jobAnalysisRecord.analysis().salaryMin());
+    entity.setSalaryMax(jobAnalysisRecord.analysis().salaryMax());
+    entity.setSalaryCurrency(jobAnalysisRecord.analysis().salaryCurrency());
+    entity.setCreatedAt(jobAnalysisRecord.createdAt());
     return entity;
   }
 

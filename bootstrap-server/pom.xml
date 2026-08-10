@@ -12,8 +12,8 @@
 
   <artifactId>bootstrap-server</artifactId>
   <name>Bootstrap Server</name>
-  <description>Bootstrap server responsible for initializing and orchestrating the various
-    components of the Job Tracker application.
+  <description>
+    Bootstrap server responsible for initializing and orchestrating the components of the application.
   </description>
 
   <dependencies>
@@ -24,17 +24,27 @@
     </dependency>
     <dependency>
       <groupId>dev.jpje.jobtracker</groupId>
-      <artifactId>application</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>adapter-persistence</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>adapter-ai</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-cache</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-auth</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>application</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
@@ -64,16 +74,6 @@
       <groupId>io.opentelemetry</groupId>
       <artifactId>opentelemetry-exporter-otlp</artifactId>
     </dependency>
-    <dependency>
-      <groupId>dev.jpje.jobtracker</groupId>
-      <artifactId>adapter-cache</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.jpje.jobtracker</groupId>
-      <artifactId>adapter-auth</artifactId>
-      <version>${project.version}</version>
-    </dependency>
 
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -89,9 +89,23 @@
     </dependency>
 
     <dependency>
+      <groupId>io.awspring.cloud</groupId>
+      <artifactId>spring-cloud-aws-starter-sns</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>io.awspring.cloud</groupId>
+      <artifactId>spring-cloud-aws-starter-sqs</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -164,21 +178,28 @@
               <BP_JVM_JMXREMOTE>true</BP_JVM_JMXREMOTE>
               <BP_JVM_HEAD_ROOM>5</BP_JVM_HEAD_ROOM>
               <BPL_JVM_THREAD_COUNT>50</BPL_JVM_THREAD_COUNT>
-              <BP_JVM_JAVA_OPTS>-XX:+UseG1GC -XX:+UseStringDeduplication -Dfile.encoding=UTF-8
-                -XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true
+              <BP_JVM_JAVA_OPTS>
+                -XX:+UseG1GC
+                -XX:+UseStringDeduplication
+                -Dfile.encoding=UTF-8
+                -XX:+UseCompactObjectHeaders
+                -Dspring.threads.virtual.enabled=true
               </BP_JVM_JAVA_OPTS>
               <BP_OCI_SOURCE>true</BP_OCI_SOURCE>
               <BP_MAVEN_BUILT_ARTIFACT>target/*.jar</BP_MAVEN_BUILT_ARTIFACT>
-              <BP_MAVEN_BUILD_ARGUMENTS>package -DskipTests=true --no-transfer-progress --also-make
-                --batch-mode
+              <BP_MAVEN_BUILD_ARGUMENTS>
+                package -DskipTests=true --no-transfer-progress --also-make --batch-mode
               </BP_MAVEN_BUILD_ARGUMENTS>
-
               <!-- https://blog.paketo.io/posts/spring-boot-performance/ -->
-              <JAVA_TOOL_OPTIONS>-XX:+UseCompactObjectHeaders -Dspring.threads.virtual.enabled=true
-                -XX:+UseContainerSupport --enable-native-access=ALL-UNNAMED
+              <JAVA_TOOL_OPTIONS>
+                -XX:+UseCompactObjectHeaders
+                -Dspring.threads.virtual.enabled=true
+                -XX:+UseContainerSupport
+                --enable-native-access=ALL-UNNAMED
               </JAVA_TOOL_OPTIONS>
               <BPE_DELIM_JAVA_TOOL_OPTIONS xml:space="preserve"> </BPE_DELIM_JAVA_TOOL_OPTIONS>
-              <BPE_APPEND_JAVA_TOOL_OPTIONS>-XX:+UseCompactObjectHeaders
+              <BPE_APPEND_JAVA_TOOL_OPTIONS>
+                -XX:+UseCompactObjectHeaders
                 -Dspring.threads.virtual.enabled=true
               </BPE_APPEND_JAVA_TOOL_OPTIONS>
             </env>
@@ -240,15 +261,4 @@
       </plugin>
     </plugins>
   </build>
-
-  <profiles>
-    <profile>
-      <id>tracing</id>
-      <properties>
-        <spring-boot.run.jvmArguments>
-          -agentlib:native-image-agent=config-output-dir=${project.basedir}/src/main/resources/META-INF/native-image/${project.groupId}/${project.artifactId}/
-        </spring-boot.run.jvmArguments>
-      </properties>
-    </profile>
-  </profiles>
 </project>

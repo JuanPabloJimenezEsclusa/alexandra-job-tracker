@@ -1,5 +1,7 @@
 package dev.jpje.jobtracker.server;
 
+import dev.jpje.jobtracker.ai.AiResourceRuntimeHints;
+import dev.jpje.jobtracker.ai.OpenAiSdkRuntimeHints;
 import dev.jpje.jobtracker.auth.JjwtRuntimeHints;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,7 +20,13 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 })
 @EnableJpaRepositories("dev.jpje.jobtracker.persistence.repository")
 @EntityScan("dev.jpje.jobtracker.persistence.entity")
-@ImportRuntimeHints(JjwtRuntimeHints.class)
+@ImportRuntimeHints({
+  AwsRuntimeHints.class,
+  AiResourceRuntimeHints.class,
+  JjwtRuntimeHints.class,
+  OpenAiSdkRuntimeHints.class,
+  DomainEventRuntimeHints.class
+})
 public class JobTrackerServerApplication {
   static void main(String[] args) {
     SpringApplication.run(JobTrackerServerApplication.class, args);

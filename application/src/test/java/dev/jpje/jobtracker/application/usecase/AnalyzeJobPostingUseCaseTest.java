@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
 import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
@@ -76,7 +77,8 @@ class AnalyzeJobPostingUseCaseTest {
     final var useCase = new AnalyzeJobPostingUseCase(loadPort, analysisPort, savePort, FIXED_CLOCK);
 
     when(loadPort.findById(posting.id())).thenReturn(Optional.of(posting));
-    when(analysisPort.analyze(posting.description())).thenReturn(expectedAnalysis);
+    when(analysisPort.analyze(posting.title().value(), posting.company().value(),
+      posting.source().name(), posting.description())).thenReturn(expectedAnalysis);
 
     // When
     final var result = useCase.analyze(posting.userId(), posting.id());
@@ -103,7 +105,7 @@ class AnalyzeJobPostingUseCaseTest {
 
     // When, then
     assertThatThrownBy(() -> useCase.analyze(userId, randomUUID))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Job posting not found");
     verify(savePort, never()).saveOrReplace(any());
   }

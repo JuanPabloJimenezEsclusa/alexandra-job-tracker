@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -64,13 +65,13 @@ class JobPostingMutationResolverTest {
   private static Stream<Arguments> analyzeScenarios() {
     final var userId = UserId.generate();
     final var jobId = UUID.randomUUID();
-    final var record = Instancio.of(JobAnalysisRecord.class)
+    final var jobAnalysisRecord = Instancio.of(JobAnalysisRecord.class)
       .set(field(JobAnalysisRecord::jobPostingId), jobId)
       .set(field(JobAnalysisRecord::userId), userId)
       .set(field(JobAnalysisRecord::analysis), validAnalysis())
       .create();
     return Stream.of(
-      arguments(userId, jobId, record)
+      arguments(userId, jobId, jobAnalysisRecord)
     );
   }
 
@@ -83,12 +84,14 @@ class JobPostingMutationResolverTest {
 
   @ParameterizedTest(name = "analyze {0}")
   @MethodSource("analyzeScenarios")
-  void shouldResolveAnalyze(final UserId userId, final UUID jobPostingId, final JobAnalysisRecord record) {
-    when(analyzeUseCase.analyze(userId, jobPostingId)).thenReturn(record);
+  void shouldResolveAnalyze(final UserId userId, final UUID jobPostingId, final JobAnalysisRecord jobAnalysisRecord) {
+    when(analyzeUseCase.analyze(userId, jobPostingId)).thenReturn(jobAnalysisRecord);
 
-    assertThat(resolver.analyzeJobPosting(userId, jobPostingId)).isEqualTo(JobAnalysisResponse.from(record));
+    assertThat(resolver.analyzeJobPosting(userId, jobPostingId))
+      .as("resolved analysis should match the recorded analysis")
+      .isEqualTo(JobAnalysisResponse.from(jobAnalysisRecord));
 
-    verify(analyzeUseCase).analyze(userId, jobPostingId);
+    verify(analyzeUseCase, description("analysis should be requested once")).analyze(userId, jobPostingId);
     verifyNoMoreInteractions(analyzeUseCase);
     verifyNoInteractions(submitUseCase, manageAnalysisUseCase);
   }
@@ -99,6 +102,7 @@ class JobPostingMutationResolverTest {
     when(analyzeUseCase.analyze(userId, jobPostingId)).thenThrow(new IllegalArgumentException(errorMessage));
 
     assertThatThrownBy(() -> resolver.analyzeJobPosting(userId, jobPostingId))
+      .as("analyze should propagate the failure")
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage(errorMessage);
 
@@ -109,9 +113,9 @@ class JobPostingMutationResolverTest {
   void shouldDeleteAnalysis() {
     final var id = UUID.randomUUID();
 
-    assertThat(resolver.deleteAnalysis(id)).isTrue();
+    assertThat(resolver.deleteAnalysis(id)).as("deletion should succeed").isTrue();
 
-    verify(manageAnalysisUseCase).delete(id);
+    verify(manageAnalysisUseCase, description("analysis deletion should be delegated")).delete(id);
     verifyNoInteractions(submitUseCase, analyzeUseCase);
   }
 
@@ -133,10 +137,11 @@ class JobPostingMutationResolverTest {
 
     final var result = resolver.submitJobPosting(userId, input);
     assertThat(result)
+      .as("submitted posting should reflect the input")
       .extracting(JobPostingResponse::source, JobPostingResponse::title, JobPostingResponse::company)
       .containsExactly(Source.LINKEDIN, "title", "company");
 
-    verify(submitUseCase).submit(userId, Url.of("https://example.com/job"), JobTitle.of("title"),
+    verify(submitUseCase, description("posting should be submitted once")).submit(userId, Url.of("https://example.com/job"), JobTitle.of("title"),
       CompanyName.of("company"), "desc", Source.LINKEDIN);
     verifyNoMoreInteractions(submitUseCase);
     verifyNoInteractions(analyzeUseCase, manageAnalysisUseCase);

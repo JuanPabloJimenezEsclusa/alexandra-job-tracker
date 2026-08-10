@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Example of usage: ./stop.sh removeImages
+
 set -o errexit
 set -o errtrace
 set -o nounset
@@ -9,6 +11,7 @@ cd "$(dirname "$0")"
 
 SEPARATOR="\n##################################################\n"
 
+REMOVE_IMAGES="${1:-}"
 STACK_NAME="${STACK_NAME:-ajt-serverless-stack}"
 REGION="${REGION:-eu-west-1}"
 
@@ -42,10 +45,27 @@ __delete_log_groups() {
   done
 }
 
+__cleanUp() {
+  echo -e "${SEPARATOR} 🧹 Clean up ${SEPARATOR}"
+  docker system prune --force --volumes
+  docker builder prune --force
+  rm -fdr ~/.m2/repository/dev/jpje || true
+
+  if [[ "${REMOVE_IMAGES}" == "removeImages" ]]; then
+    docker images \
+      --filter reference='*/*ajt-*' \
+      --filter reference='*ajt-*' \
+      --format '{{.Repository}}:{{.Tag}}' | xargs -I {} docker rmi -f {}
+  else
+    echo -e "🚧 Skip remove images"
+  fi
+}
+
 main() {
   echo "Init ${0##*/}"
   __delete_stack
   __delete_log_groups
+  __cleanUp
   echo "Done ${0##*/}"
 }
 

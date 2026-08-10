@@ -28,7 +28,7 @@ public class IntegrationTestConfig {
       .set(field(JobAnalysis::salaryMax), 130000.0)
       .set(field(JobAnalysis::salaryCurrency), "USD")
       .create();
-    when(mock.analyze(anyString())).thenReturn(jobAnalysis);
+    when(mock.analyze(anyString(), anyString(), anyString(), anyString())).thenReturn(jobAnalysis);
     return mock;
   }
 }

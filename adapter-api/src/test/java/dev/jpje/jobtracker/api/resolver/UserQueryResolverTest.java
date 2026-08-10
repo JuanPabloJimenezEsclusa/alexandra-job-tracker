@@ -2,6 +2,7 @@ package dev.jpje.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -42,10 +43,11 @@ class UserQueryResolverTest {
     when(authUseCase.getCurrentUser(userId)).thenReturn(Optional.of(user));
 
     assertThat(resolver.me(userId))
+      .as("current user should be returned")
       .isNotNull()
       .extracting(UserResponse::username).isEqualTo("alice");
 
-    verify(authUseCase).getCurrentUser(userId);
+    verify(authUseCase, description("current user should be fetched once")).getCurrentUser(userId);
     verifyNoMoreInteractions(authUseCase);
   }
 
@@ -55,9 +57,9 @@ class UserQueryResolverTest {
 
     when(authUseCase.getCurrentUser(userId)).thenReturn(Optional.empty());
 
-    assertThat(resolver.me(userId)).isNull();
+    assertThat(resolver.me(userId)).as("me should return null when no user is logged in").isNull();
 
-    verify(authUseCase).getCurrentUser(userId);
+    verify(authUseCase, description("current user should be fetched once")).getCurrentUser(userId);
     verifyNoMoreInteractions(authUseCase);
   }
 }

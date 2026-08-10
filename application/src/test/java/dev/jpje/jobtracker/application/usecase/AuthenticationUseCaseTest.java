@@ -15,6 +15,8 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.event.EventPublisher;
 import dev.jpje.jobtracker.domain.event.UserRegistered;
+import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
+import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.out.LoadUserPort;
 import dev.jpje.jobtracker.domain.port.out.PasswordEncoderPort;
@@ -85,7 +87,7 @@ class AuthenticationUseCaseTest {
     when(loadUserPort.findByUsername("alice")).thenReturn(Optional.of(existing));
 
     assertThatThrownBy(() -> useCase.register(username, "pass"))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(ResourceAlreadyExistsException.class)
       .hasMessage("Username already taken");
     verifyNoMoreInteractions(passwordEncoderPort, tokenGeneratorPort, saveUserPort, eventPublisher);
   }
@@ -123,7 +125,7 @@ class AuthenticationUseCaseTest {
     when(loadUserPort.findByUsername("nonexistent")).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> useCase.login(username, "pass"))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Invalid credentials");
     verifyNoMoreInteractions(tokenGeneratorPort);
   }

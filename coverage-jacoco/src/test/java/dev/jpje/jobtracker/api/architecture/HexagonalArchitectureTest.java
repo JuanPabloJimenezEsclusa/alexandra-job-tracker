@@ -148,11 +148,11 @@ class HexagonalArchitectureTest {
     .that().resideInAPackage(ADAPTER_AI)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
       concat(DOMAIN, ADAPTER_AI,
-        "org.springframework.(stereotype|context|beans|boot|core|ai)..",
-        "org.springaicommunity.agent.tools..",
+        "org.springframework.(aot|stereotype|context|beans|boot|core|ai)..",
+        "org.springaicommunity.agent.(utils|tools)..",
         "com.fasterxml.jackson.."))
     .as("AI module dependencies")
-    .because("the AI adapter integrates with DeepSeek via Spring AI");
+    .because("the AI adapter integrates with LLMs via Spring AI");
 
   @ArchTest
   static final ArchRule ADAPTER_CACHE_DEPENDENCIES = classes()

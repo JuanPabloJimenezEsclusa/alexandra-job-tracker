@@ -15,8 +15,8 @@ variable "jwt_secret" {
   sensitive   = true
 }
 
-variable "deepseek_api_key" {
-  description = "DeepSeek API key for AI analysis"
+variable "llm_api_key" {
+  description = "LLM API key for AI analysis"
   type        = string
   sensitive   = true
 }

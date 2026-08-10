@@ -2,6 +2,7 @@ package dev.jpje.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -53,11 +54,12 @@ class ApplicationQueryResolverTest {
 
     final var result = resolver.applications(userId, null, null);
     assertThat(result)
+      .as("listed applications should contain the stored application")
       .singleElement()
       .extracting(JobApplicationResponse::company, JobApplicationResponse::role)
       .containsExactly("Acme", "Engineer");
 
-    verify(useCase).list(userId, null, null);
+    verify(useCase, description("applications should be loaded once")).list(userId, null, null);
     verifyNoMoreInteractions(useCase);
   }
 }

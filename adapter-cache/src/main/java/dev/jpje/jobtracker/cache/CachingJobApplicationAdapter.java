@@ -70,10 +70,12 @@ public class CachingJobApplicationAdapter implements LoadJobApplicationPort, Sav
   }
 
   @Override
-  public void save(final JobApplication application) {
-    saveDelegate.save(application);
+  public JobApplication save(final JobApplication application) {
+    final var saved = saveDelegate.save(application);
     evictUserCaches(application.userId());
-    cache.put(KEY_PREFIX + application.id(), application);
+    cache.evict(KEY_PREFIX + saved.id());
+    cache.put(KEY_PREFIX + saved.id(), saved);
+    return saved;
   }
 
   @Override

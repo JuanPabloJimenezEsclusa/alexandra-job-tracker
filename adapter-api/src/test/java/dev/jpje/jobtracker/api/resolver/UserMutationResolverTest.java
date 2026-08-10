@@ -2,6 +2,7 @@ package dev.jpje.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -34,6 +35,7 @@ class UserMutationResolverTest {
     final var result = resolver.register("alice", "secret");
 
     assertThat(result)
+      .as("registration should return token and username")
       .extracting(AuthPayloadResponse::token, r -> r.user().username())
       .containsExactly("token", "alice");
     verifyRegistration();
@@ -46,6 +48,7 @@ class UserMutationResolverTest {
     final var result = resolver.login("alice", "secret");
 
     assertThat(result)
+      .as("login should return token and username")
       .extracting(AuthPayloadResponse::token, r -> r.user().username())
       .containsExactly("token", "alice");
     verifyLogin();
@@ -65,12 +68,12 @@ class UserMutationResolverTest {
   }
 
   private void verifyRegistration() {
-    verify(authUseCase).register(Username.of("alice"), "secret");
+    verify(authUseCase, description("registration should be delegated to auth use case")).register(Username.of("alice"), "secret");
     verifyNoMoreInteractions(authUseCase);
   }
 
   private void verifyLogin() {
-    verify(authUseCase).login(Username.of("alice"), "secret");
+    verify(authUseCase, description("login should be delegated to auth use case")).login(Username.of("alice"), "secret");
     verifyNoMoreInteractions(authUseCase);
   }
 

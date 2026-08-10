@@ -2,6 +2,7 @@ package dev.jpje.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -53,10 +54,11 @@ class ApplicationMutationResolverTest {
     final var result = resolver.createApplication(userId, "Acme", "Engineer",
       Source.LINKEDIN, "https://example.com/job", "notes");
     assertThat(result)
+      .as("created application should reflect the input")
       .extracting(JobApplicationResponse::company, JobApplicationResponse::role, JobApplicationResponse::source)
       .containsExactly("Acme", "Engineer", Source.LINKEDIN);
 
-    verify(useCase).create(userId, CompanyName.of("Acme"), RoleName.of("Engineer"),
+    verify(useCase, description("application should be created once")).create(userId, CompanyName.of("Acme"), RoleName.of("Engineer"),
       Source.LINKEDIN, Url.of("https://example.com/job"), Notes.of("notes"));
     verifyNoMoreInteractions(useCase);
   }
@@ -80,10 +82,12 @@ class ApplicationMutationResolverTest {
 
     final var result = resolver.updateApplicationStatus(id, ApplicationStatus.INTERVIEWING, "notes");
     assertThat(result)
+      .as("updated application should reflect the new status")
       .extracting(JobApplicationResponse::status, JobApplicationResponse::company)
       .containsExactly(ApplicationStatus.INTERVIEWING, "Acme");
 
-    verify(useCase).updateStatus(id, ApplicationStatus.INTERVIEWING, Notes.of("notes"));
+    verify(useCase, description("application status should be updated once"))
+      .updateStatus(id, ApplicationStatus.INTERVIEWING, Notes.of("notes"));
     verifyNoMoreInteractions(useCase);
   }
 
@@ -91,9 +95,9 @@ class ApplicationMutationResolverTest {
   void shouldDeleteApplication() {
     final var id = UUID.randomUUID();
 
-    assertThat(resolver.deleteApplication(id)).isTrue();
+    assertThat(resolver.deleteApplication(id)).as("deletion should succeed").isTrue();
 
-    verify(useCase).delete(id);
+    verify(useCase, description("application deletion should be delegated")).delete(id);
     verifyNoMoreInteractions(useCase);
   }
 }

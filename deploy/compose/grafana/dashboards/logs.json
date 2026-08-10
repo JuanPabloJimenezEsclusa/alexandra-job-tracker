@@ -1,103 +1,424 @@
 {
   "__inputs": [],
   "__requires": [],
+  "uid": "logs",
   "title": "Logs",
+  "description": "Loki log observability for the job-tracker compose stack. Requires promtail with docker_sd_configs (container_name) and level extraction.",
   "editable": true,
   "tags": ["logs", "loki"],
   "timezone": "browser",
   "time": { "from": "now-1h", "to": "now" },
   "refresh": "30s",
+  "graphTooltip": 1,
   "schemaVersion": 39,
-  "version": 1,
+  "version": 2,
+  "templating": {
+    "list": [
+      {
+        "name": "container",
+        "type": "query",
+        "datasource": { "type": "loki", "uid": "loki" },
+        "query": {
+          "expr": "label_values(container_name)",
+          "queryType": "range",
+          "refId": "A",
+          "editorMode": "code",
+          "supportingQueryType": "logs"
+        },
+        "refresh": 2,
+        "sort": 5,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "hide": 0
+      },
+      {
+        "name": "level",
+        "type": "query",
+        "datasource": { "type": "loki", "uid": "loki" },
+        "query": {
+          "expr": "label_values(level)",
+          "queryType": "range",
+          "refId": "A",
+          "editorMode": "code",
+          "supportingQueryType": "logs"
+        },
+        "refresh": 2,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "hide": 0
+      }
+    ]
+  },
   "panels": [
     {
-      "title": "Logs by Container",
-      "type": "logs",
+      "id": 1,
+      "title": "Total Log Volume",
+      "type": "stat",
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 0 },
+      "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "{job=\"docker\"}",
-          "legendFormat": ""
+          "expr": "sum(count_over_time({job=\"docker\", container_name=~\"$container\", level=~\"$level\"}[$__range]))",
+          "refId": "A",
+          "legendFormat": "lines",
+          "queryType": "range",
+          "editorMode": "code"
         }
       ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
+      },
       "fieldConfig": {
         "defaults": {
-          "custom": {}
-        }
+          "unit": "none",
+          "min": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
       }
     },
     {
+      "id": 2,
+      "title": "Log Rate",
+      "type": "stat",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate({job=\"docker\", container_name=~\"$container\", level=~\"$level\"}[$__interval]))",
+          "refId": "A",
+          "legendFormat": "lines/s",
+          "queryType": "range",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps",
+          "min": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 3,
+      "title": "Errors (Total)",
+      "type": "stat",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 4, "w": 6, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(count_over_time({job=\"docker\", container_name=~\"$container\", level=~\"error|fatal\"}[$__range]))",
+          "refId": "A",
+          "legendFormat": "errors",
+          "queryType": "range",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "red", "value": 0 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 4,
+      "title": "Error Rate",
+      "type": "stat",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 4, "w": 6, "x": 18, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate({job=\"docker\", container_name=~\"$container\", level=~\"error|fatal\"}[$__interval]))",
+          "refId": "A",
+          "legendFormat": "errors/s",
+          "queryType": "range",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "textMode": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps",
+          "min": 0,
+          "color": { "mode": "thresholds" },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 10 }
+            ]
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 5,
+      "title": "Log Volume by Container",
+      "type": "timeseries",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "targets": [
+        {
+          "expr": "sum by (container_name) (count_over_time({job=\"docker\", container_name=~\"$container\", level=~\"$level\"}[$__interval]))",
+          "refId": "A",
+          "legendFormat": "{{container_name}}",
+          "queryType": "range",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "min": 0,
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "showPoints": "never",
+            "pointSize": 5,
+            "stacking": { "mode": "normal", "group": "A" },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "scaleDistribution": { "type": "linear" },
+            "barAlignment": 0,
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 6,
       "title": "Log Rate by Container",
       "type": "timeseries",
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
       "targets": [
         {
-          "expr": "sum by (container_name) (rate({job=\"docker\"}[5m]))",
-          "legendFormat": "{{container_name}}"
+          "expr": "sum by (container_name) (rate({job=\"docker\", container_name=~\"$container\", level=~\"$level\"}[$__interval]))",
+          "refId": "A",
+          "legendFormat": "{{container_name}}",
+          "queryType": "range",
+          "editorMode": "code"
         }
       ],
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] }
+      },
       "fieldConfig": {
         "defaults": {
-          "unit": "rps",
+          "unit": "cps",
           "min": 0,
-          "custom": { "showPoints": "never" }
-        }
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 30,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "showPoints": "never",
+            "pointSize": 5,
+            "stacking": { "mode": "normal", "group": "A" },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "scaleDistribution": { "type": "linear" },
+            "barAlignment": 0,
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false }
+          }
+        },
+        "overrides": []
       }
     },
     {
-      "title": "Logs by Level",
-      "type": "piechart",
-      "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 12 },
-      "targets": [
-        {
-          "expr": "sum by (level) (count_over_time({job=\"docker\"}[5m]))",
-          "legendFormat": "{{level}}"
-        }
-      ],
-      "fieldConfig": {
-        "defaults": {
-          "unit": "none",
-          "min": 0
-        }
-      }
-    },
-    {
-      "title": "Log Volume",
+      "id": 7,
+      "title": "Error Rate by Container",
       "type": "timeseries",
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 12 },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
       "targets": [
         {
-          "expr": "sum by (container_name) (count_over_time({job=\"docker\"}[5m]))",
-          "legendFormat": "{{container_name}}"
+          "expr": "sum by (container_name) (rate({job=\"docker\", container_name=~\"$container\", level=~\"error|fatal\"}[$__interval]))",
+          "refId": "A",
+          "legendFormat": "{{container_name}}",
+          "queryType": "range",
+          "editorMode": "code"
         }
       ],
+      "options": {
+        "tooltip": { "mode": "multi", "sort": "desc" },
+        "legend": { "displayMode": "list", "placement": "bottom", "showLegend": true, "calcs": [] }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cps",
+          "min": 0,
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "linear",
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "showPoints": "never",
+            "pointSize": 5,
+            "stacking": { "mode": "none", "group": "A" },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "scaleDistribution": { "type": "linear" },
+            "barAlignment": 0,
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false }
+          }
+        },
+        "overrides": []
+      }
+    },
+    {
+      "id": 8,
+      "title": "Log Volume by Level",
+      "type": "piechart",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "targets": [
+        {
+          "expr": "sum by (level) (count_over_time({job=\"docker\", container_name=~\"$container\", level=~\"$level\"}[$__range]))",
+          "refId": "A",
+          "legendFormat": "{{level}}",
+          "queryType": "range",
+          "editorMode": "code"
+        }
+      ],
+      "options": {
+        "displayLabels": ["name", "percent"],
+        "legend": { "displayMode": "list", "placement": "right", "showLegend": true, "values": ["value", "percent"] },
+        "pieType": "donut",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "tooltip": { "mode": "single", "sort": "none" }
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "none",
           "min": 0,
-          "custom": { "showPoints": "never" }
-        }
+          "color": { "mode": "palette-classic" },
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        },
+        "overrides": []
       }
     },
     {
-      "title": "Error Logs",
+      "id": 9,
+      "title": "Logs",
       "type": "logs",
       "datasource": { "type": "loki", "uid": "loki" },
-      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 20 },
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 20 },
       "targets": [
         {
-          "expr": "{job=\"docker\"} |= `ERROR` |= `alexandra`",
-          "legendFormat": ""
+          "expr": "{job=\"docker\", container_name=~\"$container\", level=~\"$level\"}",
+          "refId": "A",
+          "queryType": "range",
+          "editorMode": "code"
         }
       ],
-      "fieldConfig": {
-        "defaults": {
-          "custom": {}
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyJSON": false,
+        "showCommonLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      }
+    },
+    {
+      "id": 10,
+      "title": "Errors & Fatals",
+      "type": "logs",
+      "datasource": { "type": "loki", "uid": "loki" },
+      "gridPos": { "h": 10, "w": 24, "x": 0, "y": 32 },
+      "targets": [
+        {
+          "expr": "{job=\"docker\", container_name=~\"$container\", level=~\"error|fatal\"}",
+          "refId": "A",
+          "queryType": "range",
+          "editorMode": "code"
         }
+      ],
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyJSON": false,
+        "showCommonLabels": false,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
       }
     }
   ]

@@ -20,7 +20,7 @@ SEPARATOR="\n ################################################## \n"
 IMAGE_URI="${IMAGE_URI:-546053716955.dkr.ecr.eu-west-1.amazonaws.com/ajt-serverless:1.0.0}"
 NEON_PASSWORD="${NEON_PASSWORD:-}"
 JWT_SECRET="${JWT_SECRET:-}"
-DEEPSEEK_API_KEY="${DEEPSEEK_API_KEY:-}"
+LLM_API_KEY="${LLM_API_KEY:-}"
 DOMAIN_NAME="${DOMAIN_NAME:-ajt.jpje.net}"
 REGION="${REGION:-eu-west-1}"
 
@@ -61,7 +61,7 @@ main() {
   __validate_env_var "IMAGE_URI" "${IMAGE_URI}"
   __validate_env_var "NEON_PASSWORD" "${NEON_PASSWORD}"
   __validate_env_var "JWT_SECRET" "${JWT_SECRET}"
-  __validate_env_var "DEEPSEEK_API_KEY" "${DEEPSEEK_API_KEY}"
+  __validate_env_var "LLM_API_KEY" "${LLM_API_KEY}"
   __require_hosted_zone
 
   echo -e "${SEPARATOR} Run Terraform plan. ${SEPARATOR}"
@@ -69,7 +69,7 @@ main() {
     -var "image_uri=${IMAGE_URI}" \
     -var "neon_password=${NEON_PASSWORD}" \
     -var "jwt_secret=${JWT_SECRET}" \
-    -var "deepseek_api_key=${DEEPSEEK_API_KEY}" \
+    -var "llm_api_key=${LLM_API_KEY}" \
     -var "hosted_zone_id=${HOSTED_ZONE_ID}" \
     -var "domain_name=${DOMAIN_NAME}" \
     -var "region=${REGION}"

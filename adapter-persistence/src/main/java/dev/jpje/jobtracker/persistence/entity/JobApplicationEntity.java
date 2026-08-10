@@ -23,7 +23,7 @@ public class JobApplicationEntity {
   private String role;
   @Column(nullable = false)
   private String source;
-  @Nullable
+  @Column(nullable = false)
   private String postingUrl;
   @Column(nullable = false)
   private String status;
@@ -40,7 +40,7 @@ public class JobApplicationEntity {
     return id;
   }
 
-  public void setId(UUID id) {
+  public void setId(final UUID id) {
     this.id = id;
   }
 
@@ -48,7 +48,7 @@ public class JobApplicationEntity {
     return userId;
   }
 
-  public void setUserId(UUID userId) {
+  public void setUserId(final UUID userId) {
     this.userId = userId;
   }
 
@@ -56,7 +56,7 @@ public class JobApplicationEntity {
     return company;
   }
 
-  public void setCompany(String company) {
+  public void setCompany(final String company) {
     this.company = company;
   }
 
@@ -64,7 +64,7 @@ public class JobApplicationEntity {
     return role;
   }
 
-  public void setRole(String role) {
+  public void setRole(final String role) {
     this.role = role;
   }
 
@@ -72,16 +72,15 @@ public class JobApplicationEntity {
     return source;
   }
 
-  public void setSource(String source) {
+  public void setSource(final String source) {
     this.source = source;
   }
 
-  @Nullable
   public String getPostingUrl() {
     return postingUrl;
   }
 
-  public void setPostingUrl(String postingUrl) {
+  public void setPostingUrl(final String postingUrl) {
     this.postingUrl = postingUrl;
   }
 
@@ -89,7 +88,7 @@ public class JobApplicationEntity {
     return status;
   }
 
-  public void setStatus(String status) {
+  public void setStatus(final String status) {
     this.status = status;
   }
 
@@ -97,7 +96,7 @@ public class JobApplicationEntity {
     return dateApplied;
   }
 
-  public void setDateApplied(Instant dateApplied) {
+  public void setDateApplied(final Instant dateApplied) {
     this.dateApplied = dateApplied;
   }
 
@@ -105,7 +104,7 @@ public class JobApplicationEntity {
     return lastUpdated;
   }
 
-  public void setLastUpdated(Instant lastUpdated) {
+  public void setLastUpdated(final Instant lastUpdated) {
     this.lastUpdated = lastUpdated;
   }
 
@@ -114,11 +113,16 @@ public class JobApplicationEntity {
     return notes;
   }
 
-  public void setNotes(@Nullable String notes) {
+  public void setNotes(@Nullable final String notes) {
     this.notes = notes;
   }
 
-  public @Nullable Long getVersion() {
+  @Nullable
+  public Long getVersion() {
     return version;
+  }
+
+  public void setVersion(@Nullable final Long version) {
+    this.version = version;
   }
 }

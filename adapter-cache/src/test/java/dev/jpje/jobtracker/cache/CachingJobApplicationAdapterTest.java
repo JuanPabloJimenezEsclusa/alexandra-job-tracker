@@ -2,7 +2,7 @@ package dev.jpje.jobtracker.cache;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
-import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,8 +50,8 @@ class CachingJobApplicationAdapterTest {
     final var app = jobApplication();
     primeByIdCache(app.id(), app);
 
-    assertThat(adapter.findById(app.id())).hasValue(app);
-    verify(loadDelegate, times(1)).findById(app.id());
+    assertThat(adapter.findById(app.id())).as("cached application should be returned").hasValue(app);
+    verify(loadDelegate, description("load delegate should be hit only on cache miss")).findById(app.id());
   }
 
   @Test
@@ -68,8 +68,8 @@ class CachingJobApplicationAdapterTest {
     final var app = jobApplication(userId);
     primeListCache(userId, List.of(app));
 
-    assertThat(adapter.findByUserId(userId, null, null)).containsExactly(app);
-    verify(loadDelegate, times(1)).findAllByUserId(userId);
+    assertThat(adapter.findByUserId(userId, null, null)).as("cached list should be returned").containsExactly(app);
+    verify(loadDelegate, description("load delegate should be hit only on cache miss")).findAllByUserId(userId);
   }
 
   @Test
@@ -108,11 +108,12 @@ class CachingJobApplicationAdapterTest {
   @Test
   void shouldSaveAndCacheApplication() {
     final var app = jobApplication();
+    when(saveDelegate.save(app)).thenReturn(app);
 
     adapter.save(app);
 
-    assertThat(cache.asMap()).containsKey("jobapp:" + app.id());
-    verify(saveDelegate).save(app);
+    assertThat(cache.asMap()).as("saved application should be cached").containsKey("jobapp:" + app.id());
+    verify(saveDelegate, description("save should be delegated")).save(app);
   }
 
   @Test
@@ -122,8 +123,8 @@ class CachingJobApplicationAdapterTest {
 
     adapter.delete(app.id());
 
-    assertThat(cache.asMap()).doesNotContainKey("jobapp:" + app.id());
-    verify(saveDelegate).delete(app.id());
+    assertThat(cache.asMap()).as("deleted application should be evicted from cache").doesNotContainKey("jobapp:" + app.id());
+    verify(saveDelegate, description("delete should be delegated")).delete(app.id());
   }
 
   private void primeByIdCache(final UUID id, final JobApplication app) {

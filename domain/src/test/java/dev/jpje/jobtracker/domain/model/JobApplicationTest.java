@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
@@ -21,6 +22,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class JobApplicationTest {
+
+  private static final long INITIAL_VERSION = 0L;
 
   private static Stream<Arguments> validTransitions() {
     return Stream.of(
@@ -70,11 +73,12 @@ class JobApplicationTest {
     final var now = Instant.EPOCH;
     final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), CompanyName.of("Acme"), RoleName.of("SWE"),
       Source.LINKEDIN, Url.of("https://linkedin.com/jobs/1"), from,
-      now, now, null);
+      now, now, null, INITIAL_VERSION);
 
     // When, then
     assertThat(app.withStatus(to, now))
-      .returns(to, JobApplication::status);
+      .returns(to, JobApplication::status)
+      .returns(INITIAL_VERSION, JobApplication::version);
   }
 
   @ParameterizedTest(name = "{0}")
@@ -84,11 +88,11 @@ class JobApplicationTest {
     final var now = Instant.EPOCH;
     final var app = new JobApplication(UUID.randomUUID(), UserId.generate(), CompanyName.of("Acme"), RoleName.of("SWE"),
       Source.LINKEDIN, Url.of("https://linkedin.com/jobs/1"), from,
-      now, now, null);
+      now, now, null, INITIAL_VERSION);
 
     // When, then
     assertThatThrownBy(() -> app.withStatus(to, now))
-      .isInstanceOf(IllegalStateException.class);
+      .isInstanceOf(InvalidStateTransitionException.class);
   }
 
   @ParameterizedTest(name = "{0}")
@@ -99,7 +103,7 @@ class JobApplicationTest {
                                   final Instant dateApplied, final Instant lastUpdated,
                                   final Notes notes) {
     assertThatThrownBy(() -> new JobApplication(id, userId, company, role, source, postingUrl,
-      status, dateApplied, lastUpdated, notes))
+      status, dateApplied, lastUpdated, notes, INITIAL_VERSION))
       .isInstanceOf(RuntimeException.class);
   }
 }

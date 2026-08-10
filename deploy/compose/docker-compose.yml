@@ -5,7 +5,7 @@ x-resources: &default-resources
       reservations: { cpus: "0.25", memory: "256M" }
 
 x-k6-base: &k6-base
-  image: grafana/k6:latest
+  image: grafana/k6:2.2.0
   user: ${K6_UID:-12345}
   hostname: k6
   depends_on:
@@ -33,7 +33,7 @@ services:
       - "../data:/app/deploy/data"
     environment:
       SPRING_PROFILES_ACTIVE: "dev"
-      DEEPSEEK_API_KEY: ${DEEPSEEK_API_KEY:-NOT_SET}
+      LLM_API_KEY: ${LLM_API_KEY:-NOT_SET}
       APP_OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -114,6 +114,7 @@ services:
       - "./grafana/promtail.yml:/etc/promtail/config.yaml"
       - "/var/log:/var/log:ro"
       - "/var/lib/docker/containers:/var/lib/docker/containers:ro"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
     command: [ "-config.file=/etc/promtail/config.yaml" ]
     networks: [ jobtracker ]
     <<: *default-resources

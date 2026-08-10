@@ -14,12 +14,13 @@ RUN dnf install -y glibc-minimal-langpack ca-certificates && dnf clean all
 
 COPY --from=adapter /lambda-adapter /opt/extensions/lambda-adapter
 COPY --from=graalvm-builder /app/bootstrap-server/target/job-tracker-server /opt/job-tracker-server
+COPY --from=graalvm-builder /app/bootstrap-server/target/lib*.so /opt/
 
-ENV READINESS_CHECK_PATH=/api/actuator/health
+ENV AWS_LWA_READINESS_CHECK_PATH=/api/actuator/health
 ENV AWS_LAMBDA_WEB_ADAPTER_INITIALIZATION_TIMEOUT=20000
 ENV AWS_LAMBDA_SERVER_PORT=8080
 
 EXPOSE 8080
 EXPOSE 8880
 
-ENTRYPOINT ["/opt/job-tracker-server"]
+ENTRYPOINT ["/opt/job-tracker-server", "--spring.profiles.active=aws"]

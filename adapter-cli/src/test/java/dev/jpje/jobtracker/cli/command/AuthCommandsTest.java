@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -82,8 +83,8 @@ class AuthCommandsTest {
                                       final Function<AuthCommands, String> invocation) {
     when(client.execute(anyString(), anyMap())).thenReturn(json(response));
 
-    assertThat(invocation.apply(commands)).isEqualTo(expected);
-    verify(session).saveToken("tok");
+    assertThat(invocation.apply(commands)).as("command output should match the expected message").isEqualTo(expected);
+    verify(session, description("token should be saved to the session")).saveToken("tok");
   }
 
   @ParameterizedTest(name = "{0}")
@@ -113,8 +114,8 @@ class AuthCommandsTest {
 
   @Test
   void shouldLogout() {
-    assertThat(commands.logout()).isEqualTo("Logged out");
-    verify(session).clearToken();
+    assertThat(commands.logout()).as("logout should return a confirmation message").isEqualTo("Logged out");
+    verify(session, description("token should be cleared from the session")).clearToken();
   }
 
   private static JsonNode json(final String body) {

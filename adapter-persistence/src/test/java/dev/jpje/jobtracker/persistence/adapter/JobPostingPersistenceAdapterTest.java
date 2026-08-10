@@ -3,6 +3,7 @@ package dev.jpje.jobtracker.persistence.adapter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -19,7 +20,6 @@ import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.persistence.entity.JobPostingEntity;
 import dev.jpje.jobtracker.persistence.repository.JobPostingJpaRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,6 +28,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class JobPostingPersistenceAdapterTest {
+
+  private static final int SINGLE_RESULT_SIZE = 1;
 
   @Mock
   private JobPostingJpaRepository repository;
@@ -39,8 +41,8 @@ class JobPostingPersistenceAdapterTest {
   void shouldSavePosting() {
     final var posting = posting();
 
-    assertThatCode(() -> adapter.save(posting)).doesNotThrowAnyException();
-    verify(repository).save(any(JobPostingEntity.class));
+    assertThatCode(() -> adapter.save(posting)).as("save does not throw").doesNotThrowAnyException();
+    verify(repository, description("posting persisted")).save(any(JobPostingEntity.class));
   }
 
   @Test
@@ -65,7 +67,7 @@ class JobPostingPersistenceAdapterTest {
     final var entity = entity(userId);
     when(repository.findByUserId(userId.value())).thenReturn(List.of(entity));
 
-    assertThat(adapter.findByUserId(userId)).hasSize(1);
+    assertThat(adapter.findByUserId(userId)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
   private static JobPosting toDomain(final JobPostingEntity entity) {

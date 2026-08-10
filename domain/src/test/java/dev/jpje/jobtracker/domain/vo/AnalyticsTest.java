@@ -14,6 +14,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 class AnalyticsTest {
 
+  private static final int ONLY_SAVED_EXPECTED_TOTAL = 2;
+  private static final int MIXED_EXPECTED_TOTAL = 5;
+  private static final int ALL_ZERO_EXPECTED_TOTAL = 0;
+
   private static Stream<Arguments> validAnalytics() {
     final var onlySaved = new EnumMap<ApplicationStatus, Integer>(ApplicationStatus.class);
     onlySaved.put(ApplicationStatus.SAVED, 2);
@@ -24,9 +28,9 @@ class AnalyticsTest {
 
     final var allZero = new EnumMap<ApplicationStatus, Integer>(ApplicationStatus.class);
     return Stream.of(
-      arguments(named("only saved", onlySaved), 2),
-      arguments(named("mixed statuses", mixed), 5),
-      arguments(named("all zero", allZero), 0)
+      arguments(named("only saved", onlySaved), ONLY_SAVED_EXPECTED_TOTAL),
+      arguments(named("mixed statuses", mixed), MIXED_EXPECTED_TOTAL),
+      arguments(named("all zero", allZero), ALL_ZERO_EXPECTED_TOTAL)
     );
   }
 

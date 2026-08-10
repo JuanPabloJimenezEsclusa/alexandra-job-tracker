@@ -22,9 +22,8 @@ __initServices() {
   if [[ "${type}" == "native" ]]; then
     dockerfile="deploy/compose/Dockerfile.native"
   fi
-  DOCKERFILE="${dockerfile}" docker-compose --file docker-compose.yml up -d --build --force-recreate
-  docker-compose --file docker-compose.yml ps
-
+  DOCKERFILE="${dockerfile}" docker compose --file docker-compose.yml up -d --build -V --force-recreate --always-recreate-deps
+  docker compose --file docker-compose.yml ps
 }
 
 main() {

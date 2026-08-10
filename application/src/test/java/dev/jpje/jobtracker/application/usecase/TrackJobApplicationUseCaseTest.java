@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -17,6 +18,7 @@ import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.event.EventPublisher;
 import dev.jpje.jobtracker.domain.event.JobApplicationStatusChanged;
+import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
@@ -67,6 +69,7 @@ class TrackJobApplicationUseCaseTest {
   void shouldCreateApplicationAsSaved() {
     final var userId = UserId.generate();
     when(clock.instant()).thenReturn(NOW);
+    when(savePort.save(any(JobApplication.class))).thenAnswer(inv -> inv.getArgument(0));
 
     final var result = useCase.create(userId, CompanyName.of("Acme"), RoleName.of("SWE"),
       Source.LINKEDIN, null, null);
@@ -84,6 +87,7 @@ class TrackJobApplicationUseCaseTest {
     final var app = application();
     when(loadPort.findById(app.id())).thenReturn(Optional.of(app));
     when(clock.instant()).thenReturn(NOW);
+    when(savePort.save(any(JobApplication.class))).thenAnswer(inv -> inv.getArgument(0));
 
     final var result = useCase.updateStatus(app.id(), ApplicationStatus.APPLIED, notes);
 
@@ -101,7 +105,7 @@ class TrackJobApplicationUseCaseTest {
     when(loadPort.findById(id)).thenReturn(Optional.empty());
 
     assertThatThrownBy(() -> useCase.updateStatus(id, ApplicationStatus.APPLIED, null))
-      .isInstanceOf(IllegalArgumentException.class)
+      .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Application not found");
   }
 
@@ -125,6 +129,6 @@ class TrackJobApplicationUseCaseTest {
   private static JobApplication application() {
     return new JobApplication(UUID.randomUUID(), UserId.generate(), CompanyName.of("Acme"),
       RoleName.of("SWE"), Source.LINKEDIN, Url.of("https://example.com/job"), ApplicationStatus.SAVED,
-      NOW, NOW, null);
+      NOW, NOW, null, 0L);
   }
 }

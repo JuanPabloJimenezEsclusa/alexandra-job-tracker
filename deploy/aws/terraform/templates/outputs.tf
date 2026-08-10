@@ -22,3 +22,13 @@ output "log_group_name" {
   description = "CloudWatch Log Group"
   value       = aws_cloudwatch_log_group.this.name
 }
+
+output "job_events_topic_arn" {
+  description = "SNS topic for job events"
+  value       = aws_sns_topic.job_events.arn
+}
+
+output "job_analysis_queue_url" {
+  description = "SQS queue for async job analysis"
+  value       = aws_sqs_queue.job_analysis.id
+}

@@ -2,6 +2,7 @@ package dev.jpje.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -49,11 +50,12 @@ class JobPostingQueryResolverTest {
 
     final var result = resolver.jobPostings(userId, null);
     assertThat(result)
+      .as("listed postings should contain the stored posting")
       .singleElement()
       .extracting(JobPostingResponse::source)
       .isEqualTo(Source.LINKEDIN);
 
-    verify(useCase).listJobPostings(userId, null);
+    verify(useCase, description("postings should be loaded once")).listJobPostings(userId, null);
     verifyNoMoreInteractions(useCase);
   }
 }

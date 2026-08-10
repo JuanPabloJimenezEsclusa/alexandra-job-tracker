@@ -1,30 +1,27 @@
 FROM ghcr.io/graalvm/native-image-community:25 AS native-build
 WORKDIR /app
 COPY . .
-RUN ./mvnw install -DskipTests -B -ntp -e \
+RUN ./mvnw clean install -DskipTests -B -ntp -e \
     && ./mvnw -Pnative native:compile -pl bootstrap-server -DskipTests -B -ntp -e
 
 # Use a lightweight runtime image
-FROM alpine:3.24
-
-# Install su-exec for running the application as a non-root user and create a non-root user for better security
-RUN apk add --no-cache curl su-exec \
-    && addgroup -S appuser && adduser -S -G appuser -h /app appuser
-
+FROM debian:12-slim
+RUN apt-get update \
+    && apt-get install -y curl gosu \
+    && rm -rf /var/lib/apt/lists/* \
+    && groupadd -r appuser \
+    && useradd -r -g appuser -d /app appuser
 WORKDIR /app
+COPY --from=native-build /app/bootstrap-server/target/job-tracker-server app
+COPY --from=native-build /app/bootstrap-server/target/lib*.so /app/
 
-COPY --from=native-build /app/bootstrap-server/target/job-tracker-server /app/
-
-# Set permissions for the application directory
 COPY <<'EOF' /usr/local/bin/entrypoint.sh
 #!/bin/sh
-chown -R appuser:appuser /app/deploy/data 2>/dev/null || true
-exec su-exec appuser "$@"
+chown -R appuser:appuser /app/ 2>/dev/null || true
+exec gosu appuser "$@"
 EOF
 
 RUN chmod 755 /usr/local/bin/entrypoint.sh
-
 EXPOSE 8880
-
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["/app/job-tracker-server"]
+CMD ["/app/app", "--spring.profiles.active=dev"]

@@ -34,12 +34,12 @@ public record JobAnalysisResponse(
     Objects.requireNonNull(createdAt, "createdAt must not be null");
   }
 
-  public static JobAnalysisResponse from(final JobAnalysisRecord record) {
-    Objects.requireNonNull(record, "record must not be null");
-    final var analysis = record.analysis();
+  public static JobAnalysisResponse from(final JobAnalysisRecord jobAnalysisRecord) {
+    Objects.requireNonNull(jobAnalysisRecord, "job analysis record must not be null");
+    final var analysis = jobAnalysisRecord.analysis();
     return new JobAnalysisResponse(
-      record.id(),
-      record.jobPostingId(),
+      jobAnalysisRecord.id(),
+      jobAnalysisRecord.jobPostingId(),
       analysis.summary(),
       analysis.seniority(),
       analysis.softSkills(),
@@ -50,6 +50,6 @@ public record JobAnalysisResponse(
       analysis.salaryMin(),
       analysis.salaryMax(),
       analysis.salaryCurrency(),
-      record.createdAt());
+      jobAnalysisRecord.createdAt());
   }
 }

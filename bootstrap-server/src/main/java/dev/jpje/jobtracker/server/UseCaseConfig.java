@@ -44,30 +44,34 @@ import io.micrometer.core.instrument.Timer;
 import org.jspecify.annotations.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 @Configuration(proxyBeanMethods = false)
 public class UseCaseConfig {
 
   @Bean
-  JobPostingService jobPostingService(final EventPublisher eventPublisher) {
-    return new JobPostingService(eventPublisher);
+  TransactionTemplate transactionTemplate(final PlatformTransactionManager transactionManager) {
+    return new TransactionTemplate(transactionManager);
+  }
+
+  @Bean
+  JobPostingService jobPostingService(final EventPublisher eventPublisher, final Clock clock) {
+    return new JobPostingService(eventPublisher, clock);
   }
 
   @Bean
   SubmitJobPostingPort submitJobPostingUseCase(
       final Clock clock,
       final SaveJobPostingPort savePostingPort,
-      final SaveJobApplicationPort saveAppPort,
       final JobPostingService jobPostingService,
-      final Counter applicationCreatedCounter,
-      final Timer submitDurationTimer) {
-    final var impl = new SubmitJobPostingUseCase(savePostingPort, saveAppPort, jobPostingService, clock);
+      final Timer submitDurationTimer,
+      final TransactionTemplate transactionTemplate) {
+    final var impl = new SubmitJobPostingUseCase(savePostingPort, jobPostingService, clock);
     return (userId, url, title, company, description, source) -> {
       final var sample = Timer.start();
       try {
-        final var result = impl.submit(userId, url, title, company, description, source);
-        applicationCreatedCounter.increment();
-        return result;
+        return transactionTemplate.execute(_ -> impl.submit(userId, url, title, company, description, source));
       } finally {
         sample.stop(submitDurationTimer);
       }

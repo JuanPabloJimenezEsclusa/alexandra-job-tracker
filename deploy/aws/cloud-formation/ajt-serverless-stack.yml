@@ -15,10 +15,10 @@ Parameters:
     NoEcho: true
     Description: JWT signing secret (min 32 chars)
     Default: placeholder_will_be_updated_by_init_script
-  DeepSeekApiKey:
+  LLMApiKey:
     Type: String
     NoEcho: true
-    Description: DeepSeek API key for AI analysis
+    Description: LLM API key for AI analysis
     Default: placeholder_will_be_updated_by_init_script
   HostedZoneId:
     Type: String
@@ -55,6 +55,112 @@ Resources:
                   - ecr:BatchGetImage
                   - ecr:GetAuthorizationToken
                 Resource: "*"
+        - PolicyName: events-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref JobEventsTopic
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                Resource: !GetAtt JobAnalysisQueue.Arn
+              - Effect: Allow
+                Action:
+                  - kms:Decrypt
+                Resource: !GetAtt JobEventsKmsKey.Arn
+
+  #################################################################################################
+  ###################################### Events (SNS + SQS) #######################################
+  JobEventsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ajt-job-events
+      DisplayName: AJT Job Events
+      KmsMasterKeyId: alias/aws/sns
+
+  JobEventsKmsKey:
+    Type: AWS::KMS::Key
+    Properties:
+      Description: KMS key for the AJT SQS queues (grants SNS delivery)
+      EnableKeyRotation: true
+      KeyPolicy:
+        Version: "2012-10-17"
+        Id: ajt-job-analysis-key
+        Statement:
+          - Sid: Enable IAM User Permissions
+            Effect: Allow
+            Principal:
+              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
+            Action: kms:*
+            Resource: "*"
+          - Sid: Allow SNS to encrypt messages delivered to the queue
+            Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action:
+              - kms:Decrypt
+              - kms:GenerateDataKey
+              - kms:GenerateDataKeyWithoutPlaintext
+            Resource: "*"
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref JobEventsTopic
+
+  JobEventsKmsAlias:
+    Type: AWS::KMS::Alias
+    Properties:
+      AliasName: alias/ajt-job-analysis-kms
+      TargetKeyId: !Ref JobEventsKmsKey
+
+  JobAnalysisQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ajt-job-analysis
+      VisibilityTimeout: 120
+      KmsMasterKeyId: !Ref JobEventsKmsKey
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt JobAnalysisDlq.Arn
+        maxReceiveCount: 3
+
+  JobAnalysisDlq:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: ajt-job-analysis-dlq
+      KmsMasterKeyId: !Ref JobEventsKmsKey
+
+  JobEventsSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref JobEventsTopic
+      Protocol: sqs
+      Endpoint: !GetAtt JobAnalysisQueue.Arn
+      RawMessageDelivery: true
+      FilterPolicyScope: MessageAttributes
+      FilterPolicy:
+        eventType:
+          - JobPostingCreated
+
+  JobAnalysisQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref JobAnalysisQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt JobAnalysisQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref JobEventsTopic
 
   #################################################################################################
   ###################################### Lambda ###################################################
@@ -75,7 +181,9 @@ Resources:
         Variables:
           NEON_PASSWORD: !Ref NeonPass
           JWT_SECRET: !Ref JwtSecret
-          DEEPSEEK_API_KEY: !Ref DeepSeekApiKey
+          LLM_API_KEY: !Ref LLMApiKey
+          SNS_TOPIC_ARN: !Ref JobEventsTopic
+          SQS_QUEUE_URL: !Ref JobAnalysisQueue
           SPRING_PROFILES_ACTIVE: "aws"
           LOGGING_LEVEL_ROOT: WARN
           LOGGING_LEVEL_COM_JOBTRACKER: INFO
@@ -234,3 +342,9 @@ Outputs:
   LogGroupName:
     Description: CloudWatch Log Group
     Value: !Ref LogGroup
+  JobEventsTopicArn:
+    Description: SNS topic for job events
+    Value: !Ref JobEventsTopic
+  JobAnalysisQueueUrl:
+    Description: SQS queue for async job analysis
+    Value: !Ref JobAnalysisQueue

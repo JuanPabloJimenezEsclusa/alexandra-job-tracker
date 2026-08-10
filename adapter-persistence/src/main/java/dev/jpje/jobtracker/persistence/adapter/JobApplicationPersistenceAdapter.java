@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
@@ -14,6 +15,7 @@ import dev.jpje.jobtracker.persistence.entity.JobApplicationEntity;
 import dev.jpje.jobtracker.persistence.mapper.JobApplicationMapper;
 import dev.jpje.jobtracker.persistence.repository.JobApplicationJpaRepository;
 import org.jspecify.annotations.Nullable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +30,12 @@ public class JobApplicationPersistenceAdapter implements SaveJobApplicationPort,
 
   @Override
   @Transactional
-  public void save(final JobApplication application) {
-    repository.save(JobApplicationMapper.toEntity(application));
+  public JobApplication save(final JobApplication application) {
+    try {
+      return JobApplicationMapper.toDomain(repository.saveAndFlush(JobApplicationMapper.toEntity(application)));
+    } catch (final DataIntegrityViolationException e) {
+      throw new ResourceAlreadyExistsException("Application already exists", e);
+    }
   }
 
   @Override

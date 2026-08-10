@@ -3,6 +3,7 @@ package dev.jpje.jobtracker.application.usecase;
 import java.time.Clock;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
 import dev.jpje.jobtracker.domain.port.in.AnalyzeJobPostingPort;
 import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
@@ -29,10 +30,12 @@ public class AnalyzeJobPostingUseCase implements AnalyzeJobPostingPort {
   @Override
   public JobAnalysisRecord analyze(final UserId userId, final UUID jobPostingId) {
     final var posting = loadJobPostingPort.findById(jobPostingId)
-      .orElseThrow(() -> new IllegalArgumentException("Job posting not found"));
-    final var analysis = analysisPort.analyze(posting.description());
-    final var record = new JobAnalysisRecord(UUID.randomUUID(), jobPostingId, posting.userId(), analysis, clock.instant());
-    saveAnalysisPort.saveOrReplace(record);
-    return record;
+      .orElseThrow(() -> new ResourceNotFoundException("Job posting not found"));
+    final var analysis = analysisPort.analyze(
+      posting.title().value(), posting.company().value(), posting.source().name(),
+      posting.description());
+    final var jobAnalysisRecord = new JobAnalysisRecord(UUID.randomUUID(), jobPostingId, posting.userId(), analysis, clock.instant());
+    saveAnalysisPort.saveOrReplace(jobAnalysisRecord);
+    return jobAnalysisRecord;
   }
 }

@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
@@ -30,7 +31,8 @@ public record JobApplication(
   ApplicationStatus status,
   Instant dateApplied,
   Instant lastUpdated,
-  @Nullable Notes notes) {
+  @Nullable Notes notes,
+  @Nullable Long version) {
 
   public JobApplication {
     Objects.requireNonNull(id, "id must not be null");
@@ -55,12 +57,14 @@ public record JobApplication(
 
   public JobApplication withStatus(final ApplicationStatus newStatus, final Instant lastUpdated) {
     if (!canTransitionTo(status, newStatus)) {
-      throw new IllegalStateException("Cannot transition from " + status + " to " + newStatus);
+      throw new InvalidStateTransitionException("Cannot transition from " + status + " to " + newStatus);
     }
-    return new JobApplication(id, userId, company, role, source, postingUrl, newStatus, dateApplied, lastUpdated, notes);
+    return new JobApplication(id, userId, company, role, source, postingUrl, newStatus,
+      dateApplied, lastUpdated, notes, version);
   }
 
   public JobApplication withNotes(@Nullable final Notes notes, final Instant lastUpdated) {
-    return new JobApplication(id, userId, company, role, source, postingUrl, status, dateApplied, lastUpdated, notes);
+    return new JobApplication(id, userId, company, role, source, postingUrl, status,
+      dateApplied, lastUpdated, notes, version);
   }
 }

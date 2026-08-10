@@ -3,6 +3,7 @@ package dev.jpje.jobtracker.persistence.adapter;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -30,6 +31,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class JobApplicationPersistenceAdapterTest {
 
+  private static final int SINGLE_RESULT_SIZE = 1;
+
   @Mock
   private JobApplicationJpaRepository repository;
 
@@ -38,18 +41,21 @@ class JobApplicationPersistenceAdapterTest {
 
   @Test
   void shouldSaveApplication() {
-    final var app = application();
+    final var entity = entity();
+    when(repository.saveAndFlush(any(JobApplicationEntity.class))).thenReturn(entity);
 
-    assertThatCode(() -> adapter.save(app)).doesNotThrowAnyException();
-    verify(repository).save(any(JobApplicationEntity.class));
+    final var saved = adapter.save(application());
+
+    assertThat(saved).as("saved application returned").isEqualTo(toDomain(entity));
+    verify(repository, description("repository invoked with flush")).saveAndFlush(any(JobApplicationEntity.class));
   }
 
   @Test
   void shouldDeleteApplication() {
     final var id = UUID.randomUUID();
 
-    assertThatCode(() -> adapter.delete(id)).doesNotThrowAnyException();
-    verify(repository).deleteById(id);
+    assertThatCode(() -> adapter.delete(id)).as("delete does not throw").doesNotThrowAnyException();
+    verify(repository, description("repository delete invoked")).deleteById(id);
   }
 
   @Test
@@ -76,7 +82,7 @@ class JobApplicationPersistenceAdapterTest {
       userId.value(), "SAVED", "LINKEDIN")).thenReturn(List.of(entity));
 
     assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED, Source.LINKEDIN))
-      .hasSize(1);
+      .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
   @Test
@@ -87,7 +93,7 @@ class JobApplicationPersistenceAdapterTest {
       userId.value(), "SAVED")).thenReturn(List.of(entity));
 
     assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED, null))
-      .hasSize(1);
+      .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
   @Test
@@ -98,7 +104,7 @@ class JobApplicationPersistenceAdapterTest {
       userId.value(), "LINKEDIN")).thenReturn(List.of(entity));
 
     assertThat(adapter.findByUserId(userId, null, Source.LINKEDIN))
-      .hasSize(1);
+      .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
   @Test
@@ -107,7 +113,7 @@ class JobApplicationPersistenceAdapterTest {
     final var entity = entity(userId);
     when(repository.findByUserIdOrderByDateAppliedDesc(userId.value())).thenReturn(List.of(entity));
 
-    assertThat(adapter.findByUserId(userId, null, null)).hasSize(1);
+    assertThat(adapter.findByUserId(userId, null, null)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
   @Test
@@ -116,22 +122,29 @@ class JobApplicationPersistenceAdapterTest {
     final var entity = entity(userId);
     when(repository.findByUserIdOrderByDateAppliedDesc(userId.value())).thenReturn(List.of(entity));
 
-    assertThat(adapter.findAllByUserId(userId)).hasSize(1);
+    assertThat(adapter.findAllByUserId(userId)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
   private static JobApplication toDomain(final JobApplicationEntity entity) {
-    return new JobApplication(entity.getId(), new UserId(entity.getUserId()),
-      CompanyName.of(entity.getCompany()), RoleName.of(entity.getRole()),
-      Source.valueOf(entity.getSource()), Url.of(entity.getPostingUrl()),
-      ApplicationStatus.valueOf(entity.getStatus()), entity.getDateApplied(),
-      entity.getLastUpdated(), Notes.of(entity.getNotes()));
+    return new JobApplication(
+      entity.getId(),
+      new UserId(entity.getUserId()),
+      CompanyName.of(entity.getCompany()),
+      RoleName.of(entity.getRole()),
+      Source.valueOf(entity.getSource()),
+      Url.of(entity.getPostingUrl()),
+      ApplicationStatus.valueOf(entity.getStatus()),
+      entity.getDateApplied(),
+      entity.getLastUpdated(),
+      Notes.of(entity.getNotes()),
+      entity.getVersion());
   }
 
   private static JobApplication application() {
     final var userId = UserId.generate();
     return new JobApplication(UUID.randomUUID(), userId, CompanyName.of("Acme"),
       RoleName.of("SWE"), Source.LINKEDIN, Url.of("https://example.com/job"),
-      ApplicationStatus.SAVED, Instant.EPOCH, Instant.EPOCH, Notes.of("notes"));
+      ApplicationStatus.SAVED, Instant.EPOCH, Instant.EPOCH, Notes.of("notes"), 0L);
   }
 
   private static JobApplicationEntity entity() {

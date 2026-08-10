@@ -20,16 +20,18 @@ public final class JobApplicationMapper {
     return new JobApplication(entity.getId(), new UserId(entity.getUserId()),
       CompanyName.of(entity.getCompany()), RoleName.of(entity.getRole()),
       Source.valueOf(entity.getSource()),
-      postingUrl != null ? Url.of(postingUrl) : null,
+      Url.of(postingUrl),
       ApplicationStatus.valueOf(entity.getStatus()),
       entity.getDateApplied(), entity.getLastUpdated(),
-      entity.getNotes() != null ? Notes.of(entity.getNotes()) : null);
+      entity.getNotes() != null ? Notes.of(entity.getNotes()) : null,
+      entity.getVersion() != null ? entity.getVersion() : null);
   }
 
   @SuppressWarnings("java:S4449") // false positives
   public static JobApplicationEntity toEntity(final JobApplication domain) {
     final var entity = new JobApplicationEntity();
     entity.setId(domain.id());
+    entity.setVersion(domain.version());
     entity.setUserId(domain.userId().value());
     entity.setCompany(domain.company().value());
     entity.setRole(domain.role().value());

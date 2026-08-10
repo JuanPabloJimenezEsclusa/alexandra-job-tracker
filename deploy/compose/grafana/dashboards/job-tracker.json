@@ -17,7 +17,7 @@
       "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
       "targets": [
         {
-          "expr": "rate(jobtracker_applications_created_total[5m])",
+          "expr": "rate(jobtracker_applications_total[5m])",
           "legendFormat": "rate"
         }
       ],
@@ -36,7 +36,7 @@
       "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
       "targets": [
         {
-          "expr": "jobtracker_applications_created_total",
+          "expr": "jobtracker_applications_total",
           "legendFormat": "total"
         }
       ],

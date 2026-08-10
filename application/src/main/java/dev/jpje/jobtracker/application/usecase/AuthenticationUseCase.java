@@ -5,6 +5,8 @@ import java.util.Optional;
 
 import dev.jpje.jobtracker.domain.event.EventPublisher;
 import dev.jpje.jobtracker.domain.event.UserRegistered;
+import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
+import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.in.AuthenticationPort;
 import dev.jpje.jobtracker.domain.port.out.LoadUserPort;
@@ -40,7 +42,7 @@ public class AuthenticationUseCase implements AuthenticationPort {
   @Override
   public AuthPayload register(final Username username, final String password) {
     if (loadUserPort.findByUsername(username.value()).isPresent()) {
-      throw new IllegalArgumentException("Username already taken");
+      throw new ResourceAlreadyExistsException("Username already taken");
     }
     final var user = new User(UserId.generate(), username, passwordEncoder.encode(password), clock.instant());
     saveUserPort.save(user);
@@ -51,7 +53,7 @@ public class AuthenticationUseCase implements AuthenticationPort {
   @Override
   public AuthPayload login(final Username username, final String password) {
     final var user = loadUserPort.findByUsername(username.value())
-      .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+      .orElseThrow(() -> new ResourceNotFoundException("Invalid credentials"));
     if (!passwordEncoder.matches(password, user.passwordHash())) {
       throw new IllegalArgumentException("Invalid credentials");
     }

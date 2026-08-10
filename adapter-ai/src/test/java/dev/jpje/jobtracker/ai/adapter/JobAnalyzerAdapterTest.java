@@ -1,27 +1,23 @@
 package dev.jpje.jobtracker.ai.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.vo.JobAnalysis;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 
 @ExtendWith(MockitoExtension.class)
 class JobAnalyzerAdapterTest {
@@ -34,209 +30,45 @@ class JobAnalyzerAdapterTest {
   @Mock
   private ChatClient.Builder builder;
 
-  private static Stream<Arguments> validResponses() {
-    return Stream.of(
-      arguments(named("valid response with all fields",
-        """
-        {
-          "summary": "Java backend role",
-          "technical_skills": ["Java", "Spring"],
-          "soft_skills": ["Teamwork"],
-          "fit_score": 85.0,
-          "seniority": "senior",
-          "company_rating": 4.2,
-          "company_type": "enterprise",
-          "salary_min": 90000.0,
-          "salary_max": 130000.0,
-          "salary_currency": "USD"
-        }
-        """),
-        "Java backend role",
-        "senior",
-        List.of("Teamwork"),
-        List.of("Java", "Spring"),
-        85.0, 4.2, "enterprise", 90000.0, 130000.0, "USD"),
-      arguments(named("partial JSON with only summary and fit_score",
-        """
-        {
-          "summary": "Only summary provided",
-          "fit_score": 50.0
-        }
-        """),
-        "Only summary provided",
-        "",
-        List.of(),
-        List.of(),
-        50.0, 0.0, "unknown", 0.0, 0.0, "USD"),
-      arguments(named("merge technical and soft skills",
-        """
-        {
-          "summary": "Full stack role",
-          "technical_skills": ["Java", "Spring", "React", "AWS"],
-          "soft_skills": ["Communication", "Leadership"],
-          "fit_score": 90.0,
-          "seniority": "senior",
-          "company_rating": 3.8,
-          "company_type": "mid-size",
-          "salary_min": 70000.0,
-          "salary_max": 100000.0,
-          "salary_currency": "EUR"
-        }
-        """),
-        "Full stack role",
-        "senior",
-        List.of("Communication", "Leadership"),
-        List.of("Java", "Spring", "React", "AWS"),
-        90.0, 3.8, "mid-size", 70000.0, 100000.0, "EUR"),
-      arguments(named("only technical skills",
-        """
-        {
-          "summary": "Backend role",
-          "technical_skills": ["Go", "Postgres"],
-          "soft_skills": [],
-          "fit_score": 70.0,
-          "seniority": "mid",
-          "company_rating": 2.9,
-          "company_type": "startup",
-          "salary_min": 60000.0,
-          "salary_max": 85000.0,
-          "salary_currency": "USD"
-        }
-        """),
-        "Backend role",
-        "mid",
-        List.of(),
-        List.of("Go", "Postgres"),
-        70.0, 2.9, "startup", 60000.0, 85000.0, "USD"),
-      arguments(named("only soft skills",
-        """
-        {
-          "summary": "People role",
-          "technical_skills": [],
-          "soft_skills": ["Communication", "Empathy"],
-          "fit_score": 40.0,
-          "seniority": "lead"
-        }
-        """),
-        "People role",
-        "lead",
-        List.of("Communication", "Empathy"),
-        List.of(),
-        40.0, 0.0, "unknown", 0.0, 0.0, "USD"),
-      arguments(named("JSON with prose prefix and suffix",
-        """
-        Based on the job description, here is my analysis:
-        {
-          "summary": "Java backend role",
-          "technical_skills": ["Java", "Spring"],
-          "soft_skills": ["Teamwork"],
-          "fit_score": 85.0,
-          "seniority": "senior",
-          "company_rating": 4.2,
-          "company_type": "enterprise",
-          "salary_min": 90000.0,
-          "salary_max": 130000.0,
-          "salary_currency": "USD"
-        }
-        I hope this helps!
-        """),
-        "Java backend role",
-        "senior",
-        List.of("Teamwork"),
-        List.of("Java", "Spring"),
-        85.0, 4.2, "enterprise", 90000.0, 130000.0, "USD"),
-      arguments(named("JSON inside markdown code fences",
-        """
-        ```json
-        {
-          "summary": "Java backend role",
-          "technical_skills": ["Java", "Spring"],
-          "soft_skills": ["Teamwork"],
-          "fit_score": 85.0,
-          "seniority": "senior",
-          "company_rating": 4.2,
-          "company_type": "enterprise",
-          "salary_min": 90000.0,
-          "salary_max": 130000.0,
-          "salary_currency": "USD"
-        }
-        ```
-        """),
-        "Java backend role",
-        "senior",
-        List.of("Teamwork"),
-        List.of("Java", "Spring"),
-        85.0, 4.2, "enterprise", 90000.0, 130000.0, "USD")
-    );
-  }
+  @Mock
+  private ToolCallbackFactory toolCallbackFactory;
 
-  private static Stream<Arguments> invalidResponses() {
-    return Stream.of(
-      arguments(named("null response", null), "Analysis pending"),
-      arguments(named("empty response", ""), "Analysis pending"),
-      arguments(named("malformed JSON", "not valid json at all"), "Parse error")
-    );
-  }
+  @Mock
+  private JobAnalysisParser parser;
 
   @BeforeEach
   void setUp() {
-    when(builder.defaultSystem(anyString())).thenReturn(builder);
+    when(builder.defaultSystem(any(Resource.class))).thenReturn(builder);
     when(builder.defaultTools(any())).thenReturn(builder);
     when(builder.defaultOptions(any())).thenReturn(builder);
     when(builder.build()).thenReturn(chatClient);
-    adapter = new JobAnalyzerAdapter(builder, new ClassPathResource("prompts/job-analysis.st"),
-      new ClassPathResource("skills"));
+    adapter = new JobAnalyzerAdapter(builder,
+      new ClassPathResource("prompts/system-prompt.st"),
+      new ClassPathResource("prompts/user-job-analysis.st"),
+      toolCallbackFactory,
+      parser);
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("validResponses")
-  void shouldParseResponse(final String response,
-                           final String expectedSummary,
-                           final String expectedSeniority,
-                           final List<String> expectedSoftSkills,
-                           final List<String> expectedTechnicalSkills,
-                           final double expectedFitScore,
-                           final double expectedCompanyRating,
-                           final String expectedCompanyType,
-                           final double expectedSalaryMin,
-                           final double expectedSalaryMax,
-                           final String expectedSalaryCurrency) {
-    assertThat(analyze(response))
-      .extracting(JobAnalysis::summary, JobAnalysis::seniority,
-        JobAnalysis::softSkills, JobAnalysis::technicalSkills, JobAnalysis::fitScore,
-        JobAnalysis::companyRating, JobAnalysis::companyType,
-        JobAnalysis::salaryMin, JobAnalysis::salaryMax, JobAnalysis::salaryCurrency)
-      .containsExactly(expectedSummary, expectedSeniority,
-        expectedSoftSkills, expectedTechnicalSkills, expectedFitScore,
-        expectedCompanyRating, expectedCompanyType,
-        expectedSalaryMin, expectedSalaryMax, expectedSalaryCurrency);
+  @Test
+  void shouldDelegateParsingToParser() {
+    final var analysis = mock(JobAnalysis.class);
+    stubChatClient();
+    when(parser.parse("{\"summary\":\"Java backend role\"}")).thenReturn(analysis);
+
+    final var result = adapter.analyze("Software Engineer", "Acme", "LINKEDIN",
+      "some job description");
+
+    assertThat(result).as("analysis delegated to parser").isEqualTo(analysis);
+    verify(parser, description("parser invoked with chat client content")).parse("{\"summary\":\"Java backend role\"}");
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("invalidResponses")
-  void shouldReturnFallbackForInvalidResponse(final String response, final String expectedSummaryPrefix) {
-    assertThat(analyze(response)).matches(r ->
-      r.summary().startsWith(expectedSummaryPrefix)
-        && r.seniority().isEmpty()
-        && r.softSkills().isEmpty()
-        && r.technicalSkills().isEmpty()
-        && r.fitScore() == 0.0
-        && r.companyRating() == 0.0
-        && r.companyType().equals("unknown")
-        && r.salaryMin() == 0.0
-        && r.salaryMax() == 0.0
-        && r.salaryCurrency().equals("USD"));
-  }
-
-  private JobAnalysis analyze(final String response) {
+  private void stubChatClient() {
     final var requestSpec = mock(ChatClient.ChatClientRequestSpec.class);
     final var callSpec = mock(ChatClient.CallResponseSpec.class);
 
     when(chatClient.prompt()).thenReturn(requestSpec);
     when(requestSpec.user(any(Consumer.class))).thenReturn(requestSpec);
     when(requestSpec.call()).thenReturn(callSpec);
-    when(callSpec.content()).thenReturn(response);
-
-    return adapter.analyze("some job description");
+    when(callSpec.content()).thenReturn("{\"summary\":\"Java backend role\"}");
   }
 }
