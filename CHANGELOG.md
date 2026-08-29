@@ -5,7 +5,13 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
-[bc99cbcda4ae50a](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/bc99cbcda4ae50a) juan.pablo.jimenez.esclusa *2026-08-08 14:51:05*
+**feat(domain): implement job tracker app**
+
+ * feat(ai): improve capability adding skills (#62)
+ * feat(ai): improve capability adding skills
+ * refactor(architecture): add submit job posting events
+
+[58c7ffaeed1085e](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/58c7ffaeed1085e) juan.pablo.jimenez.esclusa *2026-08-29 00:42:05*
 
 **feat(architecture): scaffold multi module maven project**
 

@@ -37,6 +37,7 @@ jobs:
         with:
           name: k6-load-report
           path: testing-pentest/src/test/k6/reports/k6-load.html
+          archive: false
 
       - name: Upload spike test report
         if: always()
@@ -44,6 +45,7 @@ jobs:
         with:
           name: k6-spike-report
           path: testing-pentest/src/test/k6/reports/k6-spike.html
+          archive: false
 
       - name: Upload soak test report
         if: always()
@@ -51,3 +53,4 @@ jobs:
         with:
           name: k6-soak-report
           path: testing-pentest/src/test/k6/reports/k6-soak.html
+          archive: false
