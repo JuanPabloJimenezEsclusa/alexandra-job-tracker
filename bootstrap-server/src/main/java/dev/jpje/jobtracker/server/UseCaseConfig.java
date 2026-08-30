@@ -33,11 +33,7 @@ import dev.jpje.jobtracker.domain.port.out.SaveUserPort;
 import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
 import dev.jpje.jobtracker.domain.service.JobPostingService;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
-import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
@@ -118,15 +114,15 @@ public class UseCaseConfig {
       final Clock clock,
       final SaveJobApplicationPort savePort,
       final LoadJobApplicationPort loadPort,
+      final LoadJobPostingPort loadPostingPort,
       final EventPublisher eventPublisher,
       final Counter applicationCreatedCounter) {
-    final var impl = new TrackJobApplicationUseCase(savePort, loadPort, clock, eventPublisher);
+    final var impl = new TrackJobApplicationUseCase(savePort, loadPort, loadPostingPort, clock, eventPublisher);
     return new TrackJobApplicationPort() {
       @Override
-      public JobApplication create(final UserId userId, final CompanyName company, final RoleName role,
-                                    final Source source, @Nullable final Url postingUrl,
+      public JobApplication create(final UserId userId, final UUID jobPostingId,
                                     @Nullable final Notes notes) {
-        final var result = impl.create(userId, company, role, source, postingUrl, notes);
+        final var result = impl.create(userId, jobPostingId, notes);
         applicationCreatedCounter.increment();
         return result;
       }
@@ -138,9 +134,8 @@ public class UseCaseConfig {
       }
 
       @Override
-      public List<JobApplication> list(final UserId userId, @Nullable final ApplicationStatus status,
-                                        @Nullable final Source source) {
-        return impl.list(userId, status, source);
+      public List<JobApplication> list(final UserId userId, @Nullable final ApplicationStatus status) {
+        return impl.list(userId, status);
       }
 
       @Override

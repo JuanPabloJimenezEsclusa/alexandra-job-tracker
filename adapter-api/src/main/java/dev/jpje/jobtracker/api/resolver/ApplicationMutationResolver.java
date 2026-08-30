@@ -6,11 +6,7 @@ import java.util.UUID;
 import dev.jpje.jobtracker.api.dto.JobApplicationResponse;
 import dev.jpje.jobtracker.domain.port.in.TrackJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
-import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -28,17 +24,10 @@ public class ApplicationMutationResolver {
 
   @MutationMapping
   public JobApplicationResponse createApplication(@ContextValue(required = false) @Nullable final UserId userId,
-                                                   @Argument final String company,
-                                                   @Argument final String role,
-                                                   @Argument final Source source,
-                                                   @Argument @Nullable final String postingUrl,
+                                                   @Argument final UUID jobPostingId,
                                                    @Argument @Nullable final String notes) {
     Objects.requireNonNull(userId, "Authentication required");
-    return JobApplicationResponse.from(useCase.create(userId,
-      CompanyName.of(StringSanitizer.sanitize(company)),
-      RoleName.of(StringSanitizer.sanitize(role)),
-      source,
-      postingUrl != null ? Url.of(StringSanitizer.sanitize(postingUrl)) : null,
+    return JobApplicationResponse.from(useCase.create(userId, jobPostingId,
       notes != null ? Notes.of(StringSanitizer.sanitize(notes)) : null));
   }
 

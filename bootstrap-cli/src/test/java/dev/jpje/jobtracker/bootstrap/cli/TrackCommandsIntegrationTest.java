@@ -20,30 +20,30 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
           {
             "data": {
               "createApplication": {
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a", "status": "SAVED"
+                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a", "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7", "status": "SAVED"
               }
             }
           }
         """,
-        "a -c Acme -r Engineer -s LINKEDIN",
+        "a -i 7c9e6679-7425-40de-944b-e07fc1f90ae7",
         "b6124fbc-eaba-4f38-bea5-54bbd88fe19a"),
-      arguments(named("add application with url and notes", "createApplication"),
+      arguments(named("add application with notes", "createApplication"),
         """
           {
             "data": {
               "createApplication": {
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a", "status": "SAVED"
+                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a", "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7", "status": "SAVED"
               }
             }
           }
         """,
-        "a -c Acme -r Engineer -s LINKEDIN -u https://example.com -n 'Some notes'",
+        "a -i 7c9e6679-7425-40de-944b-e07fc1f90ae7 -n 'Some notes'",
         "SAVED"),
       arguments(named("add application error", "createApplication"),
         """
           {"errors": [{"message": "Request failed"}], "data": null}
         """,
-        "a -c Acme -r Engineer -s LINKEDIN",
+        "a -i 7c9e6679-7425-40de-944b-e07fc1f90ae7",
         "Request failed"),
       arguments(named("list applications with data", "applications"),
         """
@@ -51,60 +51,34 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
             "data": {
               "applications": [{
                 "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "company": "Acme",
-                "role": "Engineer",
-                "source": "LINKEDIN",
+                "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
                 "status": "APPLIED",
                 "dateApplied": "2026-01-01T00:00:00Z",
                 "lastUpdated": "2026-01-01T00:00:00Z",
-                "postingUrl": null,
                 "notes": null
               }]
             }
           }
         """,
         "l",
-        "Acme"),
+        "b6124fbc-eaba-4f38-bea5-54bbd88fe19a"),
       arguments(named("list with status filter", "applications"),
         """
           {
             "data": {
               "applications": [{
                 "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "company": "Acme",
-                "role": "Engineer",
-                "source": "LINKEDIN",
+                "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
                 "status": "APPLIED",
                 "dateApplied": "2026-01-01T00:00:00Z",
                 "lastUpdated": "2026-01-01T00:00:00Z",
-                "postingUrl": null,
                 "notes": null
               }]
             }
           }
         """,
         "l -s APPLIED",
-        "Acme"),
-      arguments(named("list with source filter", "applications"),
-        """
-          {
-            "data": {
-              "applications": [{
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "company": "Acme",
-                "role": "Engineer",
-                "source": "LINKEDIN",
-                "status": "APPLIED",
-                "dateApplied": "2026-01-01T00:00:00Z",
-                "lastUpdated": "2026-01-01T00:00:00Z",
-                "postingUrl": null,
-                "notes": null
-              }]
-            }
-          }
-        """,
-        "l --source LINKEDIN",
-        "Acme"),
+        "b6124fbc-eaba-4f38-bea5-54bbd88fe19a"),
       arguments(named("list applications error", "applications"),
         """
           {"errors": [{"message": "List failed"}], "data": null}
@@ -186,16 +160,14 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
             "data": {
               "applications": [{
                 "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "company": "Acme",
-                "role": "Engineer",
-                "source": "LINKEDIN",
+                "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
                 "status": "APPLIED"
               }]
             }
           }
         """,
-        "l -j '.[] | select(.company == \"NONE\")'",
-        "Acme")
+        "l -j '.[] | select(.status == \"NONE\")'",
+        "b6124fbc-eaba-4f38-bea5-54bbd88fe19a")
     );
   }
 

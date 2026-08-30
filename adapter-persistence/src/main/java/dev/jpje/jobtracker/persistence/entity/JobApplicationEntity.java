@@ -18,13 +18,7 @@ public class JobApplicationEntity {
   @Column(nullable = false)
   private UUID userId;
   @Column(nullable = false)
-  private String company;
-  @Column(nullable = false)
-  private String role;
-  @Column(nullable = false)
-  private String source;
-  @Column(nullable = false)
-  private String postingUrl;
+  private UUID jobPostingId;
   @Column(nullable = false)
   private String status;
   @Column(nullable = false)
@@ -52,36 +46,12 @@ public class JobApplicationEntity {
     this.userId = userId;
   }
 
-  public String getCompany() {
-    return company;
+  public UUID getJobPostingId() {
+    return jobPostingId;
   }
 
-  public void setCompany(final String company) {
-    this.company = company;
-  }
-
-  public String getRole() {
-    return role;
-  }
-
-  public void setRole(final String role) {
-    this.role = role;
-  }
-
-  public String getSource() {
-    return source;
-  }
-
-  public void setSource(final String source) {
-    this.source = source;
-  }
-
-  public String getPostingUrl() {
-    return postingUrl;
-  }
-
-  public void setPostingUrl(final String postingUrl) {
-    this.postingUrl = postingUrl;
+  public void setJobPostingId(final UUID jobPostingId) {
+    this.jobPostingId = jobPostingId;
   }
 
   public String getStatus() {

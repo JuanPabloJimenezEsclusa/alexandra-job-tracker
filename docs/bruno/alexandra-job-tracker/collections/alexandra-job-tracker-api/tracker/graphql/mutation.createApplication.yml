@@ -11,31 +11,27 @@ graphql:
       value: application/json
   body:
     query: |
-      mutation($company: String!, $role: String!, $source: Source!, $postingUrl: String, $notes: String) { 
-        createApplication(company: $company, role: $role, source: $source, postingUrl: $postingUrl, notes: $notes) { 
-          id, company, role, source, postingUrl, notes, status, dateApplied, lastUpdated
+      mutation($jobPostingId: ID!, $notes: String) { 
+        createApplication(jobPostingId: $jobPostingId, notes: $notes) { 
+          id, jobPostingId, status, dateApplied, lastUpdated, notes
         } 
       }
     variables: |-
       {
-        "company": "{{randomCompany}}",
-        "role": "{{randomRole}}",
-        "source": "{{randomSource}}",
-        "postingUrl": "{{randomPostingUrl}}",
+        "jobPostingId": "{{randomPostingId}}",
         "notes": "{{randomNotes}}"
       }
   auth: inherit
 
+docs:
+  content: |
+    Tracks a new application for an existing job posting (company, role, source and
+    URL come from the posting: run mutation.submitJobPosting first and use its id).
+
 runtime:
   variables:
-    - name: randomCompany
-      value: ACME
-    - name: randomRole
-      value: Tech Lead
-    - name: randomSource
-      value: LINKEDIN
-    - name: randomPostingUrl
-      value: https://linkedin.com
+    - name: randomPostingId
+      value: "00000000-0000-0000-0000-000000000000"
     - name: randomNotes
       value: Interesting
   scripts:

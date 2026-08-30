@@ -26,42 +26,28 @@ public class TrackCommands {
     description = "Add a job application.",
     group = "Tracking",
     help = """
-      Adds a new job application with the specified company, role, source, and optional posting URL and notes.
+      Adds a new job application for an existing job posting, with optional notes.
       
       Example usage:
-        - add -c "Acme Corp" -r "Software Engineer" -s LINKEDIN
-        - a -c "Beta Inc" -r "Data Scientist" -s INDEED -u "https://example.com/job/123" -n "Applied on 2026-01-15"
+        - add -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a
+        - a -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -n "Applied on 2026-01-15"
       """)
   public String add(
     @Option(
-      longName = "company", shortName = 'c',
-      description = "Company name", required = true) final String company,
-    @Option(
-      longName = "role", shortName = 'r',
-      description = "Job role/title", required = true) final String role,
-    @Option(
-      longName = "source", shortName = 's',
-      description = "Source: LINKEDIN, INDEED, OTHER", required = true) final String source,
-    @Option(
-      longName = "url", shortName = 'u',
-      description = "Posting URL (optional)") @Nullable final String url,
+      longName = "posting-id", shortName = 'i',
+      description = "Job posting ID", required = true) final String postingId,
     @Option(
       longName = "notes", shortName = 'n',
       description = "Notes (optional)") @Nullable final String notes) {
 
     final var variables = new HashMap<String, Object>();
-    variables.put("c", company);
-    variables.put("r", role);
-    variables.put("s", source);
-    if (url != null) {
-      variables.put("u", url);
-    }
+    variables.put("id", postingId);
     if (notes != null) {
       variables.put("n", notes);
     }
     final var result = client.execute("""
-        mutation($c: String!, $r: String!, $s: Source!, $u: String, $n: String) {
-          createApplication(company: $c, role: $r, source: $s, postingUrl: $u, notes: $n) { id status }
+        mutation($id: ID!, $n: String) {
+          createApplication(jobPostingId: $id, notes: $n) { id jobPostingId status }
         }""",
       variables);
 
@@ -78,14 +64,14 @@ public class TrackCommands {
     description = "List applications.",
     group = "Tracking",
     help = """
-      Lists job applications, optionally filtered by status or source.
+      Lists job applications, optionally filtered by status.
       
        Example usage:
         - list
         - list -s APPLIED
         - list --source LINKEDIN
-        - l -j ".[] | {role,company,status}"
-        - l -j ".[] | select((.company == "ACME") and (.status == "SAVED")) | {id,role,postingUrl}"
+        - l -j ".[] | {jobPostingId,status}"
+        - l -j ".[] | select(.status == "SAVED") | {id,jobPostingId}"
       """)
   public String list(
     @Option(
@@ -109,7 +95,7 @@ public class TrackCommands {
     final var result = client.execute("""
         query($s: ApplicationStatus, $src: Source) {
           applications(status: $s, source: $src) {
-            id, company, role, source, postingUrl, status, dateApplied, lastUpdated, notes
+            id, jobPostingId, status, dateApplied, lastUpdated, notes
           }
         }""",
       variables);

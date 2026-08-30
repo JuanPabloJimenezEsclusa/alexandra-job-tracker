@@ -18,10 +18,11 @@ class AnalyticsIntegrationTest extends GraphQlIntegrationTestBase {
   void shouldReturnAnalytics() {
     final var headers = jsonHeaders();
     headers.setBearerAuth(registerAndGetToken("analytics-user"));
+    final var postingId = submitPostingAndGetId(headers);
 
     graphql(headers, """
-      {"query": "mutation { createApplication(company: \\"X\\", role: \\"Dev\\", source: LINKEDIN) { id } }"}
-      """);
+      {"query": "mutation { createApplication(jobPostingId: \\"%s\\") { id } }"}
+      """.formatted(postingId));
 
     final var analytics = graphql(headers, """
       {"query": "{ analytics { totalApplications perStatus { saved } } }"}

@@ -21,26 +21,43 @@ class ApplicationIntegrationTest extends GraphQlIntegrationTestBase {
   @Test
   void shouldCreateApplication() {
     final var headers = authHeaders("create-app-user");
-    final var created = graphql(headers, createBody("alpha", "SWE", "LINKEDIN"));
+    final var postingId = submitPostingAndGetId(headers);
+    final var created = graphql(headers, createBody(postingId));
     assertThat(created.findValue("status").asString()).as("created application status").isEqualTo("SAVED");
+    assertThat(created.findValue("jobPostingId").asString()).as("created application posting")
+      .isEqualTo(postingId);
+  }
+
+  @Test
+  void shouldRejectCreateApplicationForMissingPosting() {
+    final var headers = authHeaders("missing-posting-user");
+    final var created = graphql(headers, createBody("00000000-0000-0000-0000-000000000000"));
+    assertThat(created.findValue("message").asString()).as("create application for missing posting rejected")
+      .isEqualTo("Job posting not found");
   }
 
   @Test
   void shouldListApplications() {
     final var headers = authHeaders("list-app-user");
-    graphql(headers, createBody("beta", "SWE", "LINKEDIN"));
+    final var postingId = submitPostingAndGetId(headers);
+    final var created = graphql(headers, createBody(postingId));
+    final var appId = Objects.requireNonNull(created.findValue("id"),
+      "create response must contain an application id").asString();
 
     final var applications = graphql(headers, """
-      {"query": "{ applications { company role status } }"}
+      {"query": "{ applications { id jobPostingId status } }"}
       """);
-    assertThat(applications.findValues("company")).as("created application listed")
-      .extracting(JsonNode::asString).contains("beta");
+    assertThat(applications.findValues("id")).as("created application listed")
+      .extracting(JsonNode::asString).contains(appId);
+    assertThat(applications.findValues("jobPostingId")).as("applications reference the posting")
+      .extracting(JsonNode::asString).contains(postingId);
   }
 
   @Test
   void shouldUpdateApplicationStatus() {
     final var headers = authHeaders("update-app-user");
-    final var created = graphql(headers, createBody("gamma", "PM", "INDEED"));
+    final var postingId = submitPostingAndGetId(headers);
+    final var created = graphql(headers, createBody(postingId));
     final var appId = Objects.requireNonNull(created.findValue("id"),
       "create response must contain an application id").asString();
 
@@ -54,7 +71,8 @@ class ApplicationIntegrationTest extends GraphQlIntegrationTestBase {
   @Test
   void shouldDeleteApplication() {
     final var headers = authHeaders("delete-app-user");
-    final var created = graphql(headers, createBody("delta", "PM", "INDEED"));
+    final var postingId = submitPostingAndGetId(headers);
+    final var created = graphql(headers, createBody(postingId));
     final var appId = Objects.requireNonNull(created.findValue("id"),
       "create response must contain an application id").asString();
 
@@ -67,13 +85,13 @@ class ApplicationIntegrationTest extends GraphQlIntegrationTestBase {
   @Test
   void shouldFilterApplicationsByStatus() {
     final var headers = authHeaders("filter-user");
-    graphql(headers, createBody("epsilon", "Dev", "OTHER"));
+    final var postingId = submitPostingAndGetId(headers);
+    graphql(headers, createBody(postingId));
 
     final var applications = graphql(headers, """
-      {"query": "{ applications(status: APPLIED) { company } }"}
+      {"query": "{ applications(status: APPLIED) { id } }"}
       """);
-    assertThat(applications.findValues("company")).as("applications filtered by status")
-      .extracting(JsonNode::asString).isEmpty();
+    assertThat(applications.findValues("id")).as("applications filtered by status").isEmpty();
   }
 
   private HttpHeaders authHeaders(final String username) {
@@ -82,9 +100,9 @@ class ApplicationIntegrationTest extends GraphQlIntegrationTestBase {
     return headers;
   }
 
-  private static String createBody(final String company, final String role, final String source) {
+  private static String createBody(final String postingId) {
     return """
-      {"query": "mutation { createApplication(company: \\"%s\\", role: \\"%s\\", postingUrl: \\"https://job\\", source: %s) { id status } }"}
-      """.formatted(company, role, source);
+      {"query": "mutation { createApplication(jobPostingId: \\"%s\\") { id status jobPostingId } }"}
+      """.formatted(postingId);
   }
 }

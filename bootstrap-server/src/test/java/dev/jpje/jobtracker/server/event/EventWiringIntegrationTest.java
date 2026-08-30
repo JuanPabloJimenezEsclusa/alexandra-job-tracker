@@ -44,12 +44,12 @@ class EventWiringIntegrationTest extends GraphQlIntegrationTestBase {
 
     await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
       final var applications = graphql(headers, """
-        {"query": "{ applications { company status } }"}
+        {"query": "{ applications { jobPostingId status } }"}
         """);
-      assertThat(applications.findValues("company"))
+      assertThat(applications.findValues("jobPostingId"))
         .as("tracking application created for submitted posting")
         .extracting(JsonNode::asString)
-        .contains("EventCorp");
+        .contains(postingId);
       assertThat(applications.findValues("status"))
         .as("tracking application status")
         .extracting(JsonNode::asString)
