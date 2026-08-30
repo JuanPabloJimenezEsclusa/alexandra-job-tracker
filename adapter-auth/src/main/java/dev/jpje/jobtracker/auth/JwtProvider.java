@@ -7,7 +7,9 @@ import java.time.Clock;
 import javax.crypto.SecretKey;
 
 import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
+import dev.jpje.jobtracker.domain.vo.TokenPayload;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.domain.vo.UserRole;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -39,7 +41,7 @@ public class JwtProvider implements TokenGeneratorPort {
   }
 
   @Override
-  public String generateToken(final UserId userId) {
+  public String generateToken(final UserId userId, final UserRole role) {
     final var now = clock.instant();
     final var expirationTime = now.plusMillis(expirationMs);
 
@@ -47,13 +49,16 @@ public class JwtProvider implements TokenGeneratorPort {
       .subject(userId.value().toString())
       .claim(Claims.ISSUED_AT, now.getEpochSecond())
       .claim(Claims.EXPIRATION, expirationTime.getEpochSecond())
+      .claim("role", role.name())
       .signWith(key)
       .compact();
   }
 
   @Override
-  public UserId validateToken(final String token) {
-    final var claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
-    return new UserId(java.util.UUID.fromString(claims.getPayload().getSubject()));
+  public TokenPayload validateToken(final String token) {
+    final var claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+    final var userId = new UserId(java.util.UUID.fromString(claims.getSubject()));
+    final var roleClaim = claims.get("role", String.class);
+    return new TokenPayload(userId, UserRole.valueOf(roleClaim));
   }
 }

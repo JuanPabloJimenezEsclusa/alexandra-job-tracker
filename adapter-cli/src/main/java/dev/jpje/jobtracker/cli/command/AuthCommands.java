@@ -37,12 +37,13 @@ public class AuthCommands {
     description = "Register a new user.",
     group = "Authentication",
     help = """
-      Registers a new user with the provided username and password.
+      Registers a new user with the provided username, password and role.
       On success, logs in the user and saves the session token for future authenticated requests.
+      Requires an admin session token (only administrators can register users).
       
       Example usage:
         - register -u alice
-        - reg -u bob -p secret123
+        - reg -u bob -p secret123 -r ADMIN
       """)
   public String register(
     @Option(
@@ -50,13 +51,17 @@ public class AuthCommands {
       description = "Username", required = true) final String username,
     @Option(
       longName = "password", shortName = 'p',
-      description = "Password (omit to be prompted securely)") final String password) {
+      description = "Password (omit to be prompted securely)") final String password,
+    @Option(
+      longName = "role", shortName = 'r',
+      description = "Role for the new user (USER or ADMIN), default USER") @Nullable final String role) {
     final var resolved = resolvePassword(password);
+    final var resolvedRole = role == null || role.isBlank() ? "USER" : role.toUpperCase();
     final var result = client.execute("""
-        mutation($u: String!, $p: String!) {
-          register(username: $u, password: $p) { token }
+        mutation($u: String!, $p: String!, $r: Role!) {
+          register(username: $u, password: $p, role: $r) { token }
         }""",
-      Map.of("u", username, "p", resolved));
+      Map.of("u", username, "p", resolved, "r", resolvedRole));
     final var data = result.get("data");
     if (data == null || data.isNull() || data.get("register") == null) {
       return result.toPrettyString();

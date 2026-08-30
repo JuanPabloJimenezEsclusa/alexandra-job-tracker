@@ -15,6 +15,7 @@ import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
 import dev.jpje.jobtracker.api.dto.JobPostingResponse;
+import dev.jpje.jobtracker.domain.exception.ForbiddenException;
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
 import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.port.in.AnalyzeJobPostingPort;
@@ -26,6 +27,7 @@ import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.domain.vo.UserRole;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -110,13 +112,37 @@ class JobPostingMutationResolverTest {
   }
 
   @Test
-  void shouldDeleteAnalysis() {
+  void shouldDeleteAnalysisAsAdmin() {
     final var id = UUID.randomUUID();
+    final var userId = new UserId(UUID.randomUUID());
 
-    assertThat(resolver.deleteAnalysis(id)).as("deletion should succeed").isTrue();
+    assertThat(resolver.deleteAnalysis(userId, UserRole.ADMIN, id)).as("deletion should succeed").isTrue();
 
     verify(manageAnalysisUseCase, description("analysis deletion should be delegated")).delete(id);
     verifyNoInteractions(submitUseCase, analyzeUseCase);
+  }
+
+  @Test
+  void shouldRejectDeleteAnalysisWithoutAuth() {
+    final var id = UUID.randomUUID();
+
+    assertThatThrownBy(() -> resolver.deleteAnalysis(null, UserRole.ADMIN, id))
+      .as("delete without auth should fail")
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("Authentication required");
+    verifyNoInteractions(submitUseCase, analyzeUseCase, manageAnalysisUseCase);
+  }
+
+  @Test
+  void shouldRejectDeleteAnalysisForNonAdmin() {
+    final var id = UUID.randomUUID();
+    final var userId = new UserId(UUID.randomUUID());
+
+    assertThatThrownBy(() -> resolver.deleteAnalysis(userId, UserRole.USER, id))
+      .as("delete as non-admin should fail")
+      .isInstanceOf(ForbiddenException.class)
+      .hasMessage("Admin access required");
+    verifyNoInteractions(submitUseCase, analyzeUseCase, manageAnalysisUseCase);
   }
 
   @Test

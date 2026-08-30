@@ -19,9 +19,12 @@ public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
   public Mono<WebGraphQlResponse> intercept(final WebGraphQlRequest request, final Chain chain) {
     final var authHeader = request.getHeaders().getFirst("Authorization");
     if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {
-      final var userId = tokenGenerator.validateToken(authHeader.substring(7));
+      final var payload = tokenGenerator.validateToken(authHeader.substring(7));
       request.configureExecutionInput((_, builder) ->
-        builder.graphQLContext(ctx -> ctx.put("userId", userId)).build());
+        builder.graphQLContext(ctx -> {
+          ctx.put("userId", payload.userId());
+          ctx.put("userRole", payload.role());
+        }).build());
     }
     return chain.next(request);
   }

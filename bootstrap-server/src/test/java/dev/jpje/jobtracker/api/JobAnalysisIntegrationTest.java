@@ -63,7 +63,7 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
     final var postingId = submitPosting(headers);
     final var analysisId = awaitListenerAnalysis(postingId, headers);
 
-    final var deleted = graphql(headers, """
+    final var deleted = graphql(adminHeaders(), """
       {"query": "mutation { deleteAnalysis(id: \\"%s\\") }"}
       """.formatted(analysisId));
     assertThat(deleted.findValue("deleteAnalysis").asBoolean()).as("delete mutation result").isTrue();
@@ -73,6 +73,25 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
       """);
     assertThat(afterDelete.findValues("id")).as("deleted analysis absent from list")
       .extracting(JsonNode::asString).isEmpty();
+  }
+
+  @Test
+  void shouldRejectDeleteAnalysisForNonAdmin() {
+    final var headers = authHeaders("forbidden-delete-user");
+    final var postingId = submitPosting(headers);
+    final var analysisId = awaitListenerAnalysis(postingId, headers);
+
+    final var deleted = graphql(headers, """
+      {"query": "mutation { deleteAnalysis(id: \\"%s\\") }"}
+      """.formatted(analysisId));
+    assertThat(deleted.findValue("message").asString()).as("delete analysis as non-admin rejected")
+      .isEqualTo("Admin access required");
+
+    final var afterDelete = graphql(headers, """
+      {"query": "query { analyses { id } }"}
+      """);
+    assertThat(afterDelete.findValues("id")).as("analysis kept after forbidden delete")
+      .extracting(JsonNode::asString).contains(analysisId);
   }
 
   private HttpHeaders authHeaders(final String username) {
@@ -89,7 +108,7 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
 
   private void deleteListenerAnalysis(final String postingId, final HttpHeaders headers) {
     final var analysisId = awaitListenerAnalysis(postingId, headers);
-    final var deleted = graphql(headers, """
+    final var deleted = graphql(adminHeaders(), """
       {"query": "mutation { deleteAnalysis(id: \\"%s\\") }"}
       """.formatted(analysisId));
     assertThat(deleted.findValue("deleteAnalysis").asBoolean()).as("delete listener analysis result").isTrue();

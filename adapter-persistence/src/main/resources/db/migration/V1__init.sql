@@ -3,6 +3,7 @@ CREATE TABLE users
   id            UUID PRIMARY KEY,
   username      VARCHAR(100) UNIQUE      NOT NULL,
   password_hash VARCHAR(255)             NOT NULL,
+  role          VARCHAR(20)              NOT NULL DEFAULT 'USER',
   created_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW()
 );
 

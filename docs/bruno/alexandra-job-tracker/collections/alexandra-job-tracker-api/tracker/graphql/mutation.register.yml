@@ -11,22 +11,30 @@ graphql:
       value: application/json
   body:
     query: |
-      mutation($username: String!, $password: String!) { 
-        register(username: $username, password: $password) { token } 
+      mutation($username: String!, $password: String!, $role: Role!) { 
+        register(username: $username, password: $password, role: $role) { token user { username role } } 
       }
     variables: |-
       {
         "username": "{{randomUsername}}",
-        "password": "{{randomPassword}}"
+        "password": "{{randomPassword}}",
+        "role": "{{randomRole}}"
       }
   auth: inherit
+
+docs:
+  content: |
+    Registers a new user with the given role (USER or ADMIN).
+    Requires an ADMIN token: run mutation.loginAdmin first.
 
 runtime:
   variables:
     - name: randomUsername
-      value: JPJE
+      value: newuser
     - name: randomPassword
-      value: JPJE
+      value: password123
+    - name: randomRole
+      value: USER
 
 settings:
   encodeUrl: true

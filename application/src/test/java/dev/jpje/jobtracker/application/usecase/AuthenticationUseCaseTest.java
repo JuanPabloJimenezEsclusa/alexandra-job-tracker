@@ -23,6 +23,7 @@ import dev.jpje.jobtracker.domain.port.out.PasswordEncoderPort;
 import dev.jpje.jobtracker.domain.port.out.SaveUserPort;
 import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.domain.vo.UserRole;
 import dev.jpje.jobtracker.domain.vo.Username;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
@@ -67,15 +68,16 @@ class AuthenticationUseCaseTest {
     final var username = Username.of("alice");
     when(loadUserPort.findByUsername("alice")).thenReturn(Optional.empty());
     when(passwordEncoderPort.encode("pass")).thenReturn("encoded-pass");
-    when(tokenGeneratorPort.generateToken(any())).thenReturn("jwt-token");
+    when(tokenGeneratorPort.generateToken(any(UserId.class), any(UserRole.class))).thenReturn("jwt-token");
     when(clock.instant()).thenReturn(Instant.EPOCH);
 
-    final var payload = useCase.register(username, "pass");
+    final var payload = useCase.register(username, "pass", UserRole.USER);
 
     assertThat(payload.user().username().value()).isEqualTo("alice");
+    assertThat(payload.user().role()).isEqualTo(UserRole.USER);
     verify(passwordEncoderPort).encode("pass");
     verify(saveUserPort).save(payload.user());
-    verify(tokenGeneratorPort).generateToken(any());
+    verify(tokenGeneratorPort).generateToken(any(UserId.class), any(UserRole.class));
     verify(eventPublisher).publish(any(UserRegistered.class));
     verifyNoMoreInteractions(passwordEncoderPort, tokenGeneratorPort, saveUserPort, eventPublisher);
   }
@@ -86,7 +88,7 @@ class AuthenticationUseCaseTest {
     final var username = Username.of("alice");
     when(loadUserPort.findByUsername("alice")).thenReturn(Optional.of(existing));
 
-    assertThatThrownBy(() -> useCase.register(username, "pass"))
+    assertThatThrownBy(() -> useCase.register(username, "pass", UserRole.USER))
       .isInstanceOf(ResourceAlreadyExistsException.class)
       .hasMessage("Username already taken");
     verifyNoMoreInteractions(passwordEncoderPort, tokenGeneratorPort, saveUserPort, eventPublisher);
@@ -97,7 +99,7 @@ class AuthenticationUseCaseTest {
     final var matchingUser = userWithUsername("alice");
     when(loadUserPort.findByUsername("alice")).thenReturn(Optional.of(matchingUser));
     when(passwordEncoderPort.matches("correct-password", matchingUser.passwordHash())).thenReturn(true);
-    when(tokenGeneratorPort.generateToken(any())).thenReturn("jwt-token");
+    when(tokenGeneratorPort.generateToken(any(UserId.class), any(UserRole.class))).thenReturn("jwt-token");
 
     final var payload = useCase.login(Username.of("alice"), "correct-password");
 
