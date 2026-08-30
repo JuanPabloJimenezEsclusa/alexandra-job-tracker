@@ -1,6 +1,6 @@
 package dev.jpje.jobtracker.api.interceptor;
 
-import dev.jpje.jobtracker.auth.JwtProvider;
+import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
 import org.springframework.graphql.server.WebGraphQlInterceptor;
 import org.springframework.graphql.server.WebGraphQlRequest;
 import org.springframework.graphql.server.WebGraphQlResponse;
@@ -9,17 +9,17 @@ import reactor.core.publisher.Mono;
 
 @Component
 public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
-  private final JwtProvider jwtProvider;
+  private final TokenGeneratorPort tokenGenerator;
 
-  public GraphQlAuthInterceptor(final JwtProvider jwtProvider) {
-    this.jwtProvider = jwtProvider;
+  public GraphQlAuthInterceptor(final TokenGeneratorPort tokenGenerator) {
+    this.tokenGenerator = tokenGenerator;
   }
 
   @Override
   public Mono<WebGraphQlResponse> intercept(final WebGraphQlRequest request, final Chain chain) {
     final var authHeader = request.getHeaders().getFirst("Authorization");
     if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {
-      final var userId = jwtProvider.validateToken(authHeader.substring(7));
+      final var userId = tokenGenerator.validateToken(authHeader.substring(7));
       request.configureExecutionInput((_, builder) ->
         builder.graphQLContext(ctx -> ctx.put("userId", userId)).build());
     }

@@ -94,26 +94,30 @@ dependencies, validated at build time by ArchUnit.
 
 ```mermaid
 flowchart LR
-    subgraph core [Core]
-        domain
-        application
-    end
+  subgraph bootstrap [Boot]
+    bootstrap-server
+    bootstrap-cli
+  end
 
-    subgraph adapters [Adapters]
-        adapter-api
-        adapter-auth
-        adapter-persistence
-        adapter-ai
-        adapter-cache
-        adapter-cli
-    end
+  subgraph core [Core]
+    domain
+    application
+  end
 
-    application --> domain
-    adapter-cli -.-> |HTTP| adapter-api
-    bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth
-    adapter-api & adapter-persistence & adapter-ai & adapter-cache & adapter-auth --> domain
-    adapter-api --> adapter-auth
-    bootstrap-cli --> adapter-cli
+  subgraph adapters [Adapters]
+    adapter-api
+    adapter-auth
+    adapter-persistence
+    adapter-ai
+    adapter-cache
+    adapter-cli
+  end
+
+  application --> domain
+  adapter-cli -.-> |HTTP| adapter-api
+  bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth
+  adapter-api & adapter-persistence & adapter-ai & adapter-cache & adapter-auth --> domain
+  bootstrap-cli --> adapter-cli
 ```
 
 - `domain` — zero framework imports. Contains entities, value objects, port interfaces,
@@ -131,19 +135,16 @@ flowchart LR
 All GraphQL resolvers follow **Command Query Responsibility Segregation** — every
 endpoint is either a `QueryResolver` (read) or `MutationResolver` (write).
 
-| Query Resolver              | Endpoint               |
-|-----------------------------|------------------------|
-| `UserQueryResolver`         | `me`                   |
-| `ApplicationQueryResolver`  | `applications`         |
-| `JobPostingQueryResolver`   | `jobPostings`          |
-| `JobAnalysisQueryResolver`  | `analyses`, `analysis` |
-| `AnalyticsQueryResolver`    | `analytics`            |
-
-| Mutation Resolver             | Endpoint                                                            |
-|-------------------------------|---------------------------------------------------------------------|
-| `UserMutationResolver`        | `register`, `login`, `logout`                                       |
-| `ApplicationMutationResolver` | `createApplication`, `updateApplicationStatus`, `deleteApplication` |
-| `JobPostingMutationResolver`  | `submitJobPosting`, `analyzeJobPosting`, `deleteAnalysis`           |
+| Type     | Resolver                      | Endpoint               |
+|----------|-------------------------------|------------------------|
+| Query    | `UserQueryResolver`           | `me`                   |
+| Query    | `ApplicationQueryResolver`    | `applications`         |
+| Query    | `JobPostingQueryResolver`     | `jobPostings`          |
+| Query    | `JobAnalysisQueryResolver`    | `analyses`, `analysis` |
+| Query    | `AnalyticsQueryResolver`      | `analytics`            |
+| Mutation | `UserMutationResolver`        | `register`, `login`, `logout` |
+| Mutation | `ApplicationMutationResolver` | `createApplication`, `updateApplicationStatus`, `deleteApplication` |
+| Mutation | `JobPostingMutationResolver`  | `submitJobPosting`, `analyzeJobPosting`, `deleteAnalysis` |
 
 ### Data Flow
 
@@ -399,13 +400,13 @@ exposure of cache statistics (`asMap()`).
 
 ## CI/CD
 
-| Workflow             | Triggers                        | Job                                                 |
-|----------------------|---------------------------------|-----------------------------------------------------|
-| `ci.yml`             | PR → `develop`                  | `mvn verify` + SonarCloud + dependency review       |
-| `pages.yml`          | Push → `develop`                | `mvn site` → GitHub Pages                           |
-| `native-release.yml` | Tag `v*`                        | Native compile → Docker push + release assets       |
-| `pen-test.yml`       | Manual / schedule               | k6 security + OWASP ZAP active scan                 |
-| `perf-test.yml`      | Manual / schedule               | k6 load (20), spike (100), soak (10 min)            |
+| Workflow             | Triggers          | Job                                           |
+|----------------------|-------------------|-----------------------------------------------|
+| `ci.yml`             | PR → `develop`    | `mvn verify` + SonarCloud + dependency review |
+| `pages.yml`          | PR → `develop`    | `mvn site` → GitHub Pages                     |
+| `native-release.yml` | PR → `develop`    | Native compile → Docker push + release assets |
+| `pen-test.yml`       | Manual / schedule | k6 security + OWASP ZAP active scan           |
+| `perf-test.yml`      | PR → `develop`    | k6 load (20), spike (100), soak (10 min)      |
 
 ---
 
