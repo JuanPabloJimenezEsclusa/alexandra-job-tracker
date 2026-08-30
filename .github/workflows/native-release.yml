@@ -41,9 +41,6 @@ jobs:
       - name: Build install
         run: mvn ${MAVEN_CLI_OPTS} clean install -DskipTests
 
-      - name: Build native server image
-        run: mvn ${MAVEN_CLI_OPTS} -Pnative native:compile -pl bootstrap-server -DskipTests
-
       - name: Build native CLI binary
         run: mvn ${MAVEN_CLI_OPTS} -Pnative native:compile -pl bootstrap-cli -DskipTests
 
@@ -71,31 +68,10 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo.outputs.name }}:${{ steps.version.outputs.maven_version }}
 
-      - name: Configure AWS credentials
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: aws-actions/configure-aws-credentials@e6de054238d6b7531b4efff3b6587d9aade6a06c
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: eu-west-1
-
-      - name: Login to Amazon ECR
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: aws-actions/amazon-ecr-login@03f1aad4c6c7ffd436567f42f9384779290529bd
-
-      - name: Build & push Lambda image to ECR
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a
-        with:
-          context: .
-          file: deploy/aws/Dockerfile.native
-          push: true
-          tags: |
-            ${{ secrets.AWS_ECR_REGISTRY }}/ajt-serverless:${{ steps.version.outputs.maven_version }}
-            ${{ secrets.AWS_ECR_REGISTRY }}/ajt-serverless:latest
-
       - name: Upload CLI binary to release
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228
+        uses: actions/upload-artifact@v7
         with:
-          files: bootstrap-cli/target/job-tracker-cli
+          name: job-tracker-cli
+          path: bootstrap-cli/target/job-tracker-cli
+          archive: false
+          overwrite: true

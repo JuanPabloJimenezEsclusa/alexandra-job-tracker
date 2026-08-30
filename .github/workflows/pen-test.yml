@@ -38,6 +38,7 @@ jobs:
         with:
           name: zap-report
           path: testing-pentest/src/test/zap/reports/zap-report.html
+          archive: false
 
       - name: Upload k6 security reports
         if: always()
