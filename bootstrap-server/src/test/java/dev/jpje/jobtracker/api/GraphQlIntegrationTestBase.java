@@ -59,4 +59,14 @@ public abstract class GraphQlIntegrationTestBase {
     final var body = Objects.requireNonNull(response, "GraphQL response body must not be null");
     return mapper.readTree(body);
   }
+
+  protected String submitPostingAndGetId(final HttpHeaders headers) {
+    final var body = """
+      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id}}",\
+      "variables":{"i":{"url":"https://example.com/job","title":"Engineer","company":"Acme","description":"Software engineer role","source":"LINKEDIN"}}}
+      """;
+    final var submitted = graphql(headers, body);
+    return Objects.requireNonNull(submitted.findValue("id"),
+      "submit response must contain a posting id").asString();
+  }
 }

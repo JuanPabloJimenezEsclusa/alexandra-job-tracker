@@ -14,11 +14,7 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
-import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.persistence.entity.JobApplicationEntity;
 import dev.jpje.jobtracker.persistence.repository.JobApplicationJpaRepository;
@@ -75,35 +71,13 @@ class JobApplicationPersistenceAdapterTest {
   }
 
   @Test
-  void shouldFindByUserAndStatusAndSource() {
-    final var userId = UserId.generate();
-    final var entity = entity(userId);
-    when(repository.findByUserIdAndStatusAndSourceOrderByDateAppliedDesc(
-      userId.value(), "SAVED", "LINKEDIN")).thenReturn(List.of(entity));
-
-    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED, Source.LINKEDIN))
-      .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
-  }
-
-  @Test
   void shouldFindByUserAndStatus() {
     final var userId = UserId.generate();
     final var entity = entity(userId);
     when(repository.findByUserIdAndStatusOrderByDateAppliedDesc(
       userId.value(), "SAVED")).thenReturn(List.of(entity));
 
-    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED, null))
-      .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
-  }
-
-  @Test
-  void shouldFindByUserAndSource() {
-    final var userId = UserId.generate();
-    final var entity = entity(userId);
-    when(repository.findByUserIdAndSourceOrderByDateAppliedDesc(
-      userId.value(), "LINKEDIN")).thenReturn(List.of(entity));
-
-    assertThat(adapter.findByUserId(userId, null, Source.LINKEDIN))
+    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED))
       .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
@@ -113,7 +87,7 @@ class JobApplicationPersistenceAdapterTest {
     final var entity = entity(userId);
     when(repository.findByUserIdOrderByDateAppliedDesc(userId.value())).thenReturn(List.of(entity));
 
-    assertThat(adapter.findByUserId(userId, null, null)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
+    assertThat(adapter.findByUserId(userId, null)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
   @Test
@@ -129,21 +103,17 @@ class JobApplicationPersistenceAdapterTest {
     return new JobApplication(
       entity.getId(),
       new UserId(entity.getUserId()),
-      CompanyName.of(entity.getCompany()),
-      RoleName.of(entity.getRole()),
-      Source.valueOf(entity.getSource()),
-      Url.of(entity.getPostingUrl()),
+      entity.getJobPostingId(),
       ApplicationStatus.valueOf(entity.getStatus()),
       entity.getDateApplied(),
       entity.getLastUpdated(),
-      Notes.of(entity.getNotes()),
+      entity.getNotes() != null ? Notes.of(entity.getNotes()) : null,
       entity.getVersion());
   }
 
   private static JobApplication application() {
     final var userId = UserId.generate();
-    return new JobApplication(UUID.randomUUID(), userId, CompanyName.of("Acme"),
-      RoleName.of("SWE"), Source.LINKEDIN, Url.of("https://example.com/job"),
+    return new JobApplication(UUID.randomUUID(), userId, UUID.randomUUID(),
       ApplicationStatus.SAVED, Instant.EPOCH, Instant.EPOCH, Notes.of("notes"), 0L);
   }
 
@@ -155,10 +125,7 @@ class JobApplicationPersistenceAdapterTest {
     final var entity = new JobApplicationEntity();
     entity.setId(UUID.randomUUID());
     entity.setUserId(userId.value());
-    entity.setCompany("Acme");
-    entity.setRole("SWE");
-    entity.setSource("LINKEDIN");
-    entity.setPostingUrl("https://example.com/job");
+    entity.setJobPostingId(UUID.randomUUID());
     entity.setStatus("SAVED");
     entity.setDateApplied(Instant.EPOCH);
     entity.setLastUpdated(Instant.EPOCH);

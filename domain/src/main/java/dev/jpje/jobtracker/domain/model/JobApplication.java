@@ -13,21 +13,14 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
-import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 
 public record JobApplication(
   UUID id,
   UserId userId,
-  CompanyName company,
-  RoleName role,
-  Source source,
-  @Nullable Url postingUrl,
+  UUID jobPostingId,
   ApplicationStatus status,
   Instant dateApplied,
   Instant lastUpdated,
@@ -37,9 +30,7 @@ public record JobApplication(
   public JobApplication {
     Objects.requireNonNull(id, "id must not be null");
     Objects.requireNonNull(userId, "userId must not be null");
-    Objects.requireNonNull(company, "company must not be null");
-    Objects.requireNonNull(role, "role must not be null");
-    Objects.requireNonNull(source, "source must not be null");
+    Objects.requireNonNull(jobPostingId, "jobPostingId must not be null");
     Objects.requireNonNull(status, "status must not be null");
     Objects.requireNonNull(dateApplied, "dateApplied must not be null");
     Objects.requireNonNull(lastUpdated, "lastUpdated must not be null");
@@ -59,12 +50,12 @@ public record JobApplication(
     if (!canTransitionTo(status, newStatus)) {
       throw new InvalidStateTransitionException("Cannot transition from " + status + " to " + newStatus);
     }
-    return new JobApplication(id, userId, company, role, source, postingUrl, newStatus,
+    return new JobApplication(id, userId, jobPostingId, newStatus,
       dateApplied, lastUpdated, notes, version);
   }
 
   public JobApplication withNotes(@Nullable final Notes notes, final Instant lastUpdated) {
-    return new JobApplication(id, userId, company, role, source, postingUrl, status,
+    return new JobApplication(id, userId, jobPostingId, status,
       dateApplied, lastUpdated, notes, version);
   }
 }

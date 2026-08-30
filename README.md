@@ -241,12 +241,12 @@ passed in the `Authorization: Bearer <token>` header.
 
 | Operation                                        | Description                                   |
 |--------------------------------------------------|-----------------------------------------------|
-| `register(username, password)`                   | Create account, returns JWT                   |
+| `register(username, password, role)`             | Create account with role `USER`/`ADMIN` (admin only), returns JWT |
 | `login(username, password)`                      | Authenticate, returns JWT                     |
 | `logout`                                         | Invalidate current session                    |
-| `me`                                             | Current user info                             |
-| `applications(status, source)`                   | List job applications with optional filters   |
-| `createApplication(company, role, source, ...)`  | Track a new application                       |
+| `me`                                             | Current user info (id, username, role, createdAt) |
+| `applications(status)`                           | List job applications (company/role/source via `jobPostingId` join with `jobPostings`) |
+| `createApplication(jobPostingId, notes)`         | Track an application for an existing job posting |
 | `updateApplicationStatus(id, status)`            | Move through pipeline                         |
 | `deleteApplication(id)`                          | Remove an application                         |
 | `analytics(since)`                               | Per-status counts and conversion rate         |
@@ -255,7 +255,7 @@ passed in the `Authorization: Bearer <token>` header.
 | `analyzeJobPosting(jobPostingId)`                | AI analysis — summary, skills, fit score, company rating/type, salary range; persisted |
 | `analyses`                                       | List saved analyses for the current user      |
 | `analysis(id)`                                   | Fetch a single saved analysis                 |
-| `deleteAnalysis(id)`                             | Remove a saved analysis                       |
+| `deleteAnalysis(id)`                             | Remove a saved analysis (admin only)          |
 
 ### Status Pipeline
 
@@ -283,11 +283,11 @@ the user's home directory.
 
 | Command         | Alias | Description                                |
 |-----------------|-------|--------------------------------------------|
-| `register`      | `reg` | Create account                             |
+| `register`      | `reg` | Create account (admin only, `-r USER\|ADMIN`) |
 | `login`         | `li`  | Authenticate, stores session token         |
 | `logout`        | `lo`  | Invalidate session                         |
 | `whoami`        | `who` | Show current user                          |
-| `add`           | `a`   | Track a new job application                |
+| `add`           | `a`   | Track an application for a job posting (`-i <posting-id>`) |
 | `list`          | `l`   | List job applications                      |
 | `update`        | `u`   | Update application status                  |
 | `delete`        | `d`   | Remove an application                      |
@@ -296,15 +296,15 @@ the user's home directory.
 | `postings`      | `po`  | List submitted job postings                  |
 | `analyze`       | `anlz`| AI analysis of a job posting               |
 | `analyses`      | `al`  | List saved analyses                        |
-| `delete-analysis` | `dal`| Delete a saved analysis                  |
+| `delete-analysis` | `dal`| Delete a saved analysis (admin only)     |
 
 ```bash
 # Examples
-register --username alice --password secret
-login --username alice --password secret
+register --username alice --password secret -r USER
+login --username alexandra --password password123
 
-add --company Acme --role SWE --source LINKEDIN --url https://example.com -n "Followed up"
-list --source LINKEDIN -j ".[].company"
+add -i 7c9e6679-7425-40de-944b-e07fc1f90ae7 -n "Followed up"
+list -s APPLIED -j ".[].jobPostingId"
 update -i <app-id> --status INTERVIEWING -n "Had screening call"
 delete -i <app-id>
 

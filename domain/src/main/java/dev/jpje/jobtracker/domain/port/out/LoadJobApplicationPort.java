@@ -6,14 +6,13 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 
 public interface LoadJobApplicationPort {
   Optional<JobApplication> findById(UUID id);
 
-  List<JobApplication> findByUserId(UserId userId, @Nullable ApplicationStatus status, @Nullable Source source);
+  List<JobApplication> findByUserId(UserId userId, @Nullable ApplicationStatus status);
 
   List<JobApplication> findAllByUserId(UserId userId);
 }

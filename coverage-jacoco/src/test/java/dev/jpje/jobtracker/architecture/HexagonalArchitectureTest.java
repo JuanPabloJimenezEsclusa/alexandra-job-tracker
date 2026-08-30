@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.api.architecture;
+package dev.jpje.jobtracker.architecture;
 
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
@@ -20,24 +20,17 @@ class HexagonalArchitectureTest {
   private static final String DOMAIN = "dev.jpje.jobtracker.domain..";
   private static final String APPLICATION = "dev.jpje.jobtracker.application..";
   private static final String ADAPTER_API = "dev.jpje.jobtracker.api..";
-  private static final String ADAPTER_CLI = "dev.jpje.jobtracker.cli..";
   private static final String ADAPTER_PERSISTENCE = "dev.jpje.jobtracker.persistence..";
   private static final String ADAPTER_AUTH = "dev.jpje.jobtracker.auth..";
   private static final String ADAPTER_AI = "dev.jpje.jobtracker.ai..";
   private static final String ADAPTER_CACHE = "dev.jpje.jobtracker.cache..";
-
+  private static final String ADAPTER_CLI = "dev.jpje.jobtracker.cli..";
 
   // --- Common allowed packages (applied to all layers) ---
 
   private static final String[] COMMON = {
     "java..",
-    "org.jspecify..",
-    "org.slf4j..",
-    "com.tngtech.archunit..",
-    "org.junit..",
-    "org.assertj.core.api..",
-    "org.mockito..",
-    "org.springframework.test.."
+    "org.jspecify.."
   };
 
   // --- Critical hexagonal boundary rules ---
@@ -53,14 +46,15 @@ class HexagonalArchitectureTest {
   static final ArchRule DOMAIN_MUST_NOT_DEPEND_ON_INFRASTRUCTURE = noClasses()
     .that().resideInAPackage(DOMAIN)
     .should().dependOnClassesThat().resideInAnyPackage(
-      "..persistence..", "..auth..", "..ai..", "..cache..")
+      "..ai..", "..api..", "..auth..", "..cache..", "..cli..", "..persistence..")
     .as("Domain must not depend on infrastructure")
     .because("infrastructure details must not leak into the domain");
 
   @ArchTest
   static final ArchRule APPLICATION_MUST_NOT_DEPEND_ON_ADAPTERS = noClasses()
     .that().resideInAPackage(APPLICATION)
-    .should().dependOnClassesThat().resideInAnyPackage("..adapter..", "..cli..", "..api..")
+    .should().dependOnClassesThat().resideInAnyPackage(
+      "..ai..", "..api..", "..auth..", "..cache..", "..cli..", "..persistence..")
     .allowEmptyShould(true)
     .as("Application must not depend on adapters, CLI, or API")
     .because("application implements use cases independently of delivery mechanisms");
@@ -69,8 +63,7 @@ class HexagonalArchitectureTest {
   static final ArchRule DOMAIN_MUST_NOT_DEPEND_ON_OUTER_LAYERS = noClasses()
     .that().resideInAPackage(DOMAIN)
     .should().dependOnClassesThat().resideInAnyPackage(
-      "..application..", "..api..", "..cli..",
-      "..persistence..", "..auth..", "..ai..", "..cache..")
+      "..ai..", "..api..", "..auth..", "..cache..", "..cli..", "..persistence..")
     .allowEmptyShould(true)
     .as("Domain must not depend on application, adapters, or infrastructure")
     .because("domain is the innermost layer with no outgoing dependencies to other layers");
@@ -97,25 +90,13 @@ class HexagonalArchitectureTest {
   static final ArchRule ADAPTER_API_DEPENDENCIES = classes()
     .that().resideInAPackage(ADAPTER_API)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
-      concat(DOMAIN, APPLICATION, ADAPTER_API, ADAPTER_AUTH,
-        "org.springframework..",
-        "org.springframework.boot..",
+      concat(DOMAIN, ADAPTER_API,
+        "org.springframework.(stereotype|context|graphql|http|web)..",
         "graphql..",
+        "org.slf4j..",
         "reactor.core.."))
     .as("Adapter API module dependencies")
     .because("the GraphQL adapter translates HTTP to use case calls");
-
-  @ArchTest
-  static final ArchRule ADAPTER_CLI_DEPENDENCIES = classes()
-    .that().resideInAPackage(ADAPTER_CLI)
-    .should().onlyDependOnClassesThat().resideInAnyPackage(
-      concat(ADAPTER_CLI,
-        "org.springframework.shell..",
-        "org.springframework.(stereotype|context|beans|core|boot|lang)..",
-        "com.fasterxml.jackson..",
-        "net.thisptr.jackson.jq.."))
-    .as("Adapter CLI module dependencies")
-    .because("the CLI adapter is a standalone Spring Shell client");
 
   @ArchTest
   static final ArchRule ADAPTER_PERSISTENCE_DEPENDENCIES = classes()
@@ -124,8 +105,7 @@ class HexagonalArchitectureTest {
       concat(DOMAIN, ADAPTER_PERSISTENCE,
         "jakarta.persistence..",
         "org.hibernate..",
-        "org.springframework..",
-        "org.springframework.boot..",
+        "org.springframework.(stereotype|data|dao|transaction)..",
         "org.flywaydb.."))
     .as("Persistence module dependencies")
     .because("persistence implements domain ports with JPA and Flyway");
@@ -139,7 +119,7 @@ class HexagonalArchitectureTest {
         "jakarta.servlet..",
         "javax.crypto..",
         "org.mindrot.jbcrypt..",
-        "org.springframework.."))
+        "org.springframework.(aot|stereotype|context|beans|boot).."))
     .as("Auth module dependencies")
     .because("auth implements JWT token generation and GraphQL auth interceptor");
 
@@ -163,6 +143,17 @@ class HexagonalArchitectureTest {
         "org.springframework.(stereotype|context|beans|cache|boot).."))
     .as("Cache module dependencies")
     .because("cache decorates persistence adapters with Caffeine");
+
+  @ArchTest
+  static final ArchRule ADAPTER_CLI_DEPENDENCIES = classes()
+    .that().resideInAPackage(ADAPTER_CLI)
+    .should().onlyDependOnClassesThat().resideInAnyPackage(
+      concat(ADAPTER_CLI,
+        "org.springframework.(stereotype|context|beans|core|boot|lang|shell)..",
+        "com.fasterxml.jackson..",
+        "net.thisptr.jackson.jq.."))
+    .as("Adapter CLI module dependencies")
+    .because("the CLI adapter is a standalone Spring Shell client");
 
   // --- Helper ---
 

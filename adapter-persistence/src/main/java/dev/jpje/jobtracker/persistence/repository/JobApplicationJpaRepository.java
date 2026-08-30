@@ -10,9 +10,4 @@ public interface JobApplicationJpaRepository extends JpaRepository<JobApplicatio
   List<JobApplicationEntity> findByUserIdOrderByDateAppliedDesc(UUID userId);
 
   List<JobApplicationEntity> findByUserIdAndStatusOrderByDateAppliedDesc(UUID userId, String status);
-
-  List<JobApplicationEntity> findByUserIdAndSourceOrderByDateAppliedDesc(UUID userId, String source);
-
-  List<JobApplicationEntity> findByUserIdAndStatusAndSourceOrderByDateAppliedDesc(
-    UUID userId, String status, String source);
 }

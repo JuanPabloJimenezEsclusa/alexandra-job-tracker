@@ -20,14 +20,12 @@ import dev.jpje.jobtracker.domain.event.EventPublisher;
 import dev.jpje.jobtracker.domain.event.JobApplicationStatusChanged;
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.JobApplication;
+import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.out.LoadJobPostingPort;
 import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
-import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,6 +48,9 @@ class TrackJobApplicationUseCaseTest {
   private LoadJobApplicationPort loadPort;
 
   @Mock
+  private LoadJobPostingPort loadPostingPort;
+
+  @Mock
   private Clock clock;
 
   @Mock
@@ -68,17 +69,29 @@ class TrackJobApplicationUseCaseTest {
   @Test
   void shouldCreateApplicationAsSaved() {
     final var userId = UserId.generate();
+    final var postingId = UUID.randomUUID();
+    when(loadPostingPort.findById(postingId)).thenReturn(Optional.of(jobPosting(postingId, userId)));
     when(clock.instant()).thenReturn(NOW);
     when(savePort.save(any(JobApplication.class))).thenAnswer(inv -> inv.getArgument(0));
 
-    final var result = useCase.create(userId, CompanyName.of("Acme"), RoleName.of("SWE"),
-      Source.LINKEDIN, null, null);
+    final var result = useCase.create(userId, postingId, null);
 
     assertThat(result)
-      .extracting(JobApplication::userId, JobApplication::company, JobApplication::status,
+      .extracting(JobApplication::userId, JobApplication::jobPostingId, JobApplication::status,
         JobApplication::dateApplied, JobApplication::lastUpdated)
-      .containsExactly(userId, CompanyName.of("Acme"), ApplicationStatus.SAVED, NOW, NOW);
+      .containsExactly(userId, postingId, ApplicationStatus.SAVED, NOW, NOW);
     verify(savePort).save(result);
+  }
+
+  @Test
+  void shouldThrowWhenPostingMissing() {
+    final var userId = UserId.generate();
+    final var postingId = UUID.randomUUID();
+    when(loadPostingPort.findById(postingId)).thenReturn(Optional.empty());
+
+    assertThatThrownBy(() -> useCase.create(userId, postingId, null))
+      .isInstanceOf(ResourceNotFoundException.class)
+      .hasMessage("Job posting not found");
   }
 
   @ParameterizedTest(name = "{0}")
@@ -113,9 +126,9 @@ class TrackJobApplicationUseCaseTest {
   void shouldListApplications() {
     final var userId = UserId.generate();
     final var apps = List.of(application());
-    when(loadPort.findByUserId(userId, null, null)).thenReturn(apps);
+    when(loadPort.findByUserId(userId, null)).thenReturn(apps);
 
-    assertThat(useCase.list(userId, null, null)).isEqualTo(apps);
+    assertThat(useCase.list(userId, null)).isEqualTo(apps);
   }
 
   @Test
@@ -127,8 +140,16 @@ class TrackJobApplicationUseCaseTest {
   }
 
   private static JobApplication application() {
-    return new JobApplication(UUID.randomUUID(), UserId.generate(), CompanyName.of("Acme"),
-      RoleName.of("SWE"), Source.LINKEDIN, Url.of("https://example.com/job"), ApplicationStatus.SAVED,
-      NOW, NOW, null, 0L);
+    return new JobApplication(UUID.randomUUID(), UserId.generate(), UUID.randomUUID(),
+      ApplicationStatus.SAVED, NOW, NOW, null, 0L);
+  }
+
+  private static JobPosting jobPosting(final UUID postingId, final UserId userId) {
+    return new JobPosting(postingId, userId,
+      dev.jpje.jobtracker.domain.vo.Url.of("https://example.com/job"),
+      dev.jpje.jobtracker.domain.vo.Source.LINKEDIN,
+      dev.jpje.jobtracker.domain.vo.JobTitle.of("Engineer"),
+      dev.jpje.jobtracker.domain.vo.CompanyName.of("Acme"),
+      "desc", NOW);
   }
 }

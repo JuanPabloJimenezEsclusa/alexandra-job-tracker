@@ -16,11 +16,7 @@ import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
-import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
@@ -68,7 +64,7 @@ class CachingJobApplicationAdapterTest {
     final var app = jobApplication(userId);
     primeListCache(userId, List.of(app));
 
-    assertThat(adapter.findByUserId(userId, null, null)).as("cached list should be returned").containsExactly(app);
+    assertThat(adapter.findByUserId(userId, null)).as("cached list should be returned").containsExactly(app);
     verify(loadDelegate, description("load delegate should be hit only on cache miss")).findAllByUserId(userId);
   }
 
@@ -88,21 +84,9 @@ class CachingJobApplicationAdapterTest {
     final var applied = jobApplication(userId, ApplicationStatus.APPLIED);
     primeListCache(userId, List.of(saved, applied));
 
-    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED, null))
+    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED))
       .extracting(JobApplication::status)
       .containsExactly(ApplicationStatus.SAVED);
-  }
-
-  @Test
-  void shouldFilterCachedApplicationsBySource() {
-    final var userId = UserId.generate();
-    final var linkedIn = jobApplication(userId, Source.LINKEDIN);
-    final var indeed = jobApplication(userId, Source.INDEED);
-    primeListCache(userId, List.of(linkedIn, indeed));
-
-    assertThat(adapter.findByUserId(userId, null, Source.INDEED))
-      .extracting(JobApplication::source)
-      .containsExactly(Source.INDEED);
   }
 
   @Test
@@ -134,7 +118,7 @@ class CachingJobApplicationAdapterTest {
 
   private void primeListCache(final UserId userId, final List<JobApplication> apps) {
     when(loadDelegate.findAllByUserId(userId)).thenReturn(apps);
-    adapter.findByUserId(userId, null, null);
+    adapter.findByUserId(userId, null);
   }
 
   private static JobApplication jobApplication() {
@@ -149,24 +133,6 @@ class CachingJobApplicationAdapterTest {
     return Instancio.of(JobApplication.class)
       .set(field(JobApplication::userId), userId)
       .set(field(JobApplication::status), status)
-      .set(field(JobApplication::company), CompanyName.of("Acme"))
-      .set(field(JobApplication::role), RoleName.of("SWE"))
-      .set(field(JobApplication::source), Source.LINKEDIN)
-      .set(field(JobApplication::postingUrl), Url.of("https://example.com/job"))
-      .set(field(JobApplication::notes), Notes.of("notes"))
-      .set(field(JobApplication::dateApplied), Instant.EPOCH)
-      .set(field(JobApplication::lastUpdated), Instant.EPOCH)
-      .create();
-  }
-
-  private static JobApplication jobApplication(final UserId userId, final Source source) {
-    return Instancio.of(JobApplication.class)
-      .set(field(JobApplication::userId), userId)
-      .set(field(JobApplication::status), ApplicationStatus.SAVED)
-      .set(field(JobApplication::company), CompanyName.of("Acme"))
-      .set(field(JobApplication::role), RoleName.of("SWE"))
-      .set(field(JobApplication::source), source)
-      .set(field(JobApplication::postingUrl), Url.of("https://example.com/job"))
       .set(field(JobApplication::notes), Notes.of("notes"))
       .set(field(JobApplication::dateApplied), Instant.EPOCH)
       .set(field(JobApplication::lastUpdated), Instant.EPOCH)
