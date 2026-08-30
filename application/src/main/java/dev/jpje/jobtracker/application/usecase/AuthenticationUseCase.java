@@ -15,6 +15,7 @@ import dev.jpje.jobtracker.domain.port.out.SaveUserPort;
 import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
 import dev.jpje.jobtracker.domain.vo.AuthPayload;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.domain.vo.UserRole;
 import dev.jpje.jobtracker.domain.vo.Username;
 
 public class AuthenticationUseCase implements AuthenticationPort {
@@ -40,14 +41,14 @@ public class AuthenticationUseCase implements AuthenticationPort {
   }
 
   @Override
-  public AuthPayload register(final Username username, final String password) {
+  public AuthPayload register(final Username username, final String password, final UserRole role) {
     if (loadUserPort.findByUsername(username.value()).isPresent()) {
       throw new ResourceAlreadyExistsException("Username already taken");
     }
-    final var user = new User(UserId.generate(), username, passwordEncoder.encode(password), clock.instant());
+    final var user = new User(UserId.generate(), username, passwordEncoder.encode(password), role, clock.instant());
     saveUserPort.save(user);
     eventPublisher.publish(new UserRegistered(user.id(), username, clock.instant()));
-    return new AuthPayload(tokenGenerator.generateToken(user.id()), user);
+    return new AuthPayload(tokenGenerator.generateToken(user.id(), user.role()), user);
   }
 
   @Override
@@ -57,7 +58,7 @@ public class AuthenticationUseCase implements AuthenticationPort {
     if (!passwordEncoder.matches(password, user.passwordHash())) {
       throw new IllegalArgumentException("Invalid credentials");
     }
-    return new AuthPayload(tokenGenerator.generateToken(user.id()), user);
+    return new AuthPayload(tokenGenerator.generateToken(user.id(), user.role()), user);
   }
 
   @Override

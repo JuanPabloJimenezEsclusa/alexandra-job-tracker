@@ -1,7 +1,7 @@
 info:
   name: mutation.deleteAnalysis
   type: graphql
-  seq: 15
+  seq: 16
 
 graphql:
   method: POST
@@ -19,6 +19,11 @@ graphql:
         "id": "{{analysisId}}"
       }
   auth: inherit
+
+docs:
+  content: |
+    Deletes a job analysis. Admin only: requires an ADMIN token,
+    run mutation.loginAdmin first.
 
 runtime:
   variables:

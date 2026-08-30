@@ -29,11 +29,23 @@ public abstract class GraphQlIntegrationTestBase {
 
   protected String registerAndGetToken(final String username) {
     final var body = """
-      {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\") { token } }"}
+      {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\", role: USER) { token } }"}
       """.formatted(username);
-    final var registration = graphql(jsonHeaders(), body);
+    final var registration = graphql(adminHeaders(), body);
     return Objects.requireNonNull(registration.findValue("token"),
       "register response must contain a token").asString();
+  }
+
+  protected HttpHeaders adminHeaders() {
+    final var body = """
+      {"query": "mutation { login(username: \\"alexandra\\", password: \\"password123\\") { token } }"}
+      """;
+    final var login = graphql(jsonHeaders(), body);
+    final var token = Objects.requireNonNull(login.findValue("token"),
+      "admin login response must contain a token").asString();
+    final var headers = jsonHeaders();
+    headers.setBearerAuth(token);
+    return headers;
   }
 
   protected JsonNode graphql(final HttpHeaders headers, final String query) {

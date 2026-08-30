@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.domain.exception.ForbiddenException;
 import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
@@ -36,6 +37,8 @@ class GraphQlExceptionResolverTest {
         "Username already taken", ErrorType.ValidationError, "CONFLICT", "DOMAIN"),
       arguments(named("invalid state transition", new InvalidStateTransitionException("Invalid transition")),
         "Invalid transition", ErrorType.InvalidSyntax, "INVALID_STATE", "DOMAIN"),
+      arguments(named("forbidden", new ForbiddenException("Admin access required")),
+        "Admin access required", ErrorType.ValidationError, "FORBIDDEN", "DOMAIN"),
       arguments(named("illegal argument", new IllegalArgumentException("Invalid input")),
         "Invalid input", ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION"),
       arguments(named("illegal state", new IllegalStateException("Invalid state transition")),

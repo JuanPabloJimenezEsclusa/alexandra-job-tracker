@@ -1,7 +1,7 @@
 info:
   name: query.analysis
   type: graphql
-  seq: 14
+  seq: 15
 
 graphql:
   method: POST

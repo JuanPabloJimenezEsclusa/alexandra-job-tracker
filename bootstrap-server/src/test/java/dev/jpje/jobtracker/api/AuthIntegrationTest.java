@@ -17,29 +17,61 @@ class AuthIntegrationTest extends GraphQlIntegrationTestBase {
 
   @Test
   void shouldRegister() {
-    final var registration = graphql(jsonHeaders(), """
-      {"query": "mutation { register(username: \\"alice\\", password: \\"pass\\") { token user { username } } }"}
+    final var registration = graphql(adminHeaders(), """
+      {"query": "mutation { register(username: \\"alice\\", password: \\"pass\\", role: USER) { token user { username role } } }"}
       """);
     assertThat(registration.findValue("token")).as("register returns token").isNotNull();
     assertThat(registration.findValues("username")).as("registered user username")
       .extracting(JsonNode::asString).contains("alice");
+    assertThat(registration.findValues("role")).as("registered user role")
+      .extracting(JsonNode::asString).contains("USER");
   }
 
   @Test
   void shouldRejectDuplicateRegistration() {
     final var body = """
-      {"query": "mutation { register(username: \\"bob\\", password: \\"pass\\") { token } }"}
+      {"query": "mutation { register(username: \\"bob\\", password: \\"pass\\", role: USER) { token } }"}
       """;
-    graphql(jsonHeaders(), body);
-    final var duplicate = graphql(jsonHeaders(), body);
+    graphql(adminHeaders(), body);
+    final var duplicate = graphql(adminHeaders(), body);
     assertThat(duplicate.findValue("message").asString()).as("duplicate registration rejected")
       .isEqualTo("Username already taken");
   }
 
   @Test
+  void shouldRejectRegisterWithoutAuth() {
+    final var body = """
+      {"query": "mutation { register(username: \\"eve\\", password: \\"pass\\", role: USER) { token } }"}
+      """;
+    final var registration = graphql(jsonHeaders(), body);
+    assertThat(registration.findValue("message").asString()).as("register without auth rejected")
+      .isEqualTo("Authentication required");
+  }
+
+  @Test
+  void shouldRejectRegisterForNonAdmin() {
+    final var userHeaders = jsonHeaders();
+    userHeaders.setBearerAuth(registerAndGetToken("mallory"));
+    final var registration = graphql(userHeaders, """
+      {"query": "mutation { register(username: \\"trent\\", password: \\"pass\\", role: USER) { token } }"}
+      """);
+    assertThat(registration.findValue("message").asString()).as("register as non-admin rejected")
+      .isEqualTo("Admin access required");
+  }
+
+  @Test
+  void shouldRegisterAdmin() {
+    final var registration = graphql(adminHeaders(), """
+      {"query": "mutation { register(username: \\"admin2\\", password: \\"pass\\", role: ADMIN) { token user { role } } }"}
+      """);
+    assertThat(registration.findValues("role")).as("admin role on registered user")
+      .extracting(JsonNode::asString).contains("ADMIN");
+  }
+
+  @Test
   void shouldLogin() {
-    graphql(jsonHeaders(), """
-      {"query": "mutation { register(username: \\"carol\\", password: \\"pass\\") { token } }"}
+    graphql(adminHeaders(), """
+      {"query": "mutation { register(username: \\"carol\\", password: \\"pass\\", role: USER) { token } }"}
       """);
     final var login = graphql(jsonHeaders(), """
       {"query": "mutation { login(username: \\"carol\\", password: \\"pass\\") { token user { username } } }"}

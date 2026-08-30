@@ -10,6 +10,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.domain.vo.UserRole;
 import dev.jpje.jobtracker.domain.vo.Username;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,17 +23,19 @@ class UserTest {
     final var id = new UserId(UUID.randomUUID());
     final var now = Instant.EPOCH;
     return Stream.of(
-      arguments(named("null id", ""), null, Username.of("alice"), "hash", now),
-      arguments(named("null createdAt", ""), id, Username.of("alice"), "hash", null),
-      arguments(named("blank passwordHash", ""), id, Username.of("alice"), "", now)
+      arguments(named("null id", ""), null, Username.of("alice"), "hash", UserRole.USER, now),
+      arguments(named("null role", ""), id, Username.of("alice"), "hash", null, now),
+      arguments(named("null createdAt", ""), id, Username.of("alice"), "hash", UserRole.USER, null),
+      arguments(named("blank passwordHash", ""), id, Username.of("alice"), "", UserRole.USER, now)
     );
   }
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("invalidInputs")
   void shouldRejectInvalidInputs(final String unused, final UserId id, final Username username,
-                                  final String passwordHash, final Instant createdAt) {
-    assertThatThrownBy(() -> new User(id, username, passwordHash, createdAt))
+                                  final String passwordHash, final UserRole role,
+                                  final Instant createdAt) {
+    assertThatThrownBy(() -> new User(id, username, passwordHash, role, createdAt))
       .isInstanceOf(RuntimeException.class);
   }
 
@@ -43,10 +46,11 @@ class UserTest {
     final var now = Instant.EPOCH;
 
     // When, then
-    assertThat(new User(id, Username.of("alice"), "hash", now))
+    assertThat(new User(id, Username.of("alice"), "hash", UserRole.USER, now))
       .returns(id, User::id)
       .returns(Username.of("alice"), User::username)
       .returns("hash", User::passwordHash)
+      .returns(UserRole.USER, User::role)
       .returns(now, User::createdAt);
   }
 }
