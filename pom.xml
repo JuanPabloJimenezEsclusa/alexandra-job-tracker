@@ -452,13 +452,11 @@
                 <goal>git-changelog</goal>
               </goals>
               <configuration>
-                <templateFile>${project.basedir}/src/main/resources/changelog.mustache
-                </templateFile>
+                <templateFile>${project.basedir}/src/main/resources/changelog.mustache</templateFile>
                 <file>CHANGELOG.md</file>
                 <readableTagName>-([^-]+?)$</readableTagName>
                 <dateFormat>yyyy-MM-dd HH:mm:ss</dateFormat>
-                <ignoreCommitsIfMessageMatches>^\[maven-release-plugin\].*
-                </ignoreCommitsIfMessageMatches>
+                <ignoreCommitsIfMessageMatches>^\[maven-release-plugin\].*</ignoreCommitsIfMessageMatches>
                 <timeZone>UTC</timeZone>
                 <removeIssueFromMessage>true</removeIssueFromMessage>
               </configuration>

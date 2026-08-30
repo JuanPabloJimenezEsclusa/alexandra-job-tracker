@@ -51,6 +51,7 @@ public class JwtProvider implements TokenGeneratorPort {
       .compact();
   }
 
+  @Override
   public UserId validateToken(final String token) {
     final var claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token);
     return new UserId(java.util.UUID.fromString(claims.getPayload().getSubject()));
