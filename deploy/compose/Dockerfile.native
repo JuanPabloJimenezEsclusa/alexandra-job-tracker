@@ -5,7 +5,7 @@ RUN ./mvnw clean install -DskipTests -B -ntp -e \
     && ./mvnw -Pnative native:compile -pl bootstrap-server -DskipTests -B -ntp -e
 
 # Use a lightweight runtime image
-FROM debian:12-slim
+FROM debian:13-slim
 RUN apt-get update \
     && apt-get install -y curl gosu \
     && rm -rf /var/lib/apt/lists/* \
