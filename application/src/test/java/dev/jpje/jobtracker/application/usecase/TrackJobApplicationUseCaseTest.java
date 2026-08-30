@@ -25,7 +25,11 @@ import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.out.LoadJobPostingPort;
 import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
+import dev.jpje.jobtracker.domain.vo.CompanyName;
+import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Notes;
+import dev.jpje.jobtracker.domain.vo.Source;
+import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -146,10 +150,10 @@ class TrackJobApplicationUseCaseTest {
 
   private static JobPosting jobPosting(final UUID postingId, final UserId userId) {
     return new JobPosting(postingId, userId,
-      dev.jpje.jobtracker.domain.vo.Url.of("https://example.com/job"),
-      dev.jpje.jobtracker.domain.vo.Source.LINKEDIN,
-      dev.jpje.jobtracker.domain.vo.JobTitle.of("Engineer"),
-      dev.jpje.jobtracker.domain.vo.CompanyName.of("Acme"),
+      Url.of("https://example.com/job"),
+      Source.LINKEDIN,
+      JobTitle.of("Engineer"),
+      CompanyName.of("Acme"),
       "desc", NOW);
   }
 }

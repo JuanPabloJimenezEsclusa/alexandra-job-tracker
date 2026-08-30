@@ -43,14 +43,6 @@ class HexagonalArchitectureTest {
     .because("the domain layer is pure Java with zero framework imports");
 
   @ArchTest
-  static final ArchRule DOMAIN_MUST_NOT_DEPEND_ON_INFRASTRUCTURE = noClasses()
-    .that().resideInAPackage(DOMAIN)
-    .should().dependOnClassesThat().resideInAnyPackage(
-      "..ai..", "..api..", "..auth..", "..cache..", "..cli..", "..persistence..")
-    .as("Domain must not depend on infrastructure")
-    .because("infrastructure details must not leak into the domain");
-
-  @ArchTest
   static final ArchRule APPLICATION_MUST_NOT_DEPEND_ON_ADAPTERS = noClasses()
     .that().resideInAPackage(APPLICATION)
     .should().dependOnClassesThat().resideInAnyPackage(
@@ -63,7 +55,7 @@ class HexagonalArchitectureTest {
   static final ArchRule DOMAIN_MUST_NOT_DEPEND_ON_OUTER_LAYERS = noClasses()
     .that().resideInAPackage(DOMAIN)
     .should().dependOnClassesThat().resideInAnyPackage(
-      "..ai..", "..api..", "..auth..", "..cache..", "..cli..", "..persistence..")
+      "..usecase..", "..ai..", "..api..", "..auth..", "..cache..", "..cli..", "..persistence..")
     .allowEmptyShould(true)
     .as("Domain must not depend on application, adapters, or infrastructure")
     .because("domain is the innermost layer with no outgoing dependencies to other layers");

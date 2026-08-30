@@ -8,6 +8,7 @@ import java.security.MessageDigest;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import javax.crypto.SecretKey;
 
 import dev.jpje.jobtracker.domain.vo.TokenPayload;
 import dev.jpje.jobtracker.domain.vo.UserId;
@@ -72,7 +73,7 @@ class JwtProviderTest {
       .compact();
   }
 
-  private static javax.crypto.SecretKey deriveKey() {
+  private static SecretKey deriveKey() {
     try {
       final var digest = MessageDigest.getInstance("SHA-512");
       final var hash = digest.digest(SECRET.getBytes(StandardCharsets.UTF_8));

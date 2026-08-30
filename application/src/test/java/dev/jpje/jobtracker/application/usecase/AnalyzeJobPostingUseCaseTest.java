@@ -6,7 +6,6 @@ import static org.instancio.Select.field;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -32,14 +31,32 @@ import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+@ExtendWith(MockitoExtension.class)
 class AnalyzeJobPostingUseCaseTest {
 
-  private static final Clock FIXED_CLOCK = Clock.fixed(Instant.now().plusSeconds(60L),
-    ZoneOffset.UTC);
+  @Spy
+  private final Clock fixedClock = Clock.fixed(Instant.now().plusSeconds(60L), ZoneOffset.UTC);
+
+  @Mock
+  private LoadJobPostingPort loadPort;
+
+  @Mock
+  private JobAnalysisPort analysisPort;
+
+  @Mock
+  private SaveJobAnalysisPort savePort;
+
+  @InjectMocks
+  private AnalyzeJobPostingUseCase useCase;
 
   private static JobAnalysis validAnalysis() {
     return Instancio.of(JobAnalysis.class)
@@ -71,33 +88,21 @@ class AnalyzeJobPostingUseCaseTest {
   @MethodSource("analysisScenarios")
   void shouldAnalyzeAndPersistPosting(final JobPosting posting, final JobAnalysis expectedAnalysis) {
     // Given
-    final var loadPort = mock(LoadJobPostingPort.class);
-    final var analysisPort = mock(JobAnalysisPort.class);
-    final var savePort = mock(SaveJobAnalysisPort.class);
-    final var useCase = new AnalyzeJobPostingUseCase(loadPort, analysisPort, savePort, FIXED_CLOCK);
-
     when(loadPort.findById(posting.id())).thenReturn(Optional.of(posting));
     when(analysisPort.analyze(posting.title().value(), posting.company().value(),
       posting.source().name(), posting.description())).thenReturn(expectedAnalysis);
 
-    // When
-    final var result = useCase.analyze(posting.userId(), posting.id());
-
-    // Then
-    assertThat(result)
+    // When, Then
+    assertThat(useCase.analyze(posting.userId(), posting.id()))
       .extracting(JobAnalysisRecord::jobPostingId, JobAnalysisRecord::userId,
         JobAnalysisRecord::analysis, JobAnalysisRecord::createdAt)
-      .containsExactly(posting.id(), posting.userId(), expectedAnalysis, FIXED_CLOCK.instant());
+      .containsExactly(posting.id(), posting.userId(), expectedAnalysis, fixedClock.instant());
     verify(savePort).saveOrReplace(any(JobAnalysisRecord.class));
   }
 
   @Test
   void shouldThrowWhenPostingNotFound() {
     // Given
-    final var loadPort = mock(LoadJobPostingPort.class);
-    final var analysisPort = mock(JobAnalysisPort.class);
-    final var savePort = mock(SaveJobAnalysisPort.class);
-    final var useCase = new AnalyzeJobPostingUseCase(loadPort, analysisPort, savePort, FIXED_CLOCK);
     final var userId = UserId.generate();
     final var randomUUID = UUID.randomUUID();
 
