@@ -1,7 +1,6 @@
 package dev.jpje.jobtracker.persistence.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
@@ -39,34 +38,44 @@ class JobPostingPersistenceAdapterTest {
 
   @Test
   void shouldSavePosting() {
+    // Given
     final var posting = posting();
 
-    assertThatCode(() -> adapter.save(posting)).as("save does not throw").doesNotThrowAnyException();
+    // When
+    adapter.save(posting);
+
+    // Then
     verify(repository, description("posting persisted")).save(any(JobPostingEntity.class));
   }
 
   @Test
   void shouldFindById() {
+    // Given
     final var entity = entity();
     when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
 
-    assertThat(adapter.findById(entity.getId())).hasValue(toDomain(entity));
+    // When, then
+    assertThat(adapter.findById(entity.getId())).as("found posting").hasValue(toDomain(entity));
   }
 
   @Test
   void shouldReturnEmptyWhenNotFound() {
+    // Given
     final var id = UUID.randomUUID();
     when(repository.findById(id)).thenReturn(Optional.empty());
 
-    assertThat(adapter.findById(id)).isEmpty();
+    // When, then
+    assertThat(adapter.findById(id)).as("missing posting").isEmpty();
   }
 
   @Test
   void shouldFindByUserId() {
+    // Given
     final var userId = UserId.generate();
     final var entity = entity(userId);
     when(repository.findByUserId(userId.value())).thenReturn(List.of(entity));
 
+    // When, then
     assertThat(adapter.findByUserId(userId)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 

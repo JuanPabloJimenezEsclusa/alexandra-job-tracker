@@ -18,10 +18,12 @@ class UserIdTest {
   @Test
   void shouldGenerateRandomId() {
     // When
-    final var id = UserId.generate();
+    final var first = UserId.generate();
+    final var second = UserId.generate();
 
     // Then
-    assertThat(id.value()).isNotNull();
+    assertThat(first).as("generated ids should be unique").isNotEqualTo(second);
+    assertThat(first.value().version()).as("generated id should be a random (v4) UUID").isEqualTo(4);
   }
 
   @Test

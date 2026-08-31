@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 import java.time.Duration;
-import java.util.Objects;
 
 import dev.jpje.jobtracker.api.GraphQlIntegrationTestBase;
 import dev.jpje.jobtracker.api.config.IntegrationTestConfig;
@@ -21,26 +20,9 @@ import tools.jackson.databind.JsonNode;
 class EventWiringIntegrationTest extends GraphQlIntegrationTestBase {
 
   @Test
-  void shouldDispatchJobPostingCreatedToListeners() {
-    final var headers = jsonHeaders();
-    headers.setBearerAuth(registerAndGetToken("event-user"));
-
-    final var submitBody = """
-      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id title company source}}",\
-      "variables":{"i":{"url":"https://example.com/job/event","title":"Event Engineer",\
-      "description":"No empty","company":"EventCorp","source":"LINKEDIN"}}}
-      """;
-    final var submitted = graphql(headers, submitBody);
-    assertThat(submitted.findValues("title"))
-      .as("submitted posting title")
-      .extracting(JsonNode::asString)
-      .contains("Event Engineer");
-    assertThat(submitted.findValues("company"))
-      .as("submitted posting company")
-      .extracting(JsonNode::asString)
-      .contains("EventCorp");
-    final var postingId = Objects.requireNonNull(submitted.findValue("id"),
-      "submit response must contain a posting id").asString();
+  void shouldCreateTrackingApplicationOnSubmit() {
+    final var headers = authHeaders("event-user");
+    final var postingId = submitPostingAndGetId(headers);
 
     await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
       final var applications = graphql(headers, """
@@ -55,6 +37,12 @@ class EventWiringIntegrationTest extends GraphQlIntegrationTestBase {
         .extracting(JsonNode::asString)
         .contains("SAVED");
     });
+  }
+
+  @Test
+  void shouldPersistJobAnalysisOnSubmit() {
+    final var headers = authHeaders("event-analysis-user");
+    final var postingId = submitPostingAndGetId(headers);
 
     await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> {
       final var analyses = graphql(headers, """

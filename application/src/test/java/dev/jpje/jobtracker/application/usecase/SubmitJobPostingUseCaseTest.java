@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -53,6 +54,7 @@ class SubmitJobPostingUseCaseTest {
   @ParameterizedTest(name = "{0}")
   @MethodSource("submitScenarios")
   void shouldSubmitJobPosting(final Source source) {
+    // Given
     final var userId = UserId.generate();
     final var now = Instant.EPOCH;
     final var url = Url.of("https://example.com/job");
@@ -60,13 +62,16 @@ class SubmitJobPostingUseCaseTest {
     final var company = CompanyName.of("Acme");
     when(clock.instant()).thenReturn(now);
 
+    // When
     final var returned = useCase.submit(userId, url, title, company, "Java developer", source);
 
+    // Then
     assertThat(returned)
       .extracting(JobPosting::userId, JobPosting::url, JobPosting::source,
         JobPosting::title, JobPosting::company, JobPosting::description, JobPosting::postedAt)
       .containsExactly(userId, url, source, title, company, "Java developer", now);
     verify(savePostingPort).save(any(JobPosting.class));
     verify(jobPostingService).submit(any(JobPosting.class));
+    verifyNoMoreInteractions(savePostingPort, jobPostingService, clock);
   }
 }

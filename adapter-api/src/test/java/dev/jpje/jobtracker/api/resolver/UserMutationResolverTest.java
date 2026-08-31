@@ -83,7 +83,8 @@ class UserMutationResolverTest {
 
   @Test
   void shouldLogout() {
-    assertThat(resolver.logout()).isTrue();
+    assertThat(resolver.logout()).as("logout always succeeds (stateless session)").isTrue();
+    verifyNoInteractions(authUseCase);
   }
 
   private void stubRegistration(final AuthPayload payload) {

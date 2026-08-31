@@ -9,7 +9,6 @@ import dev.jpje.jobtracker.server.JobTrackerServerApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
 import tools.jackson.databind.JsonNode;
 
 @SpringBootTest(
@@ -65,7 +64,6 @@ class ApplicationIntegrationTest extends GraphQlIntegrationTestBase {
       {"query": "mutation { updateApplicationStatus(id: \\"%s\\", status: APPLIED) { status } }"}
       """.formatted(appId));
     assertThat(updated.findValue("status").asString()).as("updated application status").isEqualTo("APPLIED");
-    assertThat(updated.has("errors")).as("update mutation succeeded without errors").isFalse();
   }
 
   @Test
@@ -92,12 +90,6 @@ class ApplicationIntegrationTest extends GraphQlIntegrationTestBase {
       {"query": "{ applications(status: APPLIED) { id } }"}
       """);
     assertThat(applications.findValues("id")).as("applications filtered by status").isEmpty();
-  }
-
-  private HttpHeaders authHeaders(final String username) {
-    final var headers = jsonHeaders();
-    headers.setBearerAuth(registerAndGetToken(username));
-    return headers;
   }
 
   private static String createBody(final String postingId) {

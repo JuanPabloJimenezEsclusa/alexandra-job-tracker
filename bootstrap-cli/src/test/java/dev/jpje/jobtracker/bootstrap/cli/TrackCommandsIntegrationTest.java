@@ -12,31 +12,60 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
+  private static final String CREATE_APPLICATION_RESPONSE = """
+    {
+      "data": {
+        "createApplication": {
+          "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a", "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7", "status": "SAVED"
+        }
+      }
+    }
+  """;
+
+  private static final String LIST_APPLICATIONS_RESPONSE = """
+    {
+      "data": {
+        "applications": [{
+          "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+          "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+          "status": "APPLIED",
+          "dateApplied": "2026-01-01T00:00:00Z",
+          "lastUpdated": "2026-01-01T00:00:00Z",
+          "notes": null
+        }]
+      }
+    }
+  """;
+
+  private static final String UPDATE_APPLICATION_STATUS_RESPONSE = """
+    {
+      "data": {
+        "updateApplicationStatus": {
+          "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+          "status": "INTERVIEWING",
+          "lastUpdated": "2026-06-01T00:00:00Z"
+        }
+      }
+    }
+  """;
+
+  private static final String EMPTY_APPLICATIONS_RESPONSE = """
+    {
+      "data": {
+        "applications": []
+      }
+    }
+  """;
+
 
   private static Stream<Arguments> scenarios() {
     return Stream.of(
       arguments(named("add application", "createApplication"),
-        """
-          {
-            "data": {
-              "createApplication": {
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a", "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7", "status": "SAVED"
-              }
-            }
-          }
-        """,
+        CREATE_APPLICATION_RESPONSE,
         "a -i 7c9e6679-7425-40de-944b-e07fc1f90ae7",
         "b6124fbc-eaba-4f38-bea5-54bbd88fe19a"),
       arguments(named("add application with notes", "createApplication"),
-        """
-          {
-            "data": {
-              "createApplication": {
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a", "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7", "status": "SAVED"
-              }
-            }
-          }
-        """,
+        CREATE_APPLICATION_RESPONSE,
         "a -i 7c9e6679-7425-40de-944b-e07fc1f90ae7 -n 'Some notes'",
         "SAVED"),
       arguments(named("add application error", "createApplication"),
@@ -46,37 +75,11 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         "a -i 7c9e6679-7425-40de-944b-e07fc1f90ae7",
         "Request failed"),
       arguments(named("list applications with data", "applications"),
-        """
-          {
-            "data": {
-              "applications": [{
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-                "status": "APPLIED",
-                "dateApplied": "2026-01-01T00:00:00Z",
-                "lastUpdated": "2026-01-01T00:00:00Z",
-                "notes": null
-              }]
-            }
-          }
-        """,
+        LIST_APPLICATIONS_RESPONSE,
         "l",
         "b6124fbc-eaba-4f38-bea5-54bbd88fe19a"),
       arguments(named("list with status filter", "applications"),
-        """
-          {
-            "data": {
-              "applications": [{
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "jobPostingId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
-                "status": "APPLIED",
-                "dateApplied": "2026-01-01T00:00:00Z",
-                "lastUpdated": "2026-01-01T00:00:00Z",
-                "notes": null
-              }]
-            }
-          }
-        """,
+        LIST_APPLICATIONS_RESPONSE,
         "l -s APPLIED",
         "b6124fbc-eaba-4f38-bea5-54bbd88fe19a"),
       arguments(named("list applications error", "applications"),
@@ -86,31 +89,11 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         "l",
         "List failed"),
       arguments(named("update application status", "updateApplicationStatus"),
-        """
-          {
-            "data": {
-              "updateApplicationStatus": {
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "status": "INTERVIEWING",
-                "lastUpdated": "2026-06-01T00:00:00Z"
-              }
-            }
-          }
-        """,
+        UPDATE_APPLICATION_STATUS_RESPONSE,
         "u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s INTERVIEWING",
         "INTERVIEWING"),
       arguments(named("update application with notes", "updateApplicationStatus"),
-        """
-          {
-            "data": {
-              "updateApplicationStatus": {
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "status": "INTERVIEWING",
-                "lastUpdated": "2026-06-01T00:00:00Z"
-              }
-            }
-          }
-        """,
+        UPDATE_APPLICATION_STATUS_RESPONSE,
         "u -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a -s INTERVIEWING -n 'Followed up'",
         "INTERVIEWING"),
       arguments(named("update application error", "updateApplicationStatus"),
@@ -130,13 +113,7 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         "d -i b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
         "Deleted"),
       arguments(named("list with invalid jq expression", "applications"),
-        """
-          {
-            "data": {
-              "applications": []
-            }
-          }
-        """,
+        EMPTY_APPLICATIONS_RESPONSE,
         "l -j '[[['",
         "JQ error")
     );
@@ -145,13 +122,7 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
   private static Stream<Arguments> negativeScenarios() {
     return Stream.of(
       arguments(named("list empty applications", "applications"),
-        """
-          {
-            "data": {
-              "applications": []
-            }
-          }
-        """,
+        EMPTY_APPLICATIONS_RESPONSE,
         "l",
         "Error"),
       arguments(named("list with jq filter empty result", "applications"),

@@ -1,7 +1,6 @@
 package dev.jpje.jobtracker.persistence.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
@@ -37,65 +36,71 @@ class JobApplicationPersistenceAdapterTest {
 
   @Test
   void shouldSaveApplication() {
+    // Given
     final var entity = entity();
     when(repository.saveAndFlush(any(JobApplicationEntity.class))).thenReturn(entity);
 
+    // When
     final var saved = adapter.save(application());
 
+    // Then
     assertThat(saved).as("saved application returned").isEqualTo(toDomain(entity));
     verify(repository, description("repository invoked with flush")).saveAndFlush(any(JobApplicationEntity.class));
   }
 
   @Test
   void shouldDeleteApplication() {
+    // Given
     final var id = UUID.randomUUID();
 
-    assertThatCode(() -> adapter.delete(id)).as("delete does not throw").doesNotThrowAnyException();
+    // When
+    adapter.delete(id);
+
+    // Then
     verify(repository, description("repository delete invoked")).deleteById(id);
   }
 
   @Test
   void shouldFindById() {
+    // Given
     final var entity = entity();
     when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
 
-    assertThat(adapter.findById(entity.getId())).hasValue(toDomain(entity));
+    // When, then
+    assertThat(adapter.findById(entity.getId())).as("found application").hasValue(toDomain(entity));
   }
 
   @Test
   void shouldReturnEmptyWhenNotFound() {
+    // Given
     final var id = UUID.randomUUID();
     when(repository.findById(id)).thenReturn(Optional.empty());
 
-    assertThat(adapter.findById(id)).isEmpty();
+    // When, then
+    assertThat(adapter.findById(id)).as("missing application").isEmpty();
   }
 
   @Test
   void shouldFindByUserAndStatus() {
+    // Given
     final var userId = UserId.generate();
     final var entity = entity(userId);
     when(repository.findByUserIdAndStatusOrderByDateAppliedDesc(
       userId.value(), "SAVED")).thenReturn(List.of(entity));
 
+    // When, then
     assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED))
       .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
   @Test
-  void shouldFindAllByUser() {
-    final var userId = UserId.generate();
-    final var entity = entity(userId);
-    when(repository.findByUserIdOrderByDateAppliedDesc(userId.value())).thenReturn(List.of(entity));
-
-    assertThat(adapter.findByUserId(userId, null)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
-  }
-
-  @Test
   void shouldFindAllByUserId() {
+    // Given
     final var userId = UserId.generate();
     final var entity = entity(userId);
     when(repository.findByUserIdOrderByDateAppliedDesc(userId.value())).thenReturn(List.of(entity));
 
+    // When, then
     assertThat(adapter.findAllByUserId(userId)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 

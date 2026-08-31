@@ -47,8 +47,8 @@ class AnalyticsTest {
   void shouldComputeTotalFromMap(final EnumMap<ApplicationStatus, Integer> perStatus, final int expectedTotal) {
     // When, then
     assertThat(new Analytics(perStatus))
-      .returns(perStatus, Analytics::perStatus)
-      .returns(expectedTotal, Analytics::totalApplications);
+      .as("per-status counts").returns(perStatus, Analytics::perStatus)
+      .as("total applications").returns(expectedTotal, Analytics::totalApplications);
   }
 
   @ParameterizedTest(name = "{0}")
