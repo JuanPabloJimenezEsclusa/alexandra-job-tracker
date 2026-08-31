@@ -44,16 +44,17 @@ class JobApplicationTest {
   }
 
   private static Stream<Arguments> invalidInputs() {
+    final var id = UUID.randomUUID();
     final var uid = UserId.generate();
     final var postingId = UUID.randomUUID();
     final var now = Instant.EPOCH;
     return Stream.of(
-      arguments(named("null id", ""), null, uid, postingId, ApplicationStatus.SAVED, now, now, null),
-      arguments(named("null userId", ""), UUID.randomUUID(), null, postingId, ApplicationStatus.SAVED, now, now, null),
-      arguments(named("null jobPostingId", ""), UUID.randomUUID(), uid, null, ApplicationStatus.SAVED, now, now, null),
-      arguments(named("null status", ""), UUID.randomUUID(), uid, postingId, null, now, now, null),
-      arguments(named("null dateApplied", ""), UUID.randomUUID(), uid, postingId, ApplicationStatus.SAVED, null, now, null),
-      arguments(named("null lastUpdated", ""), UUID.randomUUID(), uid, postingId, ApplicationStatus.SAVED, now, null, null)
+      arguments(named("null id", null), uid, postingId, ApplicationStatus.SAVED, now, now, null),
+      arguments(named("null userId", id), null, postingId, ApplicationStatus.SAVED, now, now, null),
+      arguments(named("null jobPostingId", id), uid, null, ApplicationStatus.SAVED, now, now, null),
+      arguments(named("null status", id), uid, postingId, null, now, now, null),
+      arguments(named("null dateApplied", id), uid, postingId, ApplicationStatus.SAVED, null, now, null),
+      arguments(named("null lastUpdated", id), uid, postingId, ApplicationStatus.SAVED, now, null, null)
     );
   }
 
@@ -86,7 +87,7 @@ class JobApplicationTest {
 
   @ParameterizedTest(name = "{0}")
   @MethodSource("invalidInputs")
-  void shouldRejectInvalidInputs(final String unused, final UUID id, final UserId userId,
+  void shouldRejectInvalidInputs(final UUID id, final UserId userId,
                                   final UUID jobPostingId, final ApplicationStatus status,
                                   final Instant dateApplied, final Instant lastUpdated,
                                   final Notes notes) {

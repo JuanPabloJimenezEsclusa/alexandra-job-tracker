@@ -3,11 +3,10 @@ package dev.jpje.jobtracker.application.usecase;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -15,7 +14,6 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
@@ -32,9 +30,6 @@ import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -44,7 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AnalyzeJobPostingUseCaseTest {
 
   @Spy
-  private final Clock fixedClock = Clock.fixed(Instant.now().plusSeconds(60L), ZoneOffset.UTC);
+  private final Clock fixedClock = Clock.fixed(Instant.EPOCH, ZoneOffset.UTC);
 
   @Mock
   private LoadJobPostingPort loadPort;
@@ -69,7 +64,9 @@ class AnalyzeJobPostingUseCaseTest {
       .create();
   }
 
-  private static Stream<Arguments> analysisScenarios() {
+  @Test
+  void shouldAnalyzeAndPersistPosting() {
+    // Given
     final var userId = UserId.generate();
     final var posting = Instancio.of(JobPosting.class)
       .set(field(JobPosting::userId), userId)
@@ -79,15 +76,7 @@ class AnalyzeJobPostingUseCaseTest {
       .set(field(JobPosting::company), CompanyName.of("Acme"))
       .set(field(JobPosting::description), "We need a Java developer with Spring experience")
       .create();
-    return Stream.of(
-      arguments(named("found posting", posting), validAnalysis())
-    );
-  }
-
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("analysisScenarios")
-  void shouldAnalyzeAndPersistPosting(final JobPosting posting, final JobAnalysis expectedAnalysis) {
-    // Given
+    final var expectedAnalysis = validAnalysis();
     when(loadPort.findById(posting.id())).thenReturn(Optional.of(posting));
     when(analysisPort.analyze(posting.title().value(), posting.company().value(),
       posting.source().name(), posting.description())).thenReturn(expectedAnalysis);
@@ -98,6 +87,7 @@ class AnalyzeJobPostingUseCaseTest {
         JobAnalysisRecord::analysis, JobAnalysisRecord::createdAt)
       .containsExactly(posting.id(), posting.userId(), expectedAnalysis, fixedClock.instant());
     verify(savePort).saveOrReplace(any(JobAnalysisRecord.class));
+    verifyNoMoreInteractions(loadPort, analysisPort, savePort);
   }
 
   @Test
@@ -113,5 +103,6 @@ class AnalyzeJobPostingUseCaseTest {
       .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Job posting not found");
     verify(savePort, never()).saveOrReplace(any());
+    verifyNoMoreInteractions(loadPort, analysisPort, savePort);
   }
 }

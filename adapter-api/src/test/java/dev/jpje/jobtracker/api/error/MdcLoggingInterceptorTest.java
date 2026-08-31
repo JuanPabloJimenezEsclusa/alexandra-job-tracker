@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
+import org.jspecify.annotations.Nullable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -35,18 +36,6 @@ class MdcLoggingInterceptorTest {
     return Stream.of(
       arguments(named("short document", new HttpHeaders()), "{ me }"),
       arguments(named("long document", new HttpHeaders()), longDocument())
-    );
-  }
-
-  private static Stream<Arguments> operationScenarios() {
-    return Stream.of(
-      arguments(named("short operation", new HttpHeaders()), "{ me { username } }")
-    );
-  }
-
-  private static Stream<Arguments> truncationScenarios() {
-    return Stream.of(
-      arguments(new HttpHeaders(), longDocument())
     );
   }
 
@@ -82,36 +71,35 @@ class MdcLoggingInterceptorTest {
   @MethodSource("requestIdScenarios")
   void shouldSetRequestId(final HttpHeaders headers, final String document) {
     // Given
-    final var captured = new AtomicReference<String>();
+    final var captured = new AtomicReference<@Nullable String>();
 
     // When
     interceptor.intercept(mockRequest(headers, document), capturingChain(captured, "requestId")).block();
 
     // Then
-    assertThat(captured.get()).isNotNull().hasSize(REQUEST_ID_LENGTH);
+    assertThat(captured.get()).hasSize(REQUEST_ID_LENGTH);
   }
 
-  @ParameterizedTest(name = "{0} → MDC[operation]={1}")
-  @MethodSource("operationScenarios")
-  void shouldSetOperation(final HttpHeaders headers, final String document) {
+  @Test
+  void shouldSetOperation() {
     // Given
-    final var captured = new AtomicReference<String>();
+    final var document = "{ me { username } }";
+    final var captured = new AtomicReference<@Nullable String>();
 
     // When
-    interceptor.intercept(mockRequest(headers, document), capturingChain(captured, "operation")).block();
+    interceptor.intercept(mockRequest(new HttpHeaders(), document), capturingChain(captured, "operation")).block();
 
     // Then
     assertThat(captured.get()).isEqualTo(document);
   }
 
-  @ParameterizedTest(name = "{0} → MDC[operation] truncated to {1} chars")
-  @MethodSource("truncationScenarios")
-  void shouldTruncateLongOperation(final HttpHeaders headers, final String document) {
+  @Test
+  void shouldTruncateLongOperation() {
     // Given
-    final var captured = new AtomicReference<String>();
+    final var captured = new AtomicReference<@Nullable String>();
 
     // When
-    interceptor.intercept(mockRequest(headers, document), capturingChain(captured, "operation")).block();
+    interceptor.intercept(mockRequest(new HttpHeaders(), longDocument()), capturingChain(captured, "operation")).block();
 
     // Then
     assertThat(captured.get()).hasSize(TRUNCATED_OPERATION_LENGTH);
@@ -121,7 +109,7 @@ class MdcLoggingInterceptorTest {
   @MethodSource("hasAuthScenarios")
   void shouldSetHasAuth(final HttpHeaders headers, final String expectedValue) {
     // Given
-    final var captured = new AtomicReference<String>();
+    final var captured = new AtomicReference<@Nullable String>();
 
     // When
     interceptor.intercept(mockRequest(headers, "{ me }"), capturingChain(captured, "hasAuth")).block();
@@ -144,13 +132,13 @@ class MdcLoggingInterceptorTest {
 
   private WebGraphQlRequest mockRequest(final HttpHeaders headers, final String document) {
     var req = mock(WebGraphQlRequest.class);
-    when(req.getHeaders()).thenReturn(headers != null ? headers : new HttpHeaders());
+    when(req.getHeaders()).thenReturn(headers);
     when(req.getDocument()).thenReturn(document);
     when(req.getUri()).thenReturn(UriComponentsBuilder.fromUriString("http://localhost:8880/api/graphql").build());
     return req;
   }
 
-  private WebGraphQlInterceptor.Chain capturingChain(final AtomicReference<String> captured, final String mdcKey) {
+  private WebGraphQlInterceptor.Chain capturingChain(final AtomicReference<@Nullable String> captured, final String mdcKey) {
     var chain = mock(WebGraphQlInterceptor.Chain.class);
     when(chain.next(any())).thenAnswer(_ -> {
       captured.set(MDC.get(mdcKey));

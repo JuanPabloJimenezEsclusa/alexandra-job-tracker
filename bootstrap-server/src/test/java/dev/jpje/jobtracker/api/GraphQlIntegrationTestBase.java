@@ -27,6 +27,12 @@ public abstract class GraphQlIntegrationTestBase {
     return headers;
   }
 
+  protected HttpHeaders authHeaders(final String username) {
+    final var headers = jsonHeaders();
+    headers.setBearerAuth(registerAndGetToken(username));
+    return headers;
+  }
+
   protected String registerAndGetToken(final String username) {
     final var body = """
       {"query": "mutation { register(username: \\"%s\\", password: \\"pass\\", role: USER) { token } }"}
@@ -68,5 +74,16 @@ public abstract class GraphQlIntegrationTestBase {
     final var submitted = graphql(headers, body);
     return Objects.requireNonNull(submitted.findValue("id"),
       "submit response must contain a posting id").asString();
+  }
+
+  protected JsonNode submitJobPosting(final HttpHeaders headers, final String url,
+                                      final String title, final String company, final String source) {
+    final var body = """
+      {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id title company source}}",\
+      "variables":{"i":{"url":"https://example.com/job/%s","title":"%s",\
+      "description":"No empty","company":"%s","source":"%s"}}}
+      """.formatted(url, title, company, source);
+    final var submitted = graphql(headers, body);
+    return Objects.requireNonNull(submitted, "submit response must not be null");
   }
 }

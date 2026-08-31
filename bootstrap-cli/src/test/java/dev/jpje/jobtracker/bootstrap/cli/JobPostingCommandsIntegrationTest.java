@@ -12,43 +12,31 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class JobPostingCommandsIntegrationTest extends BaseCliIntegrationTest {
+  private static final String JOB_POSTINGS_RESPONSE = """
+    {
+      "data": {
+        "jobPostings": [{
+          "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
+          "title": "Engineer",
+          "company": "Acme",
+          "source": "LINKEDIN",
+          "url": "https://example.com/job",
+          "description": "Awesome role",
+          "postedAt": "2026-01-01T00:00:00Z"
+        }]
+      }
+    }
+  """;
+
 
   private static Stream<Arguments> scenarios() {
     return Stream.of(
       arguments(named("list postings with data", "jobPostings"),
-        """
-          {
-            "data": {
-              "jobPostings": [{
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "title": "Engineer",
-                "company": "Acme",
-                "source": "LINKEDIN",
-                "url": "https://example.com/job",
-                "description": "Awesome role",
-                "postedAt": "2026-01-01T00:00:00Z"
-              }]
-            }
-          }
-        """,
+        JOB_POSTINGS_RESPONSE,
         "po",
         "Engineer"),
       arguments(named("list postings with source filter", "jobPostings"),
-        """
-          {
-            "data": {
-              "jobPostings": [{
-                "id": "b6124fbc-eaba-4f38-bea5-54bbd88fe19a",
-                "title": "Engineer",
-                "company": "Acme",
-                "source": "LINKEDIN",
-                "url": "https://example.com/job",
-                "description": "Awesome role",
-                "postedAt": "2026-01-01T00:00:00Z"
-              }]
-            }
-          }
-        """,
+        JOB_POSTINGS_RESPONSE,
         "po -s LINKEDIN",
         "Engineer"),
       arguments(named("list postings error", "jobPostings"),

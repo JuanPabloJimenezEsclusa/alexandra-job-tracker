@@ -30,8 +30,15 @@ class JwtProviderTest {
     Clock.fixed(Instant.now().plusSeconds(60L), ZoneOffset.UTC));
 
   @Test
-  void shouldGenerateToken() {
-    assertThat(provider.generateToken(userId, UserRole.USER)).isNotBlank();
+  void shouldGenerateWellFormedToken() {
+    final var token = provider.generateToken(userId, UserRole.USER);
+    final var claims = Jwts.parser().verifyWith(deriveKey()).build()
+      .parseSignedClaims(token).getPayload();
+
+    assertThat(token.split("\\.")).as("JWT should have three segments").hasSize(3);
+    assertThat(claims.getSubject()).as("subject should be the user id").isEqualTo(userId.value().toString());
+    assertThat(claims.get("role", String.class)).as("role claim should be embedded").isEqualTo("USER");
+    assertThat(claims.getExpiration()).as("expiration claim should be set").isNotNull();
   }
 
   @Test

@@ -3,7 +3,9 @@ package dev.jpje.jobtracker.cache;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
 import static org.mockito.Mockito.description;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -52,10 +54,16 @@ class CachingJobApplicationAdapterTest {
 
   @Test
   void shouldLoadAndCacheApplicationOnMiss() {
+    // Given
     final var app = jobApplication();
     when(loadDelegate.findById(app.id())).thenReturn(Optional.of(app));
 
-    assertThat(adapter.findById(app.id())).hasValue(app);
+    // When
+    assertThat(adapter.findById(app.id())).as("loaded application returned").hasValue(app);
+
+    // Then
+    assertThat(adapter.findById(app.id())).as("second read served from cache").hasValue(app);
+    verify(loadDelegate).findById(app.id());
   }
 
   @Test
@@ -70,11 +78,17 @@ class CachingJobApplicationAdapterTest {
 
   @Test
   void shouldLoadAndCacheListOnMiss() {
+    // Given
     final var userId = UserId.generate();
     final var app = jobApplication(userId);
     when(loadDelegate.findAllByUserId(userId)).thenReturn(List.of(app));
 
-    assertThat(adapter.findAllByUserId(userId)).isEqualTo(List.of(app));
+    // When
+    assertThat(adapter.findAllByUserId(userId)).as("loaded list returned").isEqualTo(List.of(app));
+
+    // Then
+    assertThat(adapter.findAllByUserId(userId)).as("second read served from cache").isEqualTo(List.of(app));
+    verify(loadDelegate).findAllByUserId(userId);
   }
 
   @Test
@@ -91,24 +105,35 @@ class CachingJobApplicationAdapterTest {
 
   @Test
   void shouldSaveAndCacheApplication() {
+    // Given
     final var app = jobApplication();
     when(saveDelegate.save(app)).thenReturn(app);
 
+    // When
     adapter.save(app);
 
+    // Then
+    assertThat(adapter.findById(app.id())).as("saved application served from cache").hasValue(app);
     assertThat(cache.asMap()).as("saved application should be cached").containsKey("jobapp:" + app.id());
     verify(saveDelegate, description("save should be delegated")).save(app);
+    verifyNoInteractions(loadDelegate);
   }
 
   @Test
   void shouldDeleteAndEvictCaches() {
+    // Given
     final var app = jobApplication();
     when(loadDelegate.findById(app.id())).thenReturn(Optional.of(app));
 
+    // When
     adapter.delete(app.id());
 
+    // Then
+    when(loadDelegate.findById(app.id())).thenReturn(Optional.empty());
+    assertThat(adapter.findById(app.id())).as("evicted application reloaded from delegate").isEmpty();
     assertThat(cache.asMap()).as("deleted application should be evicted from cache").doesNotContainKey("jobapp:" + app.id());
     verify(saveDelegate, description("delete should be delegated")).delete(app.id());
+    verify(loadDelegate, times(2)).findById(app.id());
   }
 
   private void primeByIdCache(final UUID id, final JobApplication app) {

@@ -3,7 +3,6 @@ package dev.jpje.jobtracker.api.resolver;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -11,7 +10,6 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
 import dev.jpje.jobtracker.api.dto.JobPostingResponse;
@@ -31,9 +29,6 @@ import dev.jpje.jobtracker.domain.vo.UserRole;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -64,31 +59,19 @@ class JobPostingMutationResolverTest {
       .create();
   }
 
-  private static Stream<Arguments> analyzeScenarios() {
+  @Test
+  void shouldResolveAnalyze() {
+    // Given
     final var userId = UserId.generate();
-    final var jobId = UUID.randomUUID();
+    final var jobPostingId = UUID.randomUUID();
     final var jobAnalysisRecord = Instancio.of(JobAnalysisRecord.class)
-      .set(field(JobAnalysisRecord::jobPostingId), jobId)
+      .set(field(JobAnalysisRecord::jobPostingId), jobPostingId)
       .set(field(JobAnalysisRecord::userId), userId)
       .set(field(JobAnalysisRecord::analysis), validAnalysis())
       .create();
-    return Stream.of(
-      arguments(userId, jobId, jobAnalysisRecord)
-    );
-  }
-
-  private static Stream<Arguments> analyzeErrorScenarios() {
-    final var jobId = UUID.randomUUID();
-    return Stream.of(
-      arguments(UserId.generate(), jobId, "Job posting not found")
-    );
-  }
-
-  @ParameterizedTest(name = "analyze {0}")
-  @MethodSource("analyzeScenarios")
-  void shouldResolveAnalyze(final UserId userId, final UUID jobPostingId, final JobAnalysisRecord jobAnalysisRecord) {
     when(analyzeUseCase.analyze(userId, jobPostingId)).thenReturn(jobAnalysisRecord);
 
+    // When, then
     assertThat(resolver.analyzeJobPosting(userId, jobPostingId))
       .as("resolved analysis should match the recorded analysis")
       .isEqualTo(JobAnalysisResponse.from(jobAnalysisRecord));
@@ -98,11 +81,15 @@ class JobPostingMutationResolverTest {
     verifyNoInteractions(submitUseCase, manageAnalysisUseCase);
   }
 
-  @ParameterizedTest(name = "analyze error {0}")
-  @MethodSource("analyzeErrorScenarios")
-  void shouldThrowWhenAnalyzeFails(final UserId userId, final UUID jobPostingId, final String errorMessage) {
+  @Test
+  void shouldThrowWhenAnalyzeFails() {
+    // Given
+    final var userId = UserId.generate();
+    final var jobPostingId = UUID.randomUUID();
+    final var errorMessage = "Job posting not found";
     when(analyzeUseCase.analyze(userId, jobPostingId)).thenThrow(new IllegalArgumentException(errorMessage));
 
+    // When, then
     assertThatThrownBy(() -> resolver.analyzeJobPosting(userId, jobPostingId))
       .as("analyze should propagate the failure")
       .isInstanceOf(IllegalArgumentException.class)

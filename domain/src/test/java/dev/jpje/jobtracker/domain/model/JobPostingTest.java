@@ -58,13 +58,13 @@ class JobPostingTest {
     // When, then
     assertThat(new JobPosting(id, uid, Url.of("https://example.com"), Source.LINKEDIN,
       JobTitle.of("title"), CompanyName.of("company"), "desc", now))
-      .returns(id, JobPosting::id)
-      .returns(uid, JobPosting::userId)
-      .returns(Url.of("https://example.com"), JobPosting::url)
-      .returns(Source.LINKEDIN, JobPosting::source)
-      .returns(JobTitle.of("title"), JobPosting::title)
-      .returns(CompanyName.of("company"), JobPosting::company)
-      .returns("desc", JobPosting::description)
-      .returns(now, JobPosting::postedAt);
+      .as("posting id").returns(id, JobPosting::id)
+      .as("user id").returns(uid, JobPosting::userId)
+      .as("url").returns(Url.of("https://example.com"), JobPosting::url)
+      .as("source").returns(Source.LINKEDIN, JobPosting::source)
+      .as("title").returns(JobTitle.of("title"), JobPosting::title)
+      .as("company").returns(CompanyName.of("company"), JobPosting::company)
+      .as("description").returns("desc", JobPosting::description)
+      .as("posted at").returns(now, JobPosting::postedAt);
   }
 }

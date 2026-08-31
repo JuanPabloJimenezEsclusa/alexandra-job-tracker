@@ -25,10 +25,6 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
   private static final double MOCKED_FIT_SCORE = 85.0;
   private static final String MOCKED_COMPANY_TYPE = "enterprise";
   private static final String MOCKED_SALARY_CURRENCY = "USD";
-  private static final String SUBMIT_BODY = """
-    {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id}}",\
-    "variables":{"i":{"url":"https://example.com/job","title":"Engineer","company":"Acme","description":"Software engineer role","source":"LINKEDIN"}}}
-    """;
   private static final String ANALYZE_QUERY = """
     {"query": "mutation { analyzeJobPosting(jobPostingId: \\"%s\\") { id summary seniority softSkills \
     technicalSkills fitScore companyRating companyType salaryMin salaryMax salaryCurrency } }"}
@@ -37,7 +33,7 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
   @Test
   void shouldAnalyzeJobPosting() {
     final var headers = authHeaders("analyze-user");
-    final var postingId = submitPosting(headers);
+    final var postingId = submitPostingAndGetId(headers);
     deleteListenerAnalysis(postingId, headers);
 
     final var analysis = analyzePosting(postingId, headers);
@@ -58,9 +54,22 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
   }
 
   @Test
+  void shouldPersistListenerAnalysisForSubmittedPosting() {
+    final var headers = authHeaders("listener-analysis-user");
+    final var postingId = submitPostingAndGetId(headers);
+    awaitListenerAnalysis(postingId, headers);
+
+    final var analyses = graphql(headers, """
+      {"query": "query { analyses { id summary } }"}
+      """);
+    assertThat(analyses.findValues("summary")).as("listener analysis summary persisted")
+      .extracting(JsonNode::asString).contains(MOCKED_SUMMARY);
+  }
+
+  @Test
   void shouldDeleteAnalysis() {
     final var headers = authHeaders("delete-analysis-user");
-    final var postingId = submitPosting(headers);
+    final var postingId = submitPostingAndGetId(headers);
     final var analysisId = awaitListenerAnalysis(postingId, headers);
 
     final var deleted = graphql(adminHeaders(), """
@@ -78,7 +87,7 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
   @Test
   void shouldRejectDeleteAnalysisForNonAdmin() {
     final var headers = authHeaders("forbidden-delete-user");
-    final var postingId = submitPosting(headers);
+    final var postingId = submitPostingAndGetId(headers);
     final var analysisId = awaitListenerAnalysis(postingId, headers);
 
     final var deleted = graphql(headers, """
@@ -92,18 +101,6 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
       """);
     assertThat(afterDelete.findValues("id")).as("analysis kept after forbidden delete")
       .extracting(JsonNode::asString).contains(analysisId);
-  }
-
-  private HttpHeaders authHeaders(final String username) {
-    final var headers = jsonHeaders();
-    headers.setBearerAuth(registerAndGetToken(username));
-    return headers;
-  }
-
-  private String submitPosting(final HttpHeaders headers) {
-    final var submitted = graphql(headers, SUBMIT_BODY);
-    return Objects.requireNonNull(submitted.findValue("id"),
-      "submit response must contain a posting id").asString();
   }
 
   private void deleteListenerAnalysis(final String postingId, final HttpHeaders headers) {
@@ -130,7 +127,8 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
         .extracting(JsonNode::asString)
         .contains(postingId);
       final var index = postingIds.stream().map(JsonNode::asString).toList().indexOf(postingId);
-      analysisId.set(analyses.findValues("id").get(index).asString());
+      analysisId.set(Objects.requireNonNull(analyses.findValues("id").get(index).asString(),
+        "analysis id must not be null"));
     });
     return analysisId.get();
   }

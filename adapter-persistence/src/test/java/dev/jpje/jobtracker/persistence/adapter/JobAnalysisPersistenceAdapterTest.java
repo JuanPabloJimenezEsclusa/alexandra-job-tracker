@@ -1,7 +1,6 @@
 package dev.jpje.jobtracker.persistence.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.instancio.Select.field;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.description;
@@ -36,45 +35,58 @@ class JobAnalysisPersistenceAdapterTest {
 
   @Test
   void shouldSaveOrReplaceRecord() {
+    // Given
     final var jobAnalysisRecord = jobAnalysisRecord();
 
-    assertThatCode(() -> adapter.saveOrReplace(jobAnalysisRecord)).as("saveOrReplace does not throw")
-      .doesNotThrowAnyException();
+    // When
+    adapter.saveOrReplace(jobAnalysisRecord);
+
+    // Then
     verify(repository, description("existing analysis deleted by posting")).deleteByJobPostingId(jobAnalysisRecord.jobPostingId());
     verify(repository, description("replacement analysis persisted")).save(any(JobAnalysisEntity.class));
   }
 
   @Test
   void shouldDeleteById() {
+    // Given
     final var id = UUID.randomUUID();
 
-    assertThatCode(() -> adapter.delete(id)).as("delete does not throw").doesNotThrowAnyException();
+    // When
+    adapter.delete(id);
+
+    // Then
     verify(repository, description("repository delete invoked")).deleteById(id);
   }
 
   @Test
   void shouldFindById() {
+    // Given
     final var entity = jobAnalysisEntity();
     when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
 
-    assertThat(adapter.findById(entity.getId())).contains(expected(entity));
+    // When, then
+    assertThat(adapter.findById(entity.getId())).as("found analysis").contains(expected(entity));
   }
 
   @Test
   void shouldFindByJobPostingId() {
+    // Given
     final var entity = jobAnalysisEntity();
     when(repository.findByJobPostingId(entity.getJobPostingId())).thenReturn(Optional.of(entity));
 
-    assertThat(adapter.findByJobPostingId(entity.getJobPostingId())).contains(expected(entity));
+    // When, then
+    assertThat(adapter.findByJobPostingId(entity.getJobPostingId())).as("analysis by posting").contains(expected(entity));
   }
 
   @Test
   void shouldFindByUserId() {
+    // Given
     final var userId = UserId.generate();
     final var entity = jobAnalysisEntity(userId);
     when(repository.findByUserIdOrderByCreatedAtDesc(userId.value())).thenReturn(List.of(entity));
 
-    assertThat(adapter.findByUserId(userId)).containsExactly(expected(entity));
+    // When, then
+    assertThat(adapter.findByUserId(userId)).as("analyses for user").containsExactly(expected(entity));
   }
 
   private static JobAnalysisRecord expected(final JobAnalysisEntity entity) {
