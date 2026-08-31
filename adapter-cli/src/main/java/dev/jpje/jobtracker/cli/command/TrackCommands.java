@@ -69,7 +69,6 @@ public class TrackCommands {
        Example usage:
         - list
         - list -s APPLIED
-        - list --source LINKEDIN
         - l -j ".[] | {jobPostingId,status}"
         - l -j ".[] | select(.status == "SAVED") | {id,jobPostingId}"
       """)
@@ -78,9 +77,6 @@ public class TrackCommands {
       longName = "status", shortName = 's',
       description = "Filter by status: SAVED, APPLIED, INTERVIEWING, OFFER, ACCEPTED, REJECTED, WITHDRAWN") @Nullable final String status,
     @Option(
-      longName = "source",
-      description = "Filter by source: LINKEDIN, INDEED, OTHER") @Nullable final String source,
-    @Option(
       longName = "jq", shortName = 'j',
       description = "jq expression to filter output (e.g., '.[].company')") @Nullable final String jq) {
 
@@ -88,13 +84,10 @@ public class TrackCommands {
     if (status != null) {
       variables.put("s", status);
     }
-    if (source != null) {
-      variables.put("src", source);
-    }
 
     final var result = client.execute("""
-        query($s: ApplicationStatus, $src: Source) {
-          applications(status: $s, source: $src) {
+        query($s: ApplicationStatus) {
+          applications(status: $s) {
             id, jobPostingId, status, dateApplied, lastUpdated, notes
           }
         }""",
