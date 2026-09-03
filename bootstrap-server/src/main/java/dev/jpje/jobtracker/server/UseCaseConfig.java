@@ -128,9 +128,10 @@ public class UseCaseConfig {
       }
 
       @Override
-      public JobApplication updateStatus(final UUID applicationId, final ApplicationStatus newStatus,
+      public JobApplication updateStatus(final UserId userId, final UUID applicationId,
+                                          final ApplicationStatus newStatus,
                                           @Nullable final Notes notes) {
-        return impl.updateStatus(applicationId, newStatus, notes);
+        return impl.updateStatus(userId, applicationId, newStatus, notes);
       }
 
       @Override
@@ -139,8 +140,8 @@ public class UseCaseConfig {
       }
 
       @Override
-      public void delete(final UUID applicationId) {
-        impl.delete(applicationId);
+      public void delete(final UserId userId, final UUID applicationId) {
+        impl.delete(userId, applicationId);
       }
     };
   }

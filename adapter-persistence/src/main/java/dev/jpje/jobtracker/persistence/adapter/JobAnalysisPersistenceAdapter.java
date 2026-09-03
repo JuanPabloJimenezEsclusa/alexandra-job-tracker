@@ -36,8 +36,8 @@ public class JobAnalysisPersistenceAdapter implements SaveJobAnalysisPort, LoadJ
   }
 
   @Override
-  public Optional<JobAnalysisRecord> findById(final UUID id) {
-    return repository.findById(id).map(JobAnalysisMapper::toDomain);
+  public Optional<JobAnalysisRecord> findByIdAndUser(final UUID id, final UserId userId) {
+    return repository.findByIdAndUserId(id, userId.value()).map(JobAnalysisMapper::toDomain);
   }
 
   @Override

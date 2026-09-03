@@ -29,12 +29,12 @@ public class AnalyzeJobPostingUseCase implements AnalyzeJobPostingPort {
 
   @Override
   public JobAnalysisRecord analyze(final UserId userId, final UUID jobPostingId) {
-    final var posting = loadJobPostingPort.findById(jobPostingId)
+    final var posting = loadJobPostingPort.findByIdAndUser(jobPostingId, userId)
       .orElseThrow(() -> new ResourceNotFoundException("Job posting not found"));
     final var analysis = analysisPort.analyze(
       posting.title().value(), posting.company().value(), posting.source().name(),
       posting.description());
-    final var jobAnalysisRecord = new JobAnalysisRecord(UUID.randomUUID(), jobPostingId, posting.userId(), analysis, clock.instant());
+    final var jobAnalysisRecord = new JobAnalysisRecord(UUID.randomUUID(), jobPostingId, userId, analysis, clock.instant());
     saveAnalysisPort.saveOrReplace(jobAnalysisRecord);
     return jobAnalysisRecord;
   }

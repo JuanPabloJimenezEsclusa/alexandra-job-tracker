@@ -34,6 +34,11 @@ public class JobPostingPersistenceAdapter implements SaveJobPostingPort, LoadJob
   }
 
   @Override
+  public Optional<JobPosting> findByIdAndUser(final UUID id, final UserId userId) {
+    return repository.findByIdAndUserId(id, userId.value()).map(JobPostingMapper::toDomain);
+  }
+
+  @Override
   public List<JobPosting> findByUserId(final UserId userId) {
     return repository.findByUserId(userId.value())
       .stream()

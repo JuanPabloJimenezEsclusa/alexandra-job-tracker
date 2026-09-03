@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -111,12 +112,12 @@ class TrackJobApplicationUseCaseTest {
   void shouldUpdateStatus(final Notes notes, final Notes expectedNotes) {
     // Given
     final var app = application();
-    when(loadPort.findById(app.id())).thenReturn(Optional.of(app));
+    when(loadPort.findByIdAndUser(app.id(), app.userId())).thenReturn(Optional.of(app));
     when(clock.instant()).thenReturn(NOW);
     when(savePort.save(any(JobApplication.class))).thenAnswer(inv -> inv.getArgument(0));
 
     // When
-    final var result = useCase.updateStatus(app.id(), ApplicationStatus.APPLIED, notes);
+    final var result = useCase.updateStatus(app.userId(), app.id(), ApplicationStatus.APPLIED, notes);
 
     // Then
     assertThat(result)
@@ -128,17 +129,26 @@ class TrackJobApplicationUseCaseTest {
     verifyNoMoreInteractions(loadPort, savePort, clock, eventPublisher);
   }
 
-  @Test
-  void shouldThrowWhenApplicationMissing() {
+  private static Stream<Arguments> notAccessibleScenarios() {
+    return Stream.of(
+      arguments(named("missing application", UUID.randomUUID())),
+      arguments(named("another user's application", UUID.randomUUID()))
+    );
+  }
+
+  @ParameterizedTest(name = "{0} rejects the update with NOT_FOUND")
+  @MethodSource("notAccessibleScenarios")
+  void shouldRejectUpdateWhenApplicationNotAccessible(final UUID id) {
     // Given
-    final var id = UUID.randomUUID();
-    when(loadPort.findById(id)).thenReturn(Optional.empty());
+    final var userId = UserId.generate();
+    when(loadPort.findByIdAndUser(id, userId)).thenReturn(Optional.empty());
 
     // When, then
-    assertThatThrownBy(() -> useCase.updateStatus(id, ApplicationStatus.APPLIED, null))
+    assertThatThrownBy(() -> useCase.updateStatus(userId, id, ApplicationStatus.APPLIED, null))
+      .as("an application that is missing or not owned should be indistinguishable")
       .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Application not found");
-    verify(loadPort).findById(id);
+    verify(loadPort, description("scoped lookup should miss for the caller")).findByIdAndUser(id, userId);
     verifyNoMoreInteractions(savePort, clock, eventPublisher);
   }
 
@@ -158,14 +168,31 @@ class TrackJobApplicationUseCaseTest {
   @Test
   void shouldDeleteApplication() {
     // Given
-    final var id = UUID.randomUUID();
+    final var app = application();
+    when(loadPort.findByIdAndUser(app.id(), app.userId())).thenReturn(Optional.of(app));
 
     // When
-    useCase.delete(id);
+    useCase.delete(app.userId(), app.id());
 
     // Then
-    verify(savePort).delete(id);
+    verify(loadPort, description("owned application lookup should hit")).findByIdAndUser(app.id(), app.userId());
+    verify(savePort).delete(app.id());
     verifyNoMoreInteractions(savePort, loadPort, loadPostingPort, clock, eventPublisher);
+  }
+
+  @Test
+  void shouldRejectDeleteOfAnotherUsersApplication() {
+    // Given
+    final var app = application();
+    final var otherUser = UserId.generate();
+    when(loadPort.findByIdAndUser(app.id(), otherUser)).thenReturn(Optional.empty());
+
+    // When, then
+    assertThatThrownBy(() -> useCase.delete(otherUser, app.id()))
+      .isInstanceOf(ResourceNotFoundException.class)
+      .hasMessage("Application not found");
+    verify(loadPort, description("scoped lookup should miss for another user")).findByIdAndUser(app.id(), otherUser);
+    verifyNoMoreInteractions(savePort, clock, eventPublisher);
   }
 
   private static JobApplication application() {

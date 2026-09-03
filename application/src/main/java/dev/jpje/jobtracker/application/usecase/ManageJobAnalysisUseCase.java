@@ -20,8 +20,8 @@ public class ManageJobAnalysisUseCase implements ManageJobAnalysisPort {
   }
 
   @Override
-  public Optional<JobAnalysisRecord> findById(final UUID id) {
-    return loadPort.findById(id);
+  public Optional<JobAnalysisRecord> findByIdForUser(final UserId userId, final UUID id) {
+    return loadPort.findByIdAndUser(id, userId);
   }
 
   @Override

@@ -92,6 +92,47 @@ class ApplicationIntegrationTest extends GraphQlIntegrationTestBase {
     assertThat(applications.findValues("id")).as("applications filtered by status").isEmpty();
   }
 
+  @Test
+  void shouldRejectUpdateOfAnotherUsersApplication() {
+    final var ownerHeaders = authHeaders("cross-owner-user");
+    final var postingId = submitPostingAndGetId(ownerHeaders);
+    final var created = graphql(ownerHeaders, createBody(postingId));
+    final var appId = Objects.requireNonNull(created.findValue("id"),
+      "create response must contain an application id").asString();
+
+    final var otherUserHeaders = authHeaders("cross-intruder-user");
+    final var updated = graphql(otherUserHeaders, """
+      {"query": "mutation { updateApplicationStatus(id: \\"%s\\", status: APPLIED) { status } }"}
+      """.formatted(appId));
+    assertThat(updated.findValue("message").asString()).as("cross-user update rejected")
+      .isEqualTo("Application not found");
+  }
+
+  @Test
+  void shouldRejectDeleteOfAnotherUsersApplication() {
+    final var ownerHeaders = authHeaders("cross-delete-owner-user");
+    final var postingId = submitPostingAndGetId(ownerHeaders);
+    final var created = graphql(ownerHeaders, createBody(postingId));
+    final var appId = Objects.requireNonNull(created.findValue("id"),
+      "create response must contain an application id").asString();
+
+    final var otherUserHeaders = authHeaders("cross-delete-intruder-user");
+    final var deleted = graphql(otherUserHeaders, """
+      {"query": "mutation { deleteApplication(id: \\"%s\\") }"}
+      """.formatted(appId));
+    assertThat(deleted.findValue("message").asString()).as("cross-user delete rejected")
+      .isEqualTo("Application not found");
+  }
+
+  @Test
+  void shouldRejectUpdateWithoutAuthentication() {
+    final var updated = graphql(jsonHeaders(), """
+      {"query": "mutation { updateApplicationStatus(id: \\"00000000-0000-0000-0000-000000000000\\", status: APPLIED) { status } }"}
+      """);
+    assertThat(updated.findValue("message").asString()).as("update without auth rejected")
+      .isEqualTo("Authentication required");
+  }
+
   private static String createBody(final String postingId) {
     return """
       {"query": "mutation { createApplication(jobPostingId: \\"%s\\") { id status jobPostingId } }"}

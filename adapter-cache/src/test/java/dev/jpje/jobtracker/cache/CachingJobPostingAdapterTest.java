@@ -93,6 +93,32 @@ class CachingJobPostingAdapterTest {
   }
 
   @Test
+  void shouldScopePostingByIdToOwner() {
+    // Given
+    final var owner = UserId.generate();
+    final var posting = jobPosting(owner);
+    primeByIdCache(posting.id(), posting);
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(posting.id(), owner)).as("owned posting returned").hasValue(posting);
+    assertThat(adapter.findByIdAndUser(posting.id(), UserId.generate()))
+      .as("another user's posting indistinguishable from missing").isEmpty();
+    verify(loadDelegate, description("load delegate should be hit only on cache miss")).findById(posting.id());
+  }
+
+  @Test
+  void shouldReturnEmptyWhenPostingMissingForUser() {
+    // Given
+    final var userId = UserId.generate();
+    final var id = UUID.randomUUID();
+    when(loadDelegate.findById(id)).thenReturn(Optional.empty());
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(id, userId)).as("missing posting scoped by user").isEmpty();
+    verify(loadDelegate, description("load delegate should be hit on a scoped miss")).findById(id);
+  }
+
+  @Test
   void shouldSaveAndCachePosting() {
     // Given
     final var posting = jobPosting();
