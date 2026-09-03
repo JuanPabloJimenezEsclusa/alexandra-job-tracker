@@ -184,11 +184,12 @@ class TrackJobApplicationUseCaseTest {
   void shouldRejectDeleteOfAnotherUsersApplication() {
     // Given
     final var app = application();
+    final var appId = app.id();
     final var otherUser = UserId.generate();
     when(loadPort.findByIdAndUser(app.id(), otherUser)).thenReturn(Optional.empty());
 
     // When, then
-    assertThatThrownBy(() -> useCase.delete(otherUser, app.id()))
+    assertThatThrownBy(() -> useCase.delete(otherUser, appId))
       .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Application not found");
     verify(loadPort, description("scoped lookup should miss for another user")).findByIdAndUser(app.id(), otherUser);

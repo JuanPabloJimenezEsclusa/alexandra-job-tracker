@@ -65,7 +65,7 @@ info:
     version: ${spring.application.version}
 
 jwt:
-  secret: ${JWT_SECRET:change-me-in-production-at-least-32-chars-long!!}
+  secret: ${JWT_SECRET}
 
 ajt:
   events:

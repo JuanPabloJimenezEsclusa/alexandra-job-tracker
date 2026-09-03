@@ -8,12 +8,13 @@ import java.security.MessageDigest;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Date;
 import javax.crypto.SecretKey;
 
+import dev.jpje.jobtracker.domain.exception.InvalidTokenException;
 import dev.jpje.jobtracker.domain.vo.TokenPayload;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.domain.vo.UserRole;
-import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.Test;
@@ -60,7 +61,36 @@ class JwtProviderTest {
   @Test
   void shouldRejectInvalidToken() {
     assertThatThrownBy(() -> provider.validateToken("not-a-jwt"))
-      .isInstanceOf(JwtException.class);
+      .isInstanceOf(InvalidTokenException.class);
+  }
+
+  @Test
+  void shouldRejectExpiredToken() {
+    final var expired = Jwts.builder()
+      .subject(userId.value().toString())
+      .claim("role", UserRole.USER.name())
+      .expiration(Date.from(Instant.now().minusSeconds(60)))
+      .signWith(deriveKey())
+      .compact();
+
+    assertThatThrownBy(() -> provider.validateToken(expired))
+      .isInstanceOf(InvalidTokenException.class)
+      .hasMessage("Invalid or expired token");
+  }
+
+  @Test
+  void shouldRejectSecretShorterThanMinimum() {
+    final var clock = Clock.systemUTC();
+    assertThatThrownBy(() -> new JwtProvider("too-short", EXPIRATION_MS, clock))
+      .isInstanceOf(IllegalArgumentException.class)
+      .hasMessage("jwt.secret must be set to at least 32 characters");
+  }
+
+  @Test
+  void shouldRejectBlankSecret() {
+    final var clock = Clock.systemUTC();
+    assertThatThrownBy(() -> new JwtProvider("   ", EXPIRATION_MS, clock))
+      .isInstanceOf(IllegalArgumentException.class);
   }
 
   @Test

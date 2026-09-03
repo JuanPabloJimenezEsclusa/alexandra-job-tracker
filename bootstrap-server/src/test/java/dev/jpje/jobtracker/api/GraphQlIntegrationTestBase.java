@@ -5,10 +5,12 @@ import java.util.Objects;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.RestClient;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
+@TestPropertySource(properties = "jwt.secret=super-secret-signing-key-for-tests")
 public abstract class GraphQlIntegrationTestBase {
 
   protected final RestClient rest = RestClient.builder().build();
