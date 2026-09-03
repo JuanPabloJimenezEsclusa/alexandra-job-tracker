@@ -8,7 +8,7 @@ import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
 import dev.jpje.jobtracker.domain.vo.UserId;
 
 public interface LoadJobAnalysisPort {
-  Optional<JobAnalysisRecord> findById(UUID id);
+  Optional<JobAnalysisRecord> findByIdAndUser(UUID id, UserId userId);
 
   Optional<JobAnalysisRecord> findByJobPostingId(UUID jobPostingId);
 

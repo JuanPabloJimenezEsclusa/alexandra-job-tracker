@@ -49,10 +49,11 @@ public class TrackJobApplicationUseCase implements TrackJobApplicationPort {
   }
 
   @Override
-  public JobApplication updateStatus(final UUID applicationId,
+  public JobApplication updateStatus(final UserId userId,
+                                      final UUID applicationId,
                                       final ApplicationStatus newStatus,
                                       @Nullable final Notes notes) {
-    final var app = loadPort.findById(applicationId)
+    final var app = loadPort.findByIdAndUser(applicationId, userId)
       .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
     final var now = clock.instant();
     final var previousStatus = app.status();
@@ -73,7 +74,9 @@ public class TrackJobApplicationUseCase implements TrackJobApplicationPort {
   }
 
   @Override
-  public void delete(final UUID applicationId) {
+  public void delete(final UserId userId, final UUID applicationId) {
+    loadPort.findByIdAndUser(applicationId, userId)
+      .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
     savePort.delete(applicationId);
   }
 }

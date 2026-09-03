@@ -10,5 +10,7 @@ import dev.jpje.jobtracker.domain.vo.UserId;
 public interface LoadJobPostingPort {
   Optional<JobPosting> findById(UUID id);
 
+  Optional<JobPosting> findByIdAndUser(UUID id, UserId userId);
+
   List<JobPosting> findByUserId(UserId userId);
 }

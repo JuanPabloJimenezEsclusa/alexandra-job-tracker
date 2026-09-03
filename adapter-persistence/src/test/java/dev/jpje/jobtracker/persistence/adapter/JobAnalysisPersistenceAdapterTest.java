@@ -59,16 +59,6 @@ class JobAnalysisPersistenceAdapterTest {
   }
 
   @Test
-  void shouldFindById() {
-    // Given
-    final var entity = jobAnalysisEntity();
-    when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
-
-    // When, then
-    assertThat(adapter.findById(entity.getId())).as("found analysis").contains(expected(entity));
-  }
-
-  @Test
   void shouldFindByJobPostingId() {
     // Given
     final var entity = jobAnalysisEntity();
@@ -76,6 +66,28 @@ class JobAnalysisPersistenceAdapterTest {
 
     // When, then
     assertThat(adapter.findByJobPostingId(entity.getJobPostingId())).as("analysis by posting").contains(expected(entity));
+  }
+
+  @Test
+  void shouldFindByIdAndUser() {
+    // Given
+    final var userId = UserId.generate();
+    final var entity = jobAnalysisEntity(userId);
+    when(repository.findByIdAndUserId(entity.getId(), userId.value())).thenReturn(Optional.of(entity));
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(entity.getId(), userId)).as("analysis scoped by user").contains(expected(entity));
+  }
+
+  @Test
+  void shouldReturnEmptyWhenFindByIdAndUserMisses() {
+    // Given
+    final var id = UUID.randomUUID();
+    final var userId = UserId.generate();
+    when(repository.findByIdAndUserId(id, userId.value())).thenReturn(Optional.empty());
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(id, userId)).as("missing or foreign analysis").isEmpty();
   }
 
   @Test

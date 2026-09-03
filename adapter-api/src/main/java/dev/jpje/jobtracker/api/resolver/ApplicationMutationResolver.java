@@ -32,16 +32,20 @@ public class ApplicationMutationResolver {
   }
 
   @MutationMapping
-  public JobApplicationResponse updateApplicationStatus(@Argument final UUID id,
+  public JobApplicationResponse updateApplicationStatus(@ContextValue(required = false) @Nullable final UserId userId,
+                                                        @Argument final UUID id,
                                                         @Argument final ApplicationStatus status,
                                                         @Argument @Nullable final String notes) {
-    return JobApplicationResponse.from(useCase.updateStatus(id, status,
+    Objects.requireNonNull(userId, "Authentication required");
+    return JobApplicationResponse.from(useCase.updateStatus(userId, id, status,
       notes != null ? Notes.of(StringSanitizer.sanitize(notes)) : null));
   }
 
   @MutationMapping
-  public boolean deleteApplication(@Argument final UUID id) {
-    useCase.delete(id);
+  public boolean deleteApplication(@ContextValue(required = false) @Nullable final UserId userId,
+                                   @Argument final UUID id) {
+    Objects.requireNonNull(userId, "Authentication required");
+    useCase.delete(userId, id);
     return true;
   }
 }

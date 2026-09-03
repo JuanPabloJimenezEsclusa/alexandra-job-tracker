@@ -103,6 +103,43 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
       .extracting(JsonNode::asString).contains(analysisId);
   }
 
+  @Test
+  void shouldRejectAnalysisOfAnotherUser() {
+    final var ownerHeaders = authHeaders("analysis-owner-user");
+    final var postingId = submitPostingAndGetId(ownerHeaders);
+    final var analysisId = awaitListenerAnalysis(postingId, ownerHeaders);
+
+    final var otherUserHeaders = authHeaders("analysis-intruder-user");
+    final var fetched = graphql(otherUserHeaders, """
+      {"query": "query { analysis(id: \\"%s\\") { id summary } }"}
+      """.formatted(analysisId));
+    assertThat(fetched.findValue("message").asString()).as("cross-user analysis rejected")
+      .isEqualTo("Analysis not found");
+  }
+
+  @Test
+  void shouldRejectMissingAnalysis() {
+    final var headers = authHeaders("missing-analysis-user");
+    final var fetched = graphql(headers, """
+      {"query": "query { analysis(id: \\"00000000-0000-0000-0000-000000000000\\") { id summary } }"}
+      """);
+    assertThat(fetched.findValue("message").asString()).as("missing analysis rejected")
+      .isEqualTo("Analysis not found");
+  }
+
+  @Test
+  void shouldRejectAnalysisWithoutAuthentication() {
+    final var ownerHeaders = authHeaders("analysis-unauth-owner-user");
+    final var postingId = submitPostingAndGetId(ownerHeaders);
+    final var analysisId = awaitListenerAnalysis(postingId, ownerHeaders);
+
+    final var fetched = graphql(jsonHeaders(), """
+      {"query": "query { analysis(id: \\"%s\\") { id summary } }"}
+      """.formatted(analysisId));
+    assertThat(fetched.findValue("message").asString()).as("analysis without auth rejected")
+      .isEqualTo("Authentication required");
+  }
+
   private void deleteListenerAnalysis(final String postingId, final HttpHeaders headers) {
     final var analysisId = awaitListenerAnalysis(postingId, headers);
     final var deleted = graphql(adminHeaders(), """

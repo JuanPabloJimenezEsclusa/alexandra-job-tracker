@@ -39,6 +39,11 @@ public class CachingJobPostingAdapter implements LoadJobPostingPort, SaveJobPost
   }
 
   @Override
+  public Optional<JobPosting> findByIdAndUser(final UUID id, final UserId userId) {
+    return findById(id).filter(posting -> posting.userId().equals(userId));
+  }
+
+  @Override
   public List<JobPosting> findByUserId(final UserId userId) {
     final var key = LIST_KEY + userId.value();
     final var cached = cache.get(key, JobPostingList.class);

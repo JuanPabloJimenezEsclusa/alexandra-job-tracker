@@ -1,6 +1,7 @@
 package dev.jpje.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
@@ -64,26 +65,49 @@ class ApplicationMutationResolverTest {
       .set(field(JobApplication::notes), Notes.of("notes"))
       .create();
 
-    when(useCase.updateStatus(id, ApplicationStatus.INTERVIEWING, Notes.of("notes"))).thenReturn(app);
+    when(useCase.updateStatus(userId, id, ApplicationStatus.INTERVIEWING, Notes.of("notes"))).thenReturn(app);
 
-    final var result = resolver.updateApplicationStatus(id, ApplicationStatus.INTERVIEWING, "notes");
+    final var result = resolver.updateApplicationStatus(userId, id, ApplicationStatus.INTERVIEWING, "notes");
     assertThat(result)
       .as("updated application should reflect the new status")
       .extracting(JobApplicationResponse::status)
       .isEqualTo(ApplicationStatus.INTERVIEWING);
 
     verify(useCase, description("application status should be updated once"))
-      .updateStatus(id, ApplicationStatus.INTERVIEWING, Notes.of("notes"));
+      .updateStatus(userId, id, ApplicationStatus.INTERVIEWING, Notes.of("notes"));
+    verifyNoMoreInteractions(useCase);
+  }
+
+  @Test
+  void shouldRejectUpdateWithoutAuthentication() {
+    final var id = UUID.randomUUID();
+
+    assertThatThrownBy(() -> resolver.updateApplicationStatus(null, id, ApplicationStatus.APPLIED, null))
+      .as("update without auth should fail")
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("Authentication required");
     verifyNoMoreInteractions(useCase);
   }
 
   @Test
   void shouldDeleteApplication() {
     final var id = UUID.randomUUID();
+    final var userId = new UserId(UUID.randomUUID());
 
-    assertThat(resolver.deleteApplication(id)).as("deletion should succeed").isTrue();
+    assertThat(resolver.deleteApplication(userId, id)).as("deletion should succeed").isTrue();
 
-    verify(useCase, description("application deletion should be delegated")).delete(id);
+    verify(useCase, description("application deletion should be delegated")).delete(userId, id);
+    verifyNoMoreInteractions(useCase);
+  }
+
+  @Test
+  void shouldRejectDeleteWithoutAuthentication() {
+    final var id = UUID.randomUUID();
+
+    assertThatThrownBy(() -> resolver.deleteApplication(null, id))
+      .as("delete without auth should fail")
+      .isInstanceOf(NullPointerException.class)
+      .hasMessage("Authentication required");
     verifyNoMoreInteractions(useCase);
   }
 }

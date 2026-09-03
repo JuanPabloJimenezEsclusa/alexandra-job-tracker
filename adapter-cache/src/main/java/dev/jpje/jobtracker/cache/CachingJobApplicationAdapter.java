@@ -41,6 +41,11 @@ public class CachingJobApplicationAdapter implements LoadJobApplicationPort, Sav
   }
 
   @Override
+  public Optional<JobApplication> findByIdAndUser(final UUID id, final UserId userId) {
+    return findById(id).filter(app -> app.userId().equals(userId));
+  }
+
+  @Override
   public List<JobApplication> findByUserId(final UserId userId,
                                            @Nullable final ApplicationStatus status) {
     final var apps = getCachedOrLoad(userId);

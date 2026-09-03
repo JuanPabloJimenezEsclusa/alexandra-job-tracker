@@ -49,6 +49,11 @@ public class JobApplicationPersistenceAdapter implements SaveJobApplicationPort,
   }
 
   @Override
+  public Optional<JobApplication> findByIdAndUser(final UUID id, final UserId userId) {
+    return repository.findByIdAndUserId(id, userId.value()).map(JobApplicationMapper::toDomain);
+  }
+
+  @Override
   public List<JobApplication> findByUserId(final UserId userId,
                                            @Nullable final ApplicationStatus status) {
     final List<JobApplicationEntity> entities = status != null

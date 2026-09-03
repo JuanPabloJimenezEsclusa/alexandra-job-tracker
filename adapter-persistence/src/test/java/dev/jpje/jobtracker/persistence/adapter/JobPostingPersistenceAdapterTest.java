@@ -69,6 +69,28 @@ class JobPostingPersistenceAdapterTest {
   }
 
   @Test
+  void shouldFindByIdAndUser() {
+    // Given
+    final var userId = UserId.generate();
+    final var entity = entity(userId);
+    when(repository.findByIdAndUserId(entity.getId(), userId.value())).thenReturn(Optional.of(entity));
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(entity.getId(), userId)).as("posting scoped by user").hasValue(toDomain(entity));
+  }
+
+  @Test
+  void shouldReturnEmptyWhenFindByIdAndUserMisses() {
+    // Given
+    final var id = UUID.randomUUID();
+    final var userId = UserId.generate();
+    when(repository.findByIdAndUserId(id, userId.value())).thenReturn(Optional.empty());
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(id, userId)).as("missing or foreign posting").isEmpty();
+  }
+
+  @Test
   void shouldFindByUserId() {
     // Given
     final var userId = UserId.generate();

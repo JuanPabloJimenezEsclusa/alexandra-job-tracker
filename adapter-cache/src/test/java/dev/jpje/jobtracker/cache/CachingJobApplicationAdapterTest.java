@@ -104,6 +104,32 @@ class CachingJobApplicationAdapterTest {
   }
 
   @Test
+  void shouldScopeApplicationByIdToOwner() {
+    // Given
+    final var owner = UserId.generate();
+    final var app = jobApplication(owner);
+    primeByIdCache(app.id(), app);
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(app.id(), owner)).as("owned application returned").hasValue(app);
+    assertThat(adapter.findByIdAndUser(app.id(), UserId.generate()))
+      .as("another user's application indistinguishable from missing").isEmpty();
+    verify(loadDelegate, description("load delegate should be hit only on cache miss")).findById(app.id());
+  }
+
+  @Test
+  void shouldReturnEmptyWhenApplicationMissingForUser() {
+    // Given
+    final var userId = UserId.generate();
+    final var id = UUID.randomUUID();
+    when(loadDelegate.findById(id)).thenReturn(Optional.empty());
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(id, userId)).as("missing application scoped by user").isEmpty();
+    verify(loadDelegate, description("load delegate should be hit on a scoped miss")).findById(id);
+  }
+
+  @Test
   void shouldSaveAndCacheApplication() {
     // Given
     final var app = jobApplication();

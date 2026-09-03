@@ -5,6 +5,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
+import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.port.in.ManageJobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
@@ -30,9 +31,11 @@ public class JobAnalysisQueryResolver {
   }
 
   @QueryMapping
-  public @Nullable JobAnalysisResponse analysis(@Argument final UUID id) {
-    return useCase.findById(id)
+  public JobAnalysisResponse analysis(@ContextValue(required = false) @Nullable final UserId userId,
+                                      @Argument final UUID id) {
+    Objects.requireNonNull(userId, "Authentication required");
+    return useCase.findByIdForUser(userId, id)
       .map(JobAnalysisResponse::from)
-      .orElse(null);
+      .orElseThrow(() -> new ResourceNotFoundException("Analysis not found"));
   }
 }

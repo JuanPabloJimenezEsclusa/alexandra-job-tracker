@@ -77,7 +77,7 @@ class AnalyzeJobPostingUseCaseTest {
       .set(field(JobPosting::description), "We need a Java developer with Spring experience")
       .create();
     final var expectedAnalysis = validAnalysis();
-    when(loadPort.findById(posting.id())).thenReturn(Optional.of(posting));
+    when(loadPort.findByIdAndUser(posting.id(), userId)).thenReturn(Optional.of(posting));
     when(analysisPort.analyze(posting.title().value(), posting.company().value(),
       posting.source().name(), posting.description())).thenReturn(expectedAnalysis);
 
@@ -96,10 +96,33 @@ class AnalyzeJobPostingUseCaseTest {
     final var userId = UserId.generate();
     final var randomUUID = UUID.randomUUID();
 
-    when(loadPort.findById(randomUUID)).thenReturn(Optional.empty());
+    when(loadPort.findByIdAndUser(randomUUID, userId)).thenReturn(Optional.empty());
 
     // When, then
     assertThatThrownBy(() -> useCase.analyze(userId, randomUUID))
+      .isInstanceOf(ResourceNotFoundException.class)
+      .hasMessage("Job posting not found");
+    verify(savePort, never()).saveOrReplace(any());
+    verifyNoMoreInteractions(loadPort, analysisPort, savePort);
+  }
+
+  @Test
+  void shouldRejectAnalysisOfAnotherUsersPosting() {
+    // Given
+    final var owner = UserId.generate();
+    final var caller = UserId.generate();
+    final var posting = Instancio.of(JobPosting.class)
+      .set(field(JobPosting::userId), owner)
+      .set(field(JobPosting::source), Source.LINKEDIN)
+      .set(field(JobPosting::url), Url.of("https://example.com/job"))
+      .set(field(JobPosting::title), JobTitle.of("Software Engineer"))
+      .set(field(JobPosting::company), CompanyName.of("Acme"))
+      .set(field(JobPosting::description), "We need a Java developer")
+      .create();
+    when(loadPort.findByIdAndUser(posting.id(), caller)).thenReturn(Optional.empty());
+
+    // When, then
+    assertThatThrownBy(() -> useCase.analyze(caller, posting.id()))
       .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Job posting not found");
     verify(savePort, never()).saveOrReplace(any());
