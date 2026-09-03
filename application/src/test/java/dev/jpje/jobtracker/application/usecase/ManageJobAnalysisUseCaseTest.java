@@ -71,15 +71,15 @@ class ManageJobAnalysisUseCaseTest {
   void shouldReturnAnalysisOwnedByCaller() {
     // Given
     final var userId = UserId.generate();
-    final var record = analysisRecord(userId);
-    when(loadPort.findByIdAndUser(record.id(), userId)).thenReturn(Optional.of(record));
+    final var analysisRecord = analysisRecord(userId);
+    when(loadPort.findByIdAndUser(analysisRecord.id(), userId)).thenReturn(Optional.of(analysisRecord));
 
     // When
-    final var result = useCase.findByIdForUser(userId, record.id());
+    final var result = useCase.findByIdForUser(userId, analysisRecord.id());
 
     // Then
-    assertThat(result).as("owned analysis should be returned").contains(record);
-    verify(loadPort, description("owned analysis lookup should hit")).findByIdAndUser(record.id(), userId);
+    assertThat(result).as("owned analysis should be returned").contains(analysisRecord);
+    verify(loadPort, description("owned analysis lookup should hit")).findByIdAndUser(analysisRecord.id(), userId);
     verifyNoMoreInteractions(loadPort, savePort);
   }
 

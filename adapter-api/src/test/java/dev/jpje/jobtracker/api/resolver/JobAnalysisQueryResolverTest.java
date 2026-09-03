@@ -57,7 +57,7 @@ class JobAnalysisQueryResolverTest {
       .create();
   }
 
-  private static JobAnalysisRecord record(final UserId userId) {
+  private static JobAnalysisRecord analysisRecord(final UserId userId) {
     return Instancio.of(JobAnalysisRecord.class)
       .set(field(JobAnalysisRecord::jobPostingId), UUID.randomUUID())
       .set(field(JobAnalysisRecord::userId), userId)
@@ -70,7 +70,7 @@ class JobAnalysisQueryResolverTest {
   void shouldResolveOwnedAnalysis() {
     // Given
     final var userId = UserId.generate();
-    final var analysis = record(userId);
+    final var analysis = analysisRecord(userId);
     when(useCase.findByIdForUser(userId, analysis.id())).thenReturn(Optional.of(analysis));
 
     // When

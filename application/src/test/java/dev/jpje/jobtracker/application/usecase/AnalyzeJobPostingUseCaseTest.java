@@ -119,10 +119,11 @@ class AnalyzeJobPostingUseCaseTest {
       .set(field(JobPosting::company), CompanyName.of("Acme"))
       .set(field(JobPosting::description), "We need a Java developer")
       .create();
+    final var postingId = posting.id();
     when(loadPort.findByIdAndUser(posting.id(), caller)).thenReturn(Optional.empty());
 
     // When, then
-    assertThatThrownBy(() -> useCase.analyze(caller, posting.id()))
+    assertThatThrownBy(() -> useCase.analyze(caller, postingId))
       .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Job posting not found");
     verify(savePort, never()).saveOrReplace(any());

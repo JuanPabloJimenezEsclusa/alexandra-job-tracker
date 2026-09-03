@@ -2,8 +2,17 @@ package dev.jpje.jobtracker.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.Instant;
+import java.util.Date;
+import java.util.UUID;
+
 import dev.jpje.jobtracker.api.config.IntegrationTestConfig;
 import dev.jpje.jobtracker.server.JobTrackerServerApplication;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -14,6 +23,8 @@ import tools.jackson.databind.JsonNode;
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(IntegrationTestConfig.class)
 class AuthIntegrationTest extends GraphQlIntegrationTestBase {
+
+  private static final String TEST_SECRET = "super-secret-signing-key-for-tests";
 
   @Test
   void shouldRegister() {
@@ -115,5 +126,44 @@ class AuthIntegrationTest extends GraphQlIntegrationTestBase {
       {"query": "mutation { logout }"}
       """);
     assertThat(logout.findValue("logout").asBoolean()).as("logout result").isTrue();
+  }
+
+  @Test
+  void shouldTreatExpiredTokenAsUnauthenticated() {
+    final var headers = jsonHeaders();
+    headers.setBearerAuth(expiredToken());
+
+    final var apps = graphql(headers, """
+      {"query": "{ applications { id } }"}
+      """);
+    assertThat(apps.findValue("message").asString()).as("expired token treated as unauthenticated")
+      .isEqualTo("Authentication required");
+  }
+
+  @Test
+  void shouldTreatMalformedTokenAsUnauthenticated() {
+    final var headers = jsonHeaders();
+    headers.setBearerAuth("not-a-jwt");
+
+    final var apps = graphql(headers, """
+      {"query": "{ applications { id } }"}
+      """);
+    assertThat(apps.findValue("message").asString()).as("malformed token treated as unauthenticated")
+      .isEqualTo("Authentication required");
+  }
+
+  private static String expiredToken() {
+    try {
+      final var key = Keys.hmacShaKeyFor(
+        MessageDigest.getInstance("SHA-512").digest(TEST_SECRET.getBytes(StandardCharsets.UTF_8)));
+      return Jwts.builder()
+        .subject(UUID.randomUUID().toString())
+        .claim("role", "USER")
+        .expiration(Date.from(Instant.now().minusSeconds(60)))
+        .signWith(key)
+        .compact();
+    } catch (final NoSuchAlgorithmException e) {
+      throw new IllegalStateException(e);
+    }
   }
 }

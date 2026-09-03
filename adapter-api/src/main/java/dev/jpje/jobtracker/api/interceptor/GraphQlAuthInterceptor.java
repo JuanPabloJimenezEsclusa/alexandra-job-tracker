@@ -1,5 +1,6 @@
 package dev.jpje.jobtracker.api.interceptor;
 
+import dev.jpje.jobtracker.domain.exception.InvalidTokenException;
 import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
 import org.springframework.graphql.server.WebGraphQlInterceptor;
 import org.springframework.graphql.server.WebGraphQlRequest;
@@ -19,12 +20,16 @@ public class GraphQlAuthInterceptor implements WebGraphQlInterceptor {
   public Mono<WebGraphQlResponse> intercept(final WebGraphQlRequest request, final Chain chain) {
     final var authHeader = request.getHeaders().getFirst("Authorization");
     if (authHeader != null && authHeader.startsWith("Bearer ") && authHeader.length() > 7) {
-      final var payload = tokenGenerator.validateToken(authHeader.substring(7));
-      request.configureExecutionInput((_, builder) ->
-        builder.graphQLContext(ctx -> {
-          ctx.put("userId", payload.userId());
-          ctx.put("userRole", payload.role());
-        }).build());
+      try {
+        final var payload = tokenGenerator.validateToken(authHeader.substring(7));
+        request.configureExecutionInput((_, builder) ->
+          builder.graphQLContext(ctx -> {
+            ctx.put("userId", payload.userId());
+            ctx.put("userRole", payload.role());
+          }).build());
+      } catch (final InvalidTokenException _) {
+        // Treat an expired or invalid token as unauthenticated: leave the context empty.
+      }
     }
     return chain.next(request);
   }
