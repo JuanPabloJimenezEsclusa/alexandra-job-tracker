@@ -14,12 +14,6 @@ spring:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
-      settings:
-        web-allow-others: true
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
     hibernate.ddl-auto: validate
@@ -38,16 +32,15 @@ spring:
         model: deepseek-chat
   graphql:
     cors:
-      allowed-origin-patterns:
-      - "*"
+      allowed-origin-patterns: "${CORS_ALLOWED_ORIGINS:http://localhost:8880}"
       allowed-methods:
-      - "*"
+      - GET
+      - POST
       allowed-headers:
-      - "*"
+      - Authorization
+      - Content-Type
       allow-credentials: true
       max-age: 3600
-    graphiql:
-      enabled: true
   cloud:
     aws:
       region:
@@ -66,6 +59,7 @@ info:
 
 jwt:
   secret: ${JWT_SECRET}
+  expiration: 1800000
 
 ajt:
   events:
@@ -75,14 +69,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,prometheus,metrics,env,beans,mappings,loggers,configprops,caches
+        include: health,info,prometheus,metrics
   endpoint:
     health:
       show-details: always
-    env:
-      show-values: always
-    configprops:
-      show-values: always
   info:
     env:
       enabled: true
@@ -116,6 +106,26 @@ spring:
     password:
   jpa:
     show-sql: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+  graphql:
+    graphiql:
+      enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics,env,beans,mappings,loggers,configprops,caches
+  endpoint:
+    env:
+      show-values: always
+    configprops:
+      show-values: always
 
 otel:
   enabled: true

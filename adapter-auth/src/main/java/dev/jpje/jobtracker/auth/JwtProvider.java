@@ -28,7 +28,7 @@ public class JwtProvider implements TokenGeneratorPort {
   private final Clock clock;
 
   public JwtProvider(@Value("${jwt.secret}") @Nullable final String secret,
-                     @Value("${jwt.expiration:86400000}") final long expirationMs,
+                     @Value("${jwt.expiration:1800000}") final long expirationMs,
                      final Clock clock) {
     if (secret == null || secret.isBlank() || secret.length() < MIN_SECRET_LENGTH) {
       throw new IllegalArgumentException("jwt.secret must be set to at least 32 characters");

@@ -16,7 +16,6 @@ import java.util.UUID;
 import dev.jpje.jobtracker.domain.event.EventPublisher;
 import dev.jpje.jobtracker.domain.event.UserRegistered;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
-import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.out.LoadUserPort;
 import dev.jpje.jobtracker.domain.port.out.PasswordEncoderPort;
@@ -139,7 +138,7 @@ class AuthenticationUseCaseTest {
 
     // When, then
     assertThatThrownBy(() -> useCase.login(username, "pass"))
-      .isInstanceOf(ResourceNotFoundException.class)
+      .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Invalid credentials");
     verifyNoMoreInteractions(tokenGeneratorPort);
   }

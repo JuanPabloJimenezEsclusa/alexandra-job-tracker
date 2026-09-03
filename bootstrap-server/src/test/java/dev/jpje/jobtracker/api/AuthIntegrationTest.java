@@ -1,6 +1,8 @@
 package dev.jpje.jobtracker.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -8,12 +10,16 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.api.config.IntegrationTestConfig;
 import dev.jpje.jobtracker.server.JobTrackerServerApplication;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import tools.jackson.databind.JsonNode;
@@ -25,6 +31,7 @@ import tools.jackson.databind.JsonNode;
 class AuthIntegrationTest extends GraphQlIntegrationTestBase {
 
   private static final String TEST_SECRET = "super-secret-signing-key-for-tests";
+  private static final String AUTHENTICATION_REQUIRED = "Authentication required";
 
   @Test
   void shouldRegister() {
@@ -56,7 +63,7 @@ class AuthIntegrationTest extends GraphQlIntegrationTestBase {
       """;
     final var registration = graphql(jsonHeaders(), body);
     assertThat(registration.findValue("message").asString()).as("register without auth rejected")
-      .isEqualTo("Authentication required");
+      .isEqualTo(AUTHENTICATION_REQUIRED);
   }
 
   @Test
@@ -99,6 +106,8 @@ class AuthIntegrationTest extends GraphQlIntegrationTestBase {
       """);
     assertThat(login.findValue("message").asString()).as("invalid login rejected")
       .isEqualTo("Invalid credentials");
+    assertThat(login.findValue("errorCode").asString()).as("invalid login error code")
+      .isEqualTo("BAD_REQUEST");
   }
 
   @Test
@@ -128,28 +137,28 @@ class AuthIntegrationTest extends GraphQlIntegrationTestBase {
     assertThat(logout.findValue("logout").asBoolean()).as("logout result").isTrue();
   }
 
-  @Test
-  void shouldTreatExpiredTokenAsUnauthenticated() {
-    final var headers = jsonHeaders();
-    headers.setBearerAuth(expiredToken());
-
-    final var apps = graphql(headers, """
-      {"query": "{ applications { id } }"}
-      """);
-    assertThat(apps.findValue("message").asString()).as("expired token treated as unauthenticated")
-      .isEqualTo("Authentication required");
+  private static Stream<Arguments> invalidTokenScenarios() {
+    return Stream.of(
+      arguments(named("expired token", expiredToken())),
+      arguments(named("malformed token", "not-a-jwt"))
+    );
   }
 
-  @Test
-  void shouldTreatMalformedTokenAsUnauthenticated() {
+  @ParameterizedTest(name = "{0} treated as unauthenticated")
+  @MethodSource("invalidTokenScenarios")
+  void shouldTreatInvalidTokenAsUnauthenticated(final String token) {
+    // Given
     final var headers = jsonHeaders();
-    headers.setBearerAuth("not-a-jwt");
+    headers.setBearerAuth(token);
 
+    // When
     final var apps = graphql(headers, """
       {"query": "{ applications { id } }"}
       """);
-    assertThat(apps.findValue("message").asString()).as("malformed token treated as unauthenticated")
-      .isEqualTo("Authentication required");
+
+    // Then
+    assertThat(apps.findValue("message").asString()).as("an invalid token is treated as unauthenticated")
+      .isEqualTo(AUTHENTICATION_REQUIRED);
   }
 
   private static String expiredToken() {
@@ -159,7 +168,7 @@ class AuthIntegrationTest extends GraphQlIntegrationTestBase {
       return Jwts.builder()
         .subject(UUID.randomUUID().toString())
         .claim("role", "USER")
-        .expiration(Date.from(Instant.now().minusSeconds(60)))
+        .expiration(Date.from(Instant.EPOCH))
         .signWith(key)
         .compact();
     } catch (final NoSuchAlgorithmException e) {
