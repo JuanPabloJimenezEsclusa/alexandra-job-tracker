@@ -3,6 +3,8 @@ package dev.jpje.jobtracker.application.usecase;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -14,6 +16,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
@@ -30,6 +33,9 @@ import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -90,40 +96,23 @@ class AnalyzeJobPostingUseCaseTest {
     verifyNoMoreInteractions(loadPort, analysisPort, savePort);
   }
 
-  @Test
-  void shouldThrowWhenPostingNotFound() {
-    // Given
-    final var userId = UserId.generate();
-    final var randomUUID = UUID.randomUUID();
-
-    when(loadPort.findByIdAndUser(randomUUID, userId)).thenReturn(Optional.empty());
-
-    // When, then
-    assertThatThrownBy(() -> useCase.analyze(userId, randomUUID))
-      .isInstanceOf(ResourceNotFoundException.class)
-      .hasMessage("Job posting not found");
-    verify(savePort, never()).saveOrReplace(any());
-    verifyNoMoreInteractions(loadPort, analysisPort, savePort);
+  private static Stream<Arguments> notAccessibleScenarios() {
+    return Stream.of(
+      arguments(named("missing posting", UUID.randomUUID())),
+      arguments(named("another user's posting", UUID.randomUUID()))
+    );
   }
 
-  @Test
-  void shouldRejectAnalysisOfAnotherUsersPosting() {
+  @ParameterizedTest(name = "{0} rejects analysis with NOT_FOUND")
+  @MethodSource("notAccessibleScenarios")
+  void shouldRejectAnalysisWhenPostingNotAccessible(final UUID id) {
     // Given
-    final var owner = UserId.generate();
-    final var caller = UserId.generate();
-    final var posting = Instancio.of(JobPosting.class)
-      .set(field(JobPosting::userId), owner)
-      .set(field(JobPosting::source), Source.LINKEDIN)
-      .set(field(JobPosting::url), Url.of("https://example.com/job"))
-      .set(field(JobPosting::title), JobTitle.of("Software Engineer"))
-      .set(field(JobPosting::company), CompanyName.of("Acme"))
-      .set(field(JobPosting::description), "We need a Java developer")
-      .create();
-    final var postingId = posting.id();
-    when(loadPort.findByIdAndUser(posting.id(), caller)).thenReturn(Optional.empty());
+    final var userId = UserId.generate();
+    when(loadPort.findByIdAndUser(id, userId)).thenReturn(Optional.empty());
 
     // When, then
-    assertThatThrownBy(() -> useCase.analyze(caller, postingId))
+    assertThatThrownBy(() -> useCase.analyze(userId, id))
+      .as("a posting that is missing or not owned should be indistinguishable")
       .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Job posting not found");
     verify(savePort, never()).saveOrReplace(any());
