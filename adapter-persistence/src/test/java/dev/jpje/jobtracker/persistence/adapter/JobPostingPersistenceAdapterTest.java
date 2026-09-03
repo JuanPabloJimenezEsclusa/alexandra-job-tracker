@@ -1,6 +1,7 @@
 package dev.jpje.jobtracker.persistence.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
 import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.JobTitle;
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DataIntegrityViolationException;
 
 @ExtendWith(MockitoExtension.class)
 class JobPostingPersistenceAdapterTest {
@@ -45,7 +48,21 @@ class JobPostingPersistenceAdapterTest {
     adapter.save(posting);
 
     // Then
-    verify(repository, description("posting persisted")).save(any(JobPostingEntity.class));
+    verify(repository, description("posting persisted with flush")).saveAndFlush(any(JobPostingEntity.class));
+  }
+
+  @Test
+  void shouldMapDuplicateUrlToConflict() {
+    // Given
+    when(repository.saveAndFlush(any(JobPostingEntity.class)))
+      .thenThrow(new DataIntegrityViolationException("duplicate user_id, url"));
+    final var posting = posting();
+
+    // When, then
+    assertThatThrownBy(() -> adapter.save(posting))
+      .as("duplicate url submission maps to a conflict")
+      .isInstanceOf(ResourceAlreadyExistsException.class)
+      .hasMessage("Job posting already exists");
   }
 
   @Test

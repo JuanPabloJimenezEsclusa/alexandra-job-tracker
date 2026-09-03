@@ -16,6 +16,29 @@ import tools.jackson.databind.JsonNode;
 class JobPostingIntegrationTest extends GraphQlIntegrationTestBase {
 
   @Test
+  void shouldRejectDuplicateUrlSubmissionWithConflict() {
+    final var headers = authHeaders("dup-url-user");
+    submitJobPosting(headers, "dup-job", "Dup Engineer", "DupCorp", "LINKEDIN");
+
+    final var duplicate = submitJobPosting(headers, "dup-job", "Dup Engineer", "DupCorp", "LINKEDIN");
+    assertThat(duplicate.findValue("message").asString()).as("duplicate url submission rejected")
+      .isEqualTo("Job posting already exists");
+    assertThat(duplicate.findValue("errorCode").asString()).as("duplicate url submission error code")
+      .isEqualTo("CONFLICT");
+  }
+
+  @Test
+  void shouldAcceptSameUrlForDifferentUsers() {
+    final var firstUser = authHeaders("dup-first-user");
+    final var secondUser = authHeaders("dup-second-user");
+    submitJobPosting(firstUser, "shared-job", "Shared Engineer", "SharedCorp", "LINKEDIN");
+
+    final var second = submitJobPosting(secondUser, "shared-job", "Shared Engineer", "SharedCorp", "LINKEDIN");
+    assertThat(second.findValues("title")).as("same url accepted for another user")
+      .extracting(JsonNode::asString).contains("Shared Engineer");
+  }
+
+  @Test
   void shouldListJobPostings() {
     final var headers = authHeaders("jp-list-user");
     final var postings = graphql(headers, """
