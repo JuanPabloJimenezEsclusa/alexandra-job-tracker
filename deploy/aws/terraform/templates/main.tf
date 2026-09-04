@@ -12,6 +12,10 @@ provider "aws" {
   region = var.region
 }
 
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
+
 #################################################################################################
 # IAM
 #################################################################################################
@@ -73,6 +77,11 @@ resource "aws_iam_role_policy" "events" {
           "sqs:GetQueueAttributes"
         ]
         Resource = [aws_sqs_queue.job_analysis.arn]
+      },
+      {
+        Effect   = "Allow"
+        Action   = ["kms:Decrypt"]
+        Resource = [aws_kms_key.job_events.arn]
       }
     ]
   })
@@ -89,11 +98,49 @@ resource "aws_sns_topic" "job_events" {
   kms_master_key_id = "alias/aws/sns"
 }
 
+resource "aws_kms_key" "job_events" {
+  description         = "KMS key for the AJT SQS queues (grants SNS delivery)"
+  enable_key_rotation = true
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Id      = "ajt-job-analysis-key"
+    Statement = [
+      {
+        Sid       = "Enable IAM User Permissions"
+        Effect    = "Allow"
+        Principal = { AWS = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root" }
+        Action    = "kms:*"
+        Resource  = "*"
+      },
+      {
+        Sid       = "Allow SNS to encrypt messages delivered to the queue"
+        Effect    = "Allow"
+        Principal = { Service = "sns.amazonaws.com" }
+        Action = [
+          "kms:Decrypt",
+          "kms:GenerateDataKey",
+          "kms:GenerateDataKeyWithoutPlaintext"
+        ]
+        Resource = "*"
+        Condition = {
+          ArnEquals = {
+            "aws:SourceArn" = aws_sns_topic.job_events.arn
+          }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_kms_alias" "job_events" {
+  name          = "alias/ajt-job-analysis-kms"
+  target_key_id = aws_kms_key.job_events.id
+}
+
 resource "aws_sqs_queue" "job_analysis" {
   name                       = "ajt-job-analysis"
   visibility_timeout_seconds = 120
-  # Non-sensitive job posting metadata only — AWS-managed KMS is sufficient.
-  kms_master_key_id = "alias/aws/sqs"
+  kms_master_key_id          = aws_kms_key.job_events.id
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.job_analysis_dlq.arn
     maxReceiveCount     = 3
@@ -101,21 +148,19 @@ resource "aws_sqs_queue" "job_analysis" {
 }
 
 resource "aws_sqs_queue" "job_analysis_dlq" {
-  name = "ajt-job-analysis-dlq"
-  # Non-sensitive job posting metadata only — AWS-managed KMS is sufficient.
-  kms_master_key_id = "alias/aws/sqs"
+  name              = "ajt-job-analysis-dlq"
+  kms_master_key_id = aws_kms_key.job_events.id
 }
 
 resource "aws_sns_topic_subscription" "job_events_to_sqs" {
-  topic_arn = aws_sns_topic.job_events.arn
-  protocol  = "sqs"
-  endpoint  = aws_sqs_queue.job_analysis.arn
-}
-
-resource "aws_lambda_event_source_mapping" "job_analysis" {
-  event_source_arn = aws_sqs_queue.job_analysis.arn
-  function_name    = aws_lambda_function.this.arn
-  batch_size       = 1
+  topic_arn            = aws_sns_topic.job_events.arn
+  protocol             = "sqs"
+  endpoint             = aws_sqs_queue.job_analysis.arn
+  raw_message_delivery = true
+  filter_policy_scope  = "MessageAttributes"
+  filter_policy = jsonencode({
+    eventType = ["JobPostingCreated"]
+  })
 }
 
 #################################################################################################
