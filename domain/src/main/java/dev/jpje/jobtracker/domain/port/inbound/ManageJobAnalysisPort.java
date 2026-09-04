@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.domain.port.in;
+package dev.jpje.jobtracker.domain.port.inbound;
 
 import java.util.List;
 import java.util.Optional;

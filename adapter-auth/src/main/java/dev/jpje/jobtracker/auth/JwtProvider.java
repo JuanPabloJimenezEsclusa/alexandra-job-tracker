@@ -7,7 +7,7 @@ import java.time.Clock;
 import javax.crypto.SecretKey;
 
 import dev.jpje.jobtracker.domain.exception.InvalidTokenException;
-import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
+import dev.jpje.jobtracker.domain.port.outbound.TokenGeneratorPort;
 import dev.jpje.jobtracker.domain.vo.TokenPayload;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.domain.vo.UserRole;

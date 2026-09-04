@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Objects;
 
 import dev.jpje.jobtracker.api.dto.JobPostingResponse;
-import dev.jpje.jobtracker.domain.port.in.ListJobPostingsPort;
+import dev.jpje.jobtracker.domain.port.inbound.ListJobPostingsPort;
 import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;

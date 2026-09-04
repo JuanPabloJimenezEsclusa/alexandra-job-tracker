@@ -6,9 +6,9 @@ import java.util.UUID;
 import dev.jpje.jobtracker.domain.event.JobPostingCreated;
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
 import dev.jpje.jobtracker.domain.model.JobApplication;
-import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.JobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import io.micrometer.core.instrument.Counter;
 

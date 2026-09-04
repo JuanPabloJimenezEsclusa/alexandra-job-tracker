@@ -5,9 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
-import dev.jpje.jobtracker.domain.port.in.ManageJobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.LoadJobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.inbound.ManageJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 
 public class ManageJobAnalysisUseCase implements ManageJobAnalysisPort {

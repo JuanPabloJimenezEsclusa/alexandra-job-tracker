@@ -5,7 +5,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.JobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.JobAnalysis;
 import org.instancio.Instancio;
 import org.springframework.boot.test.context.TestConfiguration;

@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.domain.port.in;
+package dev.jpje.jobtracker.domain.port.inbound;
 
 import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.vo.CompanyName;

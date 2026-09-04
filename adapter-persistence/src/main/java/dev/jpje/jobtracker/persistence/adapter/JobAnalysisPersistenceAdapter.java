@@ -5,8 +5,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
-import dev.jpje.jobtracker.domain.port.out.LoadJobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.persistence.mapper.JobAnalysisMapper;
 import dev.jpje.jobtracker.persistence.repository.JobAnalysisJpaRepository;

@@ -14,8 +14,8 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
-import dev.jpje.jobtracker.domain.port.out.LoadJobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.JobAnalysis;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
