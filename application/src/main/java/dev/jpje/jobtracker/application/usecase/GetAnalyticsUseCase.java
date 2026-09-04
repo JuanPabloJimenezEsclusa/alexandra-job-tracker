@@ -13,9 +13,10 @@ public class GetAnalyticsUseCase implements GetAnalyticsPort {
   private final LoadJobApplicationPort loadPort;
   private final AnalyticsCalculator calculator;
 
-  public GetAnalyticsUseCase(final LoadJobApplicationPort loadPort) {
+  public GetAnalyticsUseCase(final LoadJobApplicationPort loadPort,
+                             final AnalyticsCalculator calculator) {
     this.loadPort = loadPort;
-    this.calculator = new AnalyticsCalculator();
+    this.calculator = calculator;
   }
 
   @Override

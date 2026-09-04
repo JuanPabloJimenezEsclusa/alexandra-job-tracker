@@ -31,6 +31,7 @@ import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.out.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.port.out.SaveUserPort;
 import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
+import dev.jpje.jobtracker.domain.service.AnalyticsCalculator;
 import dev.jpje.jobtracker.domain.service.JobPostingService;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import dev.jpje.jobtracker.domain.vo.Notes;
@@ -105,8 +106,14 @@ public class UseCaseConfig {
   }
 
   @Bean
-  GetAnalyticsPort getAnalyticsUseCase(final LoadJobApplicationPort loadPort) {
-    return new GetAnalyticsUseCase(loadPort);
+  AnalyticsCalculator analyticsCalculator() {
+    return new AnalyticsCalculator();
+  }
+
+  @Bean
+  GetAnalyticsPort getAnalyticsUseCase(final LoadJobApplicationPort loadPort,
+                                       final AnalyticsCalculator analyticsCalculator) {
+    return new GetAnalyticsUseCase(loadPort, analyticsCalculator);
   }
 
   @Bean
