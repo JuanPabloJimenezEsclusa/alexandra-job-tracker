@@ -26,7 +26,7 @@ class JobPostingCommandsIntegrationTest extends BaseCliIntegrationTest {
         }]
       }
     }
-  """;
+    """;
 
 
   private static Stream<Arguments> scenarios() {
