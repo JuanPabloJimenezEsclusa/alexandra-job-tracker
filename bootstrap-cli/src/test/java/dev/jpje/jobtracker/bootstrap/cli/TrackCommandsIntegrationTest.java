@@ -25,7 +25,7 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         }
       }
     }
-  """;
+    """;
 
   private static final String LIST_APPLICATIONS_RESPONSE = """
     {
@@ -40,7 +40,7 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         }]
       }
     }
-  """;
+    """;
 
   private static final String UPDATE_APPLICATION_STATUS_RESPONSE = """
     {
@@ -52,7 +52,7 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         }
       }
     }
-  """;
+    """;
 
   private static final String EMPTY_APPLICATIONS_RESPONSE = """
     {
@@ -60,7 +60,7 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
         "applications": []
       }
     }
-  """;
+    """;
 
 
   private static Stream<Arguments> scenarios() {

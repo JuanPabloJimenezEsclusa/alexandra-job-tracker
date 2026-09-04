@@ -17,10 +17,9 @@ public final class JobApplicationMapper {
       ApplicationStatus.valueOf(entity.getStatus()),
       entity.getDateApplied(), entity.getLastUpdated(),
       entity.getNotes() != null ? Notes.of(entity.getNotes()) : null,
-      entity.getVersion() != null ? entity.getVersion() : null);
+      entity.getVersion());
   }
 
-  @SuppressWarnings("java:S4449") // false positives
   public static JobApplicationEntity toEntity(final JobApplication domain) {
     final var entity = new JobApplicationEntity();
     entity.setId(domain.id());

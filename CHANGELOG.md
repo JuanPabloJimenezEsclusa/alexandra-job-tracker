@@ -5,6 +5,16 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**fix(deploy): homologate terraform SQS events and KMS with cloudformation**
+
+
+[41e83c407c9837d](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/41e83c407c9837d) juan.pablo.jimenez.esclusa *2026-09-04 13:27:41*
+
+**refactor(domain): rename port packages in/out to inbound/outbound**
+
+
+[f35082f727d73f9](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/f35082f727d73f9) juan.pablo.jimenez.esclusa *2026-09-04 13:19:44*
+
 **fix(cli): add HTTP timeouts to GraphQL client**
 
 
