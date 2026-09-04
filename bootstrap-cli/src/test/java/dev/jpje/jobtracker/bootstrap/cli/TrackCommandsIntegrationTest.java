@@ -1,5 +1,9 @@
 package dev.jpje.jobtracker.bootstrap.cli;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -7,6 +11,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -145,6 +150,15 @@ class TrackCommandsIntegrationTest extends BaseCliIntegrationTest {
   @BeforeEach
   void setUp() throws Exception {
     authenticate();
+  }
+
+  @Test
+  void shouldSendApplicationsQueryWithoutSourceArgument() {
+    stubGraphql("applications", LIST_APPLICATIONS_RESPONSE);
+    sendCommandUnchecked("l -s APPLIED");
+
+    verify(0, postRequestedFor(urlPathEqualTo("/api/graphql"))
+      .withRequestBody(containing("\"source\"")));
   }
 
   @ParameterizedTest(name = "{0}")
