@@ -6,6 +6,7 @@ import java.util.UUID;
 import dev.jpje.jobtracker.domain.exception.DomainException;
 import dev.jpje.jobtracker.domain.exception.ForbiddenException;
 import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
+import dev.jpje.jobtracker.domain.exception.OptimisticLockException;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import graphql.ErrorType;
@@ -47,6 +48,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
     return switch (ex) {
       case ResourceNotFoundException e -> e.getMessage() != null ? e.getMessage() : "Resource not found";
       case ResourceAlreadyExistsException e -> e.getMessage() != null ? e.getMessage() : "Resource already exists";
+      case OptimisticLockException e -> e.getMessage() != null ? e.getMessage() : "Resource was modified concurrently";
       case InvalidStateTransitionException e -> e.getMessage() != null ? e.getMessage() : "Invalid state transition";
       case ForbiddenException e -> e.getMessage() != null ? e.getMessage() : "Forbidden";
       case IllegalArgumentException e -> e.getMessage() != null ? e.getMessage() : "Invalid input";
@@ -59,7 +61,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
   private String resolveErrorCode(final Throwable ex) {
     return switch (ex) {
       case ResourceNotFoundException _ -> "NOT_FOUND";
-      case ResourceAlreadyExistsException _ -> "CONFLICT";
+      case ResourceAlreadyExistsException _, OptimisticLockException _ -> "CONFLICT";
       case InvalidStateTransitionException _ -> "INVALID_STATE";
       case ForbiddenException _ -> "FORBIDDEN";
       case IllegalArgumentException _ -> "BAD_REQUEST";
@@ -73,6 +75,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
     return switch (ex) {
       case ResourceNotFoundException _,
            ResourceAlreadyExistsException _,
+           OptimisticLockException _,
            ForbiddenException _,
            IllegalArgumentException _,
            NullPointerException _ -> ErrorType.ValidationError;
