@@ -10,6 +10,7 @@ import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.exception.ForbiddenException;
 import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
+import dev.jpje.jobtracker.domain.exception.OptimisticLockException;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import graphql.ErrorType;
@@ -35,6 +36,9 @@ class GraphQlExceptionResolverTest {
         "Application not found", ErrorType.ValidationError, "NOT_FOUND", "DOMAIN"),
       arguments(named("resource already exists", new ResourceAlreadyExistsException("Username already taken")),
         "Username already taken", ErrorType.ValidationError, "CONFLICT", "DOMAIN"),
+      arguments(named("optimistic lock conflict",
+          new OptimisticLockException("Application was modified concurrently", new IllegalStateException())),
+        "Application was modified concurrently", ErrorType.ValidationError, "CONFLICT", "DOMAIN"),
       arguments(named("invalid state transition", new InvalidStateTransitionException("Invalid transition")),
         "Invalid transition", ErrorType.InvalidSyntax, "INVALID_STATE", "DOMAIN"),
       arguments(named("forbidden", new ForbiddenException("Admin access required")),

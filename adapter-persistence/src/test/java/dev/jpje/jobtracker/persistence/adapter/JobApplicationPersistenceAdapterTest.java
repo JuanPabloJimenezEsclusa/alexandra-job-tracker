@@ -1,6 +1,7 @@
 package dev.jpje.jobtracker.persistence.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.domain.exception.OptimisticLockException;
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import dev.jpje.jobtracker.domain.vo.Notes;
@@ -22,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.OptimisticLockingFailureException;
 
 @ExtendWith(MockitoExtension.class)
 class JobApplicationPersistenceAdapterTest {
@@ -46,6 +49,20 @@ class JobApplicationPersistenceAdapterTest {
     // Then
     assertThat(saved).as("saved application returned").isEqualTo(toDomain(entity));
     verify(repository, description("repository invoked with flush")).saveAndFlush(any(JobApplicationEntity.class));
+  }
+
+  @Test
+  void shouldMapStaleUpdateToOptimisticLockConflict() {
+    // Given
+    when(repository.saveAndFlush(any(JobApplicationEntity.class)))
+      .thenThrow(new OptimisticLockingFailureException("stale version"));
+    final var application = application();
+
+    // When, then
+    assertThatThrownBy(() -> adapter.save(application))
+      .as("a stale update is rejected as an optimistic lock conflict")
+      .isInstanceOf(OptimisticLockException.class)
+      .hasMessage("Application was modified concurrently");
   }
 
   @Test
