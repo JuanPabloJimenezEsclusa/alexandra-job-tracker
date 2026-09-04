@@ -2,7 +2,6 @@ package dev.jpje.jobtracker.persistence.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,6 +19,7 @@ import dev.jpje.jobtracker.persistence.repository.JobAnalysisJpaRepository;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,16 +34,40 @@ class JobAnalysisPersistenceAdapterTest {
   private JobAnalysisPersistenceAdapter adapter;
 
   @Test
-  void shouldSaveOrReplaceRecord() {
+  void shouldInsertAnalysisWhenNoPreviousExists() {
     // Given
     final var jobAnalysisRecord = jobAnalysisRecord();
+    when(repository.findByJobPostingId(jobAnalysisRecord.jobPostingId())).thenReturn(Optional.empty());
 
     // When
     adapter.saveOrReplace(jobAnalysisRecord);
 
     // Then
-    verify(repository, description("existing analysis deleted by posting")).deleteByJobPostingId(jobAnalysisRecord.jobPostingId());
-    verify(repository, description("replacement analysis persisted")).save(any(JobAnalysisEntity.class));
+    final var captor = ArgumentCaptor.forClass(JobAnalysisEntity.class);
+    verify(repository, description("new analysis persisted")).saveAndFlush(captor.capture());
+    assertThat(captor.getValue())
+      .as("new analysis carries the record identity")
+      .extracting(JobAnalysisEntity::getId, JobAnalysisEntity::getCreatedAt, JobAnalysisEntity::getJobPostingId)
+      .containsExactly(jobAnalysisRecord.id(), jobAnalysisRecord.createdAt(), jobAnalysisRecord.jobPostingId());
+  }
+
+  @Test
+  void shouldReplaceAnalysisInPlaceWhenPreviousExists() {
+    // Given
+    final var jobAnalysisRecord = jobAnalysisRecord();
+    final var existing = jobAnalysisEntity();
+    when(repository.findByJobPostingId(jobAnalysisRecord.jobPostingId())).thenReturn(Optional.of(existing));
+
+    // When
+    adapter.saveOrReplace(jobAnalysisRecord);
+
+    // Then
+    final var captor = ArgumentCaptor.forClass(JobAnalysisEntity.class);
+    verify(repository, description("replacement analysis upserted")).saveAndFlush(captor.capture());
+    assertThat(captor.getValue())
+      .as("replacement keeps the previous row identity")
+      .extracting(JobAnalysisEntity::getId, JobAnalysisEntity::getCreatedAt, JobAnalysisEntity::getJobPostingId)
+      .containsExactly(existing.getId(), existing.getCreatedAt(), jobAnalysisRecord.jobPostingId());
   }
 
   @Test
