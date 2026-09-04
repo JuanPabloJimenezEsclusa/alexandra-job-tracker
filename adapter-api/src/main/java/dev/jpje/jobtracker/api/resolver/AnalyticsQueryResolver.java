@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.util.Objects;
 
 import dev.jpje.jobtracker.api.dto.AnalyticsResponse;
-import dev.jpje.jobtracker.domain.port.in.GetAnalyticsPort;
+import dev.jpje.jobtracker.domain.port.inbound.GetAnalyticsPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;

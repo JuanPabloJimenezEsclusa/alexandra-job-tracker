@@ -5,10 +5,10 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
-import dev.jpje.jobtracker.domain.port.in.AnalyzeJobPostingPort;
-import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.LoadJobPostingPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.inbound.AnalyzeJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.JobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 
 public class AnalyzeJobPostingUseCase implements AnalyzeJobPostingPort {

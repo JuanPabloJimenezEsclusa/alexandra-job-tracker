@@ -3,8 +3,8 @@ package dev.jpje.jobtracker.application.usecase;
 import java.util.List;
 
 import dev.jpje.jobtracker.domain.model.JobPosting;
-import dev.jpje.jobtracker.domain.port.in.ListJobPostingsPort;
-import dev.jpje.jobtracker.domain.port.out.LoadJobPostingPort;
+import dev.jpje.jobtracker.domain.port.inbound.ListJobPostingsPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobPostingPort;
 import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;

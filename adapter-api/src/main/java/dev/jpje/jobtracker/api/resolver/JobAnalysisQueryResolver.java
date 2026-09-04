@@ -6,7 +6,7 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
-import dev.jpje.jobtracker.domain.port.in.ManageJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.inbound.ManageJobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;

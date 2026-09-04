@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.domain.port.out;
+package dev.jpje.jobtracker.domain.port.outbound;
 
 import java.util.UUID;
 

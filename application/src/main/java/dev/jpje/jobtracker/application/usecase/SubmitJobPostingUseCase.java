@@ -4,8 +4,8 @@ import java.time.Clock;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobPosting;
-import dev.jpje.jobtracker.domain.port.in.SubmitJobPostingPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobPostingPort;
+import dev.jpje.jobtracker.domain.port.inbound.SubmitJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.service.JobPostingService;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.JobTitle;

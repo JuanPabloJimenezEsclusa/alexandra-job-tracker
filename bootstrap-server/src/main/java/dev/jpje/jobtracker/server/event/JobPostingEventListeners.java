@@ -3,9 +3,9 @@ package dev.jpje.jobtracker.server.event;
 import java.time.Clock;
 
 import dev.jpje.jobtracker.domain.event.JobPostingCreated;
-import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.JobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
 import io.micrometer.core.instrument.Counter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

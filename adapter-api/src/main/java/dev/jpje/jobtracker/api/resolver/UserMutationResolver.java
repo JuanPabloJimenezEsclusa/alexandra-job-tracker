@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import dev.jpje.jobtracker.api.Authorization;
 import dev.jpje.jobtracker.api.dto.AuthPayloadResponse;
-import dev.jpje.jobtracker.domain.port.in.AuthenticationPort;
+import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.domain.vo.UserRole;
 import dev.jpje.jobtracker.domain.vo.Username;

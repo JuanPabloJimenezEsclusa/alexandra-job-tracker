@@ -1,7 +1,7 @@
 package dev.jpje.jobtracker.api.interceptor;
 
 import dev.jpje.jobtracker.domain.exception.InvalidTokenException;
-import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
+import dev.jpje.jobtracker.domain.port.outbound.TokenGeneratorPort;
 import org.springframework.graphql.server.WebGraphQlInterceptor;
 import org.springframework.graphql.server.WebGraphQlRequest;
 import org.springframework.graphql.server.WebGraphQlResponse;
