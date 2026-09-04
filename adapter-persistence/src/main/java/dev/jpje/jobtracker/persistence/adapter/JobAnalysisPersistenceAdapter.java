@@ -25,8 +25,13 @@ public class JobAnalysisPersistenceAdapter implements SaveJobAnalysisPort, LoadJ
   @Override
   @Transactional
   public void saveOrReplace(final JobAnalysisRecord jobAnalysisRecord) {
-    repository.deleteByJobPostingId(jobAnalysisRecord.jobPostingId());
-    repository.save(JobAnalysisMapper.toEntity(jobAnalysisRecord));
+    final var existing = repository.findByJobPostingId(jobAnalysisRecord.jobPostingId());
+    final var entity = JobAnalysisMapper.toEntity(jobAnalysisRecord);
+    existing.ifPresent(previous -> {
+      entity.setId(previous.getId());
+      entity.setCreatedAt(previous.getCreatedAt());
+    });
+    repository.saveAndFlush(entity);
   }
 
   @Override

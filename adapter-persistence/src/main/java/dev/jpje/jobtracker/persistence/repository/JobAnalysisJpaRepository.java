@@ -12,7 +12,5 @@ public interface JobAnalysisJpaRepository extends JpaRepository<JobAnalysisEntit
 
   Optional<JobAnalysisEntity> findByJobPostingId(UUID jobPostingId);
 
-  void deleteByJobPostingId(UUID jobPostingId);
-
   List<JobAnalysisEntity> findByUserIdOrderByCreatedAtDesc(UUID userId);
 }
