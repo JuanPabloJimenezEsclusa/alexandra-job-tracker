@@ -5,6 +5,11 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**chore(config): externalize llm and jwt config via environment variables**
+
+
+[b31f5bad1865b37](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/b31f5bad1865b37) juan.pablo.jimenez.esclusa *2026-09-05 15:16:05*
+
 **test(adapter): replace thread.sleep with awaitility in client timeout test**
 
 

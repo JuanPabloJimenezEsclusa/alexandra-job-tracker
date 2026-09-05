@@ -15,6 +15,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 
 @SpringBootTest(
@@ -57,6 +58,28 @@ class ExposureIntegrationTest extends GraphQlIntegrationTestBase {
     assertThat(headers.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN))
       .as("non-configured origin must not receive CORS headers")
       .isNull();
+  }
+
+  @Test
+  void shouldAllowChromeExtensionCrossOrigin() {
+    // Given
+    final var extensionOrigin = "chrome-extension://abcdefghijklmnopabcdefghijklmnop";
+
+    // When
+    final var headers = rest.method(HttpMethod.OPTIONS)
+      .uri(url())
+      .header(HttpHeaders.ORIGIN, extensionOrigin)
+      .header(HttpHeaders.ACCESS_CONTROL_REQUEST_METHOD, "POST")
+      .header(HttpHeaders.ACCESS_CONTROL_REQUEST_HEADERS, "content-type")
+      .exchange((_, response) -> response.getHeaders());
+
+    // Then
+    assertThat(headers.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN))
+      .as("chrome extension origin must be allowed")
+      .isEqualTo(extensionOrigin);
+    assertThat(headers.getFirst(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS))
+      .as("preflight allows the POST method")
+      .isNotNull();
   }
 
   private String apiBaseUrl() {
