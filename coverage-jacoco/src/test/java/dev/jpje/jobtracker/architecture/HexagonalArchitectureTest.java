@@ -147,6 +147,50 @@ class HexagonalArchitectureTest {
     .as("Adapter CLI module dependencies")
     .because("the CLI adapter is a standalone Spring Shell client");
 
+  // --- Hexagonal best practices ---
+
+  @ArchTest
+  static final ArchRule API_ADAPTER_ISOLATED = adapterIsolationRule(
+    "API adapter", ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CACHE, ADAPTER_CLI);
+
+  @ArchTest
+  static final ArchRule PERSISTENCE_ADAPTER_ISOLATED = adapterIsolationRule(
+    "Persistence adapter", ADAPTER_PERSISTENCE, ADAPTER_API, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CACHE, ADAPTER_CLI);
+
+  @ArchTest
+  static final ArchRule AUTH_ADAPTER_ISOLATED = adapterIsolationRule(
+    "Auth adapter", ADAPTER_AUTH, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AI, ADAPTER_CACHE, ADAPTER_CLI);
+
+  @ArchTest
+  static final ArchRule AI_ADAPTER_ISOLATED = adapterIsolationRule(
+    "AI adapter", ADAPTER_AI, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_CACHE, ADAPTER_CLI);
+
+  @ArchTest
+  static final ArchRule CACHE_ADAPTER_ISOLATED = adapterIsolationRule(
+    "Cache adapter", ADAPTER_CACHE, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CLI);
+
+  @ArchTest
+  static final ArchRule CLI_ADAPTER_ISOLATED = adapterIsolationRule(
+    "CLI adapter", ADAPTER_CLI, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CACHE);
+
+  @ArchTest
+  static final ArchRule PERSISTENCE_INTERNALS_CONFINED = noClasses()
+    .that().resideOutsideOfPackage(ADAPTER_PERSISTENCE)
+    .should().dependOnClassesThat().resideInAnyPackage(
+      "dev.jpje.jobtracker.persistence.entity..",
+      "dev.jpje.jobtracker.persistence.repository..")
+    .as("Persistence internals stay in the persistence adapter")
+    .because("JPA entities and repositories are adapter types that must not leak into the core (boundary isolation)");
+
+  private static ArchRule adapterIsolationRule(final String label, final String adapter,
+                                               final String... siblings) {
+    return noClasses()
+      .that().resideInAPackage(adapter)
+      .should().dependOnClassesThat().resideInAnyPackage(siblings)
+      .as(label + " must not depend on other adapters")
+      .because("adapters reach the core only through ports; cross-adapter wiring happens in the composition root");
+  }
+
   // --- Helper ---
 
   private static String[] concat(String... rest) {

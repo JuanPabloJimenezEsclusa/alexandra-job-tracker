@@ -5,45 +5,55 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
-**fix(deploy): homologate terraform SQS events and KMS with cloudformation**
+**test(adapter): replace thread.sleep with awaitility in client timeout test**
 
 
-[41e83c407c9837d](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/41e83c407c9837d) juan.pablo.jimenez.esclusa *2026-09-04 13:27:41*
+[a9c3cf7dc5adf8e](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/a9c3cf7dc5adf8e) juan.pablo.jimenez.esclusa *2026-09-05 11:18:11*
+
+**refactor(adapter): clear spec debt — remove suppress warning, decouple cache test**
+
+
+[8f7f688565f62a4](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/8f7f688565f62a4) juan.pablo.jimenez.esclusa *2026-09-05 11:18:02*
+
+**fix(ci): homologate terraform sqs events and kms with cloudformation**
+
+
+[30286e5cb19a7ac](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/30286e5cb19a7ac) juan.pablo.jimenez.esclusa *2026-09-05 11:18:02*
 
 **refactor(domain): rename port packages in/out to inbound/outbound**
 
 
-[f35082f727d73f9](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/f35082f727d73f9) juan.pablo.jimenez.esclusa *2026-09-04 13:19:44*
+[f05368c4d5a3b36](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/f05368c4d5a3b36) juan.pablo.jimenez.esclusa *2026-09-05 11:18:01*
 
-**fix(cli): add HTTP timeouts to GraphQL client**
-
-
-[0e5d166bf97f3d1](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/0e5d166bf97f3d1) juan.pablo.jimenez.esclusa *2026-09-04 13:09:18*
-
-**refactor(application): inject AnalyticsCalculator into analytics use case**
+**fix(adapter): add http timeouts to graphql client**
 
 
-[24ac0c28a3027b9](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/24ac0c28a3027b9) juan.pablo.jimenez.esclusa *2026-09-04 12:44:52*
+[99613a9e8b134b4](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/99613a9e8b134b4) juan.pablo.jimenez.esclusa *2026-09-05 11:18:01*
+
+**refactor(application): inject analytics calculator into analytics use case**
+
+
+[0e4e1b7bb213fe1](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/0e4e1b7bb213fe1) juan.pablo.jimenez.esclusa *2026-09-05 11:17:52*
 
 **fix(adapter): upsert job analysis atomically on re-analysis**
 
 
-[1cd526bba79b911](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/1cd526bba79b911) juan.pablo.jimenez.esclusa *2026-09-04 12:39:47*
+[5c5cf5d492340cf](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/5c5cf5d492340cf) juan.pablo.jimenez.esclusa *2026-09-05 11:05:35*
 
-**fix(adapter): reject stale application updates with CONFLICT**
-
-
-[efb7eae01091875](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/efb7eae01091875) juan.pablo.jimenez.esclusa *2026-09-04 10:33:56*
-
-**fix(adapter): return CONFLICT on duplicate job posting URL**
+**fix(adapter): reject stale application updates with conflict**
 
 
-[4b1821ea77c0815](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/4b1821ea77c0815) juan.pablo.jimenez.esclusa *2026-09-03 15:51:45*
+[7a69a479655511c](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/7a69a479655511c) juan.pablo.jimenez.esclusa *2026-09-05 11:05:25*
 
-**fix(adapter): harden jwt token lifetime, default exposure, and login errors\n\n- default jwt.expiration to 30 minutes\n- restrict default-profile actuator/graphiql/h2 and CORS to dev\n- return BAD_REQUEST instead of NOT_FOUND for invalid login\n- consolidate duplicated invalid-secret/not-accessible token tests**
+**fix(adapter): return conflict on duplicate job posting url**
 
 
-[fdf4f4f19872923](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/fdf4f4f19872923) juan.pablo.jimenez.esclusa *2026-09-03 15:38:40*
+[730893c8faf2e3f](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/730893c8faf2e3f) juan.pablo.jimenez.esclusa *2026-09-05 11:05:17*
+
+**fix(adapter): harden jwt token lifetime, default exposure, and login errors**
+
+
+[ce1de9724847150](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/ce1de9724847150) juan.pablo.jimenez.esclusa *2026-09-05 10:57:09*
 
 **fix(adapter): require jwt secret, add invalid token exception**
 
