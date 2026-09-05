@@ -168,6 +168,8 @@ __deploy_stack() {
       NeonPass="${NEON_PASSWORD}" \
       JwtSecret="${JWT_SECRET}" \
       LLMApiKey="${LLM_API_KEY}" \
+      LLMBaseUrl="${LLM_BASE_URL}" \
+      LLMChatModel="${LLM_CHAT_MODEL}" \
       HostedZoneId="${HOSTED_ZONE_ID}" \
     --capabilities CAPABILITY_NAMED_IAM \
     --region "${REGION}" \

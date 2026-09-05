@@ -9,17 +9,22 @@ Parameters:
     Type: String
     NoEcho: true
     Description: Neon PostgreSQL password
-    Default: placeholder_will_be_updated_by_init_script
   JwtSecret:
     Type: String
     NoEcho: true
     Description: JWT signing secret (min 32 chars)
-    Default: placeholder_will_be_updated_by_init_script
   LLMApiKey:
     Type: String
     NoEcho: true
     Description: LLM API key for AI analysis
-    Default: placeholder_will_be_updated_by_init_script
+  LLMBaseUrl:
+    Type: String
+    NoEcho: true
+    Description: LLM base url for AI analysis
+  LLMChatModel:
+    Type: String
+    NoEcho: true
+    Description: LLM chat model for AI analysis
   HostedZoneId:
     Type: String
     Description: Route53 hosted zone ID for jpje.net
@@ -182,6 +187,8 @@ Resources:
           NEON_PASSWORD: !Ref NeonPass
           JWT_SECRET: !Ref JwtSecret
           LLM_API_KEY: !Ref LLMApiKey
+          LLM_BASE_URL: !Ref LLMBaseUrl
+          LLM_CHAT_MODEL: !Ref LLMChatModel
           SNS_TOPIC_ARN: !Ref JobEventsTopic
           SQS_QUEUE_URL: !Ref JobAnalysisQueue
           SPRING_PROFILES_ACTIVE: "aws"

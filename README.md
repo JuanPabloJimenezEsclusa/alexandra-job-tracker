@@ -226,7 +226,7 @@ java -jar bootstrap-server/target/bootstrap-server-*.jar
 java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost:8880/api
 
 # Native server
-./bootstrap-server/target/job-tracker-server --spring.profiles.active=loc
+./bootstrap-server/target/job-tracker-server --spring.profiles.active=dev
 
 # Native CLI
 ./bootstrap-cli/target/job-tracker-cli --server.url=http://localhost:8880/api
@@ -363,21 +363,23 @@ Coverage reports are available at:
 
 ## Configuration
 
-| Property                                | Default                               | Description                                  |
-|-----------------------------------------|---------------------------------------|----------------------------------------------|
-| `jwt.secret`                            | `change-me-...`                       | Signing key (min 32 chars, use `JWT_SECRET`) |
-| `spring.ai.openai.api-key`              | `sk-placeholder`                      | LLM key (use `LLM_API_KEY`)             |
-| `cache.max-size`                        | `1000`                                | Caffeine max entries                         |
-| `cache.default-ttl-seconds`             | `300`                                 | Cache time-to-live                           |
-| `server.url` (CLI)                      | `http://localhost:8880/api`           | GraphQL API base URL                         |
+| Property                      | Default                     | Description                                  |
+|-------------------------------|-----------------------------|----------------------------------------------|
+| `jwt.secret`                  |                             | Signing key (min 32 chars, use `JWT_SECRET`) |
+| `spring.ai.openai.api-key`    |                             | LLM key (use `LLM_API_KEY`)                  |
+| `spring.ai.openai.base-url`   |                             | LLM base url (use `LLM_BASE_URL`)            |
+| `spring.ai.openai.chat.model` |                             | LLM chat model (use `LLM_CHAT_MODEL`)        |
+| `cache.max-size`              | `1000`                      | Caffeine max entries                         |
+| `cache.default-ttl-seconds`   | `300`                       | Cache time-to-live                           |
+| `server.url` (CLI)            | `http://localhost:8880/api` | GraphQL API base URL                         |
 
 **Spring profiles:**
 
-| Profile  | Storage                     | Use case                            |
-|----------|-----------------------------|-------------------------------------|
-| default  | H2 in-memory, Flyway auto   | Local development                   |
-| dev / loc| H2 file (`./data/jobtracker`)| Persistent local data               |
-| aws      | Neon PostgreSQL, Lambda     | Production deployment               |
+| Profile | Storage                       | Use case               |
+|---------|-------------------------------|------------------------|
+| default | H2 in-memory, Flyway auto     | Local development      |
+| dev     | H2 file (`./data/jobtracker`) | Persistent local data  |
+| aws     | Neon PostgreSQL, Lambda       | Production deployment  |
 
 ---
 

@@ -35,7 +35,7 @@ cd deploy/compose
 ./stop.sh
 
 # Stop and also remove built images
-./stop.sh removeImages=true
+./stop.sh removeImages
 ```
 
 ## 🔗 Links
@@ -47,16 +47,11 @@ cd deploy/compose
   * [GraphiQL IDE](http://localhost:8880/api/graphiql)
   * [H2 Console](http://localhost:8880/api/h2-console) (JDBC URL: `jdbc:h2:file:./deploy/data/jobtracker;AUTO_SERVER=TRUE`, user: `sa`, password: _blank_)
   * [Actuator health](http://localhost:8880/api/actuator/health)
-  * [Prometheus metrics](http://localhost:8880/api/actuator/prometheus)
-* **Prometheus (Metrics Storage):**
+* **Observability:**
   * [Prometheus dashboard](http://localhost:9090)
-* **Tempo (Distributed Tracing):**
   * [Tempo search](http://localhost:3200/status)
-* **Loki (Log Aggregation):**
   * [Loki dashboard](http://localhost:3100/services/loki)
-* **Grafana (Visualization):**
   * [Grafana dashboard](http://localhost:3000) (admin / admin)
-* **Cadvisor (Container Monitoring):**
   * [Cadvisor dashboard](http://localhost:8080)
 * **k6 (Performance/Security Testing):**
   * Runs load/spike/soak/security scripts from `testing-pentest/src/test/k6/`

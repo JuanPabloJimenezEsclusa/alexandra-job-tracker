@@ -26,10 +26,10 @@ spring:
     validate-on-migrate: false
   ai:
     openai:
-      api-key: ${LLM_API_KEY:sk-placeholder}
-      base-url: https://api.deepseek.com
+      api-key: ${LLM_API_KEY:}
+      base-url: ${LLM_BASE_URL:}
       chat:
-        model: deepseek-chat
+        model: ${LLM_CHAT_MODEL:}
   graphql:
     cors:
       allowed-origin-patterns: "${CORS_ALLOWED_ORIGINS:http://localhost:8880}"
@@ -58,7 +58,7 @@ info:
     version: ${spring.application.version}
 
 jwt:
-  secret: ${JWT_SECRET}
+  secret: ${JWT_SECRET:}
   expiration: 1800000
 
 ajt:
