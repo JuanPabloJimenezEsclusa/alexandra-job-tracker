@@ -1,9 +1,12 @@
 package dev.jpje.jobtracker.cli.client;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 
 import java.net.InetSocketAddress;
+import java.time.Duration;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.sun.net.httpserver.HttpServer;
 import dev.jpje.jobtracker.cli.session.SessionManager;
@@ -14,19 +17,14 @@ class GraphqlClientTimeoutTest {
   @Test
   void shouldFailWithClearErrorWhenServerDoesNotRespondInTime() throws Exception {
     final var server = HttpServer.create(new InetSocketAddress(0), 0);
+    final var releaseResponse = new AtomicBoolean(false);
     try {
       server.createContext("/api/graphql", exchange -> {
-        try {
-          Thread.sleep(2000L);
-        } catch (final InterruptedException e) {
-          Thread.currentThread().interrupt();
-        }
+        await().atMost(Duration.ofSeconds(5)).until(releaseResponse::get);
         try {
           final var body = "{}".getBytes();
           exchange.sendResponseHeaders(200, body.length);
           exchange.getResponseBody().write(body);
-        } catch (final Exception _) {
-          // the client has already timed out and closed the connection
         } finally {
           exchange.close();
         }
@@ -43,6 +41,7 @@ class GraphqlClientTimeoutTest {
         .isInstanceOf(GraphqlClientException.class)
         .hasMessageContaining("timed out after 300 ms");
     } finally {
+      releaseResponse.set(true);
       server.stop(0);
     }
   }

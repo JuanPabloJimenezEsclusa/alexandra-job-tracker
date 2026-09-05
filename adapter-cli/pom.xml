@@ -29,6 +29,11 @@
       <groupId>net.thisptr</groupId>
       <artifactId>jackson-jq</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.awaitility</groupId>
+      <artifactId>awaitility</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <reporting>
