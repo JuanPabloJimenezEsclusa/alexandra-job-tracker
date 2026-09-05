@@ -1,4 +1,4 @@
-# AJT Serverless — AWS Lambda + API Gateway
+# AJT Serverless: AWS Lambda + API Gateway
 
 ## Architecture
 
@@ -19,7 +19,7 @@ Lambda's cold start is negligible for this use case (single-user CLI). The cost 
 
 ### Flyway strategy
 
-**Disabled on Lambda** — schema migrations are a deployment-time concern, not a runtime one. Run them as a one-shot step before deploying a new Lambda version (see [Migrations](#migrations)).
+**Disabled on Lambda**: schema migrations are a deployment-time concern, not a runtime one. Run them as a one-shot step before deploying a new Lambda version (see [Migrations](#migrations)).
 
 ## Deploy
 
@@ -37,10 +37,10 @@ IA_C=cloud-formation make all
 # Tear down
 IA_C=terraform make destroy
 
-# Rollback (instant — alias switch, no rebuild)
+# Rollback (instant alias switch, no rebuild)
 make rollback ROLLBACK_TO=2
 
-# Canary — shift 10% traffic to v4 for 5 min
+# Canary, shifting 10% of traffic to v4 for 5 min
 aws lambda update-alias --function-name ajt-serverless --name live \
   --function-version 4 \
   --routing-config AdditionalVersionWeights={3=0.1}
@@ -53,7 +53,7 @@ aws lambda update-alias --function-name ajt-serverless --name live \
 make info   # Lambda config + alias listing
 ```
 
-Image tag auto-derives from git SHA (`git-abc1234`). Each deploy publishes a new Lambda version and shifts the `live` alias. Rollback is an alias pointer change — instant, no rebuild.
+Image tag auto-derives from git SHA (`git-abc1234`). Each deploy publishes a new Lambda version and shifts the `live` alias. Rollback is an alias pointer change: instant, no rebuild.
 
 ### Option A: CloudFormation
 
@@ -88,7 +88,7 @@ IMAGE_URI="$(aws ecr describe-repositories ...):git-abc1234" \
 ./destroy-aws-plan.sh
 ```
 
-The Terraform workspace is self-contained in `terraform/templates/` (provider, variables, outputs). Image build/push remains separate — Terraform only manages infrastructure.
+The Terraform workspace is self-contained in `terraform/templates/` (provider, variables, outputs). Image build/push remains separate: Terraform only manages infrastructure.
 
 ## Security
 
@@ -98,8 +98,8 @@ The Terraform workspace is self-contained in `terraform/templates/` (provider, v
 | API auth | JWT (app-layer, validated by Spring Security) |
 | Lambda URL | Public (auth decisions delegated to app) |
 | API Gateway | Public with rate limiting (20 burst, 5/s) |
-| Secrets | Env vars — `NEON_PASSWORD`, `JWT_SECRET`, `LLM_API_KEY` |
-| IAM | Least-privilege — only Lambda execution + ECR pull |
+| Secrets | Env vars: `NEON_PASSWORD`, `JWT_SECRET`, `LLM_API_KEY` |
+| IAM | Least-privilege: only Lambda execution + ECR pull |
 | Encryption at rest | SNS topic: AWS-managed KMS (`alias/aws/sns`). SQS queues: customer-managed KMS (`alias/ajt-job-analysis-kms`) |
 | Database | SSL enforced, password auth, IP-restricted by Neon |
 
@@ -157,7 +157,7 @@ SPRING_PROFILES_ACTIVE=aws,db-migrate \
   java -jar bootstrap-server/target/bootstrap-server-*.jar
 ```
 
-CI/CD pattern — add this step before deploying a new Lambda image:
+CI/CD pattern: add this step before deploying a new Lambda image:
 
 ```yaml
 - name: Run database migrations
@@ -205,7 +205,7 @@ events are acknowledged without reprocessing.
 
 ### Rollback
 
-Lambda has a `live` alias that API Gateway routes to. Rollback is an alias pointer change — instant, no rebuild required:
+Lambda has a `live` alias that API Gateway routes to. Rollback points the alias elsewhere, so it is instant and needs no rebuild:
 
 ```bash
 make rollback ROLLBACK_TO=2
@@ -214,7 +214,7 @@ aws lambda update-alias --function-name ajt-serverless --name live \
   --function-version 2 --region eu-west-1
 ```
 
-The previous version remains deployed and available — only the alias moves.
+The previous version remains deployed and available: only the alias moves.
 
 ### Canary deploys
 
@@ -241,19 +241,19 @@ aws lambda update-alias --function-name ajt-serverless --name live \
 
 Both IaC paths create the same resource set:
 
-- **IAM role** — Lambda execution with `AWSLambdaBasicExecutionRole` + ECR pull policy
-- **Lambda** — Container image function (1024 MB, 60s, 512 MB ephemeral), auto-publishes versions on deploy
-- **Lambda alias `live`** — API Gateway routes here, not `$LATEST`. Rollback = alias pointer change
-- **Lambda URL** — Public function URL pointing to `$LATEST` (for testing/debugging)
-- **API Gateway HTTP API** — `$default` route, `AWS_PROXY` to `live` alias, throttled 20/5
-- **SNS topic `ajt-job-events`** — publishes `JobPostingCreated` events, SSE with AWS-managed KMS (`alias/aws/sns`)
-- **SQS queue `ajt-job-analysis`** — async analysis workload, visibility timeout 120s, DLQ after 3 failures, SSE with customer-managed KMS
-- **SQS DLQ `ajt-job-analysis-dlq`** — dead-letter queue for failed events
-- **KMS key `alias/ajt-job-analysis-kms`** — customer-managed, key rotation enabled, grants SNS `kms:Decrypt`/`kms:GenerateDataKey` for queue delivery
-- **ACM certificate** — DNS-validated for `ajt.jpje.net`
-- **API Gateway domain name** — Regional endpoint, TLS 1.2
-- **Route53 records** — DNS validation CNAME + A alias to API Gateway domain
-- **CloudWatch log group** — 1-day retention
+- **IAM role**: Lambda execution with `AWSLambdaBasicExecutionRole` + ECR pull policy
+- **Lambda**: Container image function (1024 MB, 60s, 512 MB ephemeral), auto-publishes versions on deploy
+- **Lambda alias `live`**: API Gateway routes here, not `$LATEST`. Rollback = alias pointer change
+- **Lambda URL**: Public function URL pointing to `$LATEST` (for testing/debugging)
+- **API Gateway HTTP API**: `$default` route, `AWS_PROXY` to `live` alias, throttled 20/5
+- **SNS topic `ajt-job-events`**: publishes `JobPostingCreated` events, SSE with AWS-managed KMS (`alias/aws/sns`)
+- **SQS queue `ajt-job-analysis`**: async analysis workload, visibility timeout 120s, DLQ after 3 failures, SSE with customer-managed KMS
+- **SQS DLQ `ajt-job-analysis-dlq`**: dead-letter queue for failed events
+- **KMS key `alias/ajt-job-analysis-kms`**: customer-managed, key rotation enabled, grants SNS `kms:Decrypt`/`kms:GenerateDataKey` for queue delivery
+- **ACM certificate**: DNS-validated for `ajt.jpje.net`
+- **API Gateway domain name**: Regional endpoint, TLS 1.2
+- **Route53 records**: DNS validation CNAME + A alias to API Gateway domain
+- **CloudWatch log group**: 1-day retention
 
 Templates: CloudFormation (`cloud-formation/ajt-serverless-stack.yml`) | Terraform (`terraform/templates/main.tf`)
 

@@ -1,4 +1,4 @@
-# Alexandra Job Tracker — Browser Extension
+# Alexandra Job Tracker Browser Extension
 
 Chrome extension that captures job postings from **LinkedIn** and **Indeed** and submits them to your
 local [Alexandra Job Tracker](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker) API.

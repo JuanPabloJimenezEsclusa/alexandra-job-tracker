@@ -34,11 +34,11 @@
 
 ## Alexandra Job Tracker
 
-**Alexandra Job Tracker** is a multi-tenant job application tracking system built with
-[hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/). It provides
-a GraphQL API for server-side operations and a CLI client for terminal-based workflows.
-Architected around **ports and adapters**, the domain layer is pure Java with zero framework
-dependencies, validated at build time by ArchUnit.
+**Alexandra Job Tracker** is a multi-tenant job application tracking system. It exposes a
+GraphQL API for server-side operations and a Spring Shell CLI for terminal workflows, and
+it follows [hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/)
+with ports and adapters. The domain layer is pure Java with no framework dependencies, and
+ArchUnit checks the module boundaries at build time.
 
 **Stack:** Java 25 · Spring Boot 4.1 · Maven multi-module · GraalVM native · OpenTelemetry
 
@@ -74,20 +74,20 @@ dependencies, validated at build time by ArchUnit.
 
 | Module               | Layer     | Description                                                      |
 |----------------------|-----------|------------------------------------------------------------------|
-| `domain`             | Core      | Pure Java — domain models, value objects, ports, domain services |
+| `domain`             | Core      | Pure Java: domain models, value objects, ports, domain services |
 | `application`        | Core      | Use cases orchestrating domain logic through inbound ports       |
-| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs — Spring for GraphQL        |
+| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs: Spring for GraphQL        |
 | `adapter-cli`        | Inbound   | Spring Shell commands, HTTP GraphQL client, session management   |
 | `adapter-persistence`| Outbound  | JPA entities, repositories, mappers, Flyway migrations           |
 | `adapter-auth`       | Outbound  | JWT provider, GraphQL auth interceptor, bcrypt password hashing  |
 | `adapter-ai`         | Outbound  | Job analysis via Spring AI + skill-based prompts                 |
 | `adapter-cache`      | Outbound  | Caffeine cache with hexagonal `CachePort` decorators             |
-| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API — wires use cases, adapters, events      |
-| `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI — standalone HTTP client                   |
+| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API: wires use cases, adapters, events      |
+| `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI: standalone HTTP client                   |
 | `coverage-jacoco`    | Testing   | JaCoCo aggregated coverage reports + ArchUnit architecture tests |
 | `testing-pentest`    | Testing   | k6 GraphQL security tests + OWASP ZAP active scan                |
 
-> **browser-extension** — Chrome extension for capturing LinkedIn/Indeed job postings
+> **browser-extension**: Chrome extension for capturing LinkedIn/Indeed job postings
 > (separate JavaScript project, not a Maven module).
 
 ### Dependency Graph
@@ -120,19 +120,19 @@ flowchart LR
   bootstrap-cli --> adapter-cli
 ```
 
-- `domain` — zero framework imports. Contains entities, value objects, port interfaces,
+- `domain`: zero framework imports. Contains entities, value objects, port interfaces,
   domain services, and domain events. Enforced by ArchUnit.
-- `application` — implements inbound ports. Framework-free by design.
-- `adapter-*` — implement outbound ports. `adapter-cli` is a standalone delivery mechanism
+- `application`: implements inbound ports. Framework-free by design.
+- `adapter-*`: implement outbound ports. `adapter-cli` is a standalone delivery mechanism
   that communicates with the server exclusively over HTTP.
-- `bootstrap-server` — composition root. Wires use cases, adapters, domain services, and
+- `bootstrap-server`: composition root. Wires use cases, adapters, domain services, and
   the event publisher. Includes OpenTelemetry tracing via `TracingFilter`.
-- `bootstrap-cli` — depends only on `adapter-cli`. The domain layer is never on its
+- `bootstrap-cli`: depends only on `adapter-cli`. The domain layer is never on its
   classpath.
 
 ### CQRS Resolver Pattern
 
-All GraphQL resolvers follow **Command Query Responsibility Segregation** — every
+All GraphQL resolvers follow **Command Query Responsibility Segregation**: every
 endpoint is either a `QueryResolver` (read) or `MutationResolver` (write).
 
 | Type     | Resolver                      | Endpoint               |
@@ -252,7 +252,7 @@ passed in the `Authorization: Bearer <token>` header.
 | `analytics(since)`                               | Per-status counts and conversion rate         |
 | `jobPostings(source)`                            | List submitted job postings                   |
 | `submitJobPosting(input)`                        | Submit a job posting from raw data            |
-| `analyzeJobPosting(jobPostingId)`                | AI analysis — summary, skills, fit score, company rating/type, salary range; persisted |
+| `analyzeJobPosting(jobPostingId)`                | AI analysis: summary, skills, fit score, company rating/type, salary range; persisted |
 | `analyses`                                       | List saved analyses for the current user      |
 | `analysis(id)`                                   | Fetch a single saved analysis                 |
 | `deleteAnalysis(id)`                             | Remove a saved analysis (admin only)          |
@@ -388,9 +388,9 @@ Coverage reports are available at:
 The `adapter-cache` module decorates persistence adapters with Caffeine caches via the
 `CachePort` abstraction:
 
-- **JobApplication** — individual (`jobapp:<id>`) and per-user list
+- **JobApplication**: individual (`jobapp:<id>`) and per-user list
   (`jobapps:user:<id>`) caches, evicted on create, update, and delete.
-- **JobPosting** — individual (`jobpost:<id>`) and per-user list
+- **JobPosting**: individual (`jobpost:<id>`) and per-user list
   (`jobposts:user:<id>`) caches, evicted on create. Cache hit avoids the
   persistence adapter entirely.
 
@@ -423,4 +423,4 @@ mvn clean verify site site:stage-deploy
 
 ## License
 
-[GNU General Public License v3.0](LICENSE) — see `LICENSE` for the full text.
+[GNU General Public License v3.0](LICENSE): see `LICENSE` for the full text.
