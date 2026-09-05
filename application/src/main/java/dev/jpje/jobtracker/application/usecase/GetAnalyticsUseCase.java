@@ -2,8 +2,8 @@ package dev.jpje.jobtracker.application.usecase;
 
 import java.time.Instant;
 
-import dev.jpje.jobtracker.domain.port.in.GetAnalyticsPort;
-import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.inbound.GetAnalyticsPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobApplicationPort;
 import dev.jpje.jobtracker.domain.service.AnalyticsCalculator;
 import dev.jpje.jobtracker.domain.vo.Analytics;
 import dev.jpje.jobtracker.domain.vo.UserId;
@@ -13,9 +13,10 @@ public class GetAnalyticsUseCase implements GetAnalyticsPort {
   private final LoadJobApplicationPort loadPort;
   private final AnalyticsCalculator calculator;
 
-  public GetAnalyticsUseCase(final LoadJobApplicationPort loadPort) {
+  public GetAnalyticsUseCase(final LoadJobApplicationPort loadPort,
+                             final AnalyticsCalculator calculator) {
     this.loadPort = loadPort;
-    this.calculator = new AnalyticsCalculator();
+    this.calculator = calculator;
   }
 
   @Override

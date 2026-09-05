@@ -5,8 +5,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
-import dev.jpje.jobtracker.domain.port.out.LoadJobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.persistence.mapper.JobAnalysisMapper;
 import dev.jpje.jobtracker.persistence.repository.JobAnalysisJpaRepository;
@@ -25,8 +25,13 @@ public class JobAnalysisPersistenceAdapter implements SaveJobAnalysisPort, LoadJ
   @Override
   @Transactional
   public void saveOrReplace(final JobAnalysisRecord jobAnalysisRecord) {
-    repository.deleteByJobPostingId(jobAnalysisRecord.jobPostingId());
-    repository.save(JobAnalysisMapper.toEntity(jobAnalysisRecord));
+    final var existing = repository.findByJobPostingId(jobAnalysisRecord.jobPostingId());
+    final var entity = JobAnalysisMapper.toEntity(jobAnalysisRecord);
+    existing.ifPresent(previous -> {
+      entity.setId(previous.getId());
+      entity.setCreatedAt(previous.getCreatedAt());
+    });
+    repository.saveAndFlush(entity);
   }
 
   @Override
@@ -36,8 +41,8 @@ public class JobAnalysisPersistenceAdapter implements SaveJobAnalysisPort, LoadJ
   }
 
   @Override
-  public Optional<JobAnalysisRecord> findById(final UUID id) {
-    return repository.findById(id).map(JobAnalysisMapper::toDomain);
+  public Optional<JobAnalysisRecord> findByIdAndUser(final UUID id, final UserId userId) {
+    return repository.findByIdAndUserId(id, userId.value()).map(JobAnalysisMapper::toDomain);
   }
 
   @Override

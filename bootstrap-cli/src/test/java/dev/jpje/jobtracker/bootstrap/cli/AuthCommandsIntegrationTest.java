@@ -14,6 +14,10 @@ import org.junit.jupiter.params.provider.MethodSource;
 class AuthCommandsIntegrationTest extends BaseCliIntegrationTest {
 
   private static final Consumer<AuthCommandsIntegrationTest> NO_OP = _ -> {};
+  private static final Consumer<AuthCommandsIntegrationTest> STUB_LOGIN = _ ->
+    stubGraphql("login", """
+      {"data": {"login": {"token": "test-jwt-token", "user": {"id": "1", "username": "preloaded"}}}}
+      """);
   private static final Consumer<AuthCommandsIntegrationTest> STUB_ERROR = _ ->
     stubGraphqlError();
   private static final Consumer<AuthCommandsIntegrationTest> STUB_ME_NULL = _ ->
@@ -48,7 +52,7 @@ class AuthCommandsIntegrationTest extends BaseCliIntegrationTest {
 
   private static Stream<Arguments> scenarios() {
     return Stream.of(
-      arguments(named("login with valid credentials", NO_OP), NO_OP,
+      arguments(named("login with valid credentials", STUB_LOGIN), NO_OP,
         "login --username preloaded --password pass", "Logged in as"),
       arguments(named("login with invalid credentials", STUB_ERROR), NO_OP,
         "login --username preloaded --password wrongpass", "Invalid credentials"),

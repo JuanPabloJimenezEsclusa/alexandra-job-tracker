@@ -2,6 +2,7 @@ scalar Instant
 
 enum ApplicationStatus { SAVED APPLIED INTERVIEWING OFFER ACCEPTED REJECTED WITHDRAWN }
 enum Source { LINKEDIN INDEED OTHER }
+enum Role { USER ADMIN }
 
 input SubmitJobInput {
   url: String!
@@ -13,7 +14,7 @@ input SubmitJobInput {
 
 type Query {
   me: User
-  applications(status: ApplicationStatus, source: Source): [JobApplication!]!
+  applications(status: ApplicationStatus): [JobApplication!]!
   analytics(since: Instant): Analytics!
   jobPostings(source: Source): [JobPosting!]!
   analyses: [JobAnalysis!]!
@@ -21,10 +22,10 @@ type Query {
 }
 
 type Mutation {
-  register(username: String!, password: String!): AuthPayload!
+  register(username: String!, password: String!, role: Role!): AuthPayload!
   login(username: String!, password: String!): AuthPayload!
   logout: Boolean!
-  createApplication(company: String!, role: String!, source: Source!, postingUrl: String, notes: String): JobApplication!
+  createApplication(jobPostingId: ID!, notes: String): JobApplication!
   updateApplicationStatus(id: ID!, status: ApplicationStatus!, notes: String): JobApplication!
   deleteApplication(id: ID!): Boolean!
   submitJobPosting(input: SubmitJobInput!): JobPosting!
@@ -33,8 +34,8 @@ type Mutation {
 }
 
 type AuthPayload { token: String! user: User! }
-type User { id: ID! username: String! createdAt: Instant! }
-type JobApplication { id: ID! company: String! role: String! source: Source! postingUrl: String status: ApplicationStatus! dateApplied: Instant! lastUpdated: Instant! notes: String }
+type User { id: ID! username: String! role: Role! createdAt: Instant! }
+type JobApplication { id: ID! jobPostingId: ID! status: ApplicationStatus! dateApplied: Instant! lastUpdated: Instant! notes: String }
 type JobPosting { id: ID! url: String! source: Source! title: String! company: String! description: String postedAt: Instant }
 type JobAnalysis { id: ID! jobPostingId: ID! summary: String! seniority: String! softSkills: [String!]! technicalSkills: [String!]! fitScore: Float! companyRating: Float! companyType: String! salaryMin: Float! salaryMax: Float! salaryCurrency: String! createdAt: Instant! }
 type Analytics { totalApplications: Int! perStatus: StatusCounts! conversionRate: Float! }

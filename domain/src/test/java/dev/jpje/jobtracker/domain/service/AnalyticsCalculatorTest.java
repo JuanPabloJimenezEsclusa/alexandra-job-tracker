@@ -11,9 +11,6 @@ import java.util.stream.Stream;
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.vo.Analytics;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -59,10 +56,6 @@ class AnalyticsCalculatorTest {
     return Instancio.of(JobApplication.class)
       .set(field(JobApplication::userId), userId)
       .set(field(JobApplication::status), status)
-      .set(field(JobApplication::company), CompanyName.of("Acme"))
-      .set(field(JobApplication::role), RoleName.of("SWE"))
-      .set(field(JobApplication::source), Source.LINKEDIN)
-      .set(field(JobApplication::postingUrl), null)
       .set(field(JobApplication::notes), null)
       .create();
   }

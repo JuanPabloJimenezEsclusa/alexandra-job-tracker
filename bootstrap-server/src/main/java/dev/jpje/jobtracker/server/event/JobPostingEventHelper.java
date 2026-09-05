@@ -6,11 +6,10 @@ import java.util.UUID;
 import dev.jpje.jobtracker.domain.event.JobPostingCreated;
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
 import dev.jpje.jobtracker.domain.model.JobApplication;
-import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobAnalysisPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.JobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.RoleName;
 import io.micrometer.core.instrument.Counter;
 
 final class JobPostingEventHelper {
@@ -26,10 +25,7 @@ final class JobPostingEventHelper {
     final var tracking = new JobApplication(
       UUID.randomUUID(),
       posting.userId(),
-      posting.company(),
-      RoleName.of(posting.title().value()),
-      posting.source(),
-      posting.url(),
+      posting.id(),
       ApplicationStatus.SAVED,
       now,
       now,

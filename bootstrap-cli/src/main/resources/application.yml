@@ -37,3 +37,5 @@ spring:
 
 server:
   url: http://localhost:8880/api
+  connect-timeout: 5000
+  request-timeout: 30000

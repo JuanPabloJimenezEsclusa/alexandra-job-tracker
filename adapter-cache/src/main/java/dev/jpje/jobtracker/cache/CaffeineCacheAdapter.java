@@ -6,7 +6,7 @@ import java.util.concurrent.ConcurrentMap;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import dev.jpje.jobtracker.domain.port.out.CachePort;
+import dev.jpje.jobtracker.domain.port.outbound.CachePort;
 
 public class CaffeineCacheAdapter implements CachePort {
 

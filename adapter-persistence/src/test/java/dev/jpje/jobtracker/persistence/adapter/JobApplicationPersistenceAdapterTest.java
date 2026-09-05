@@ -1,7 +1,7 @@
 package dev.jpje.jobtracker.persistence.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
@@ -12,13 +12,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.domain.exception.OptimisticLockException;
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
-import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.persistence.entity.JobApplicationEntity;
 import dev.jpje.jobtracker.persistence.repository.JobApplicationJpaRepository;
@@ -27,6 +24,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.OptimisticLockingFailureException;
 
 @ExtendWith(MockitoExtension.class)
 class JobApplicationPersistenceAdapterTest {
@@ -41,87 +39,107 @@ class JobApplicationPersistenceAdapterTest {
 
   @Test
   void shouldSaveApplication() {
+    // Given
     final var entity = entity();
     when(repository.saveAndFlush(any(JobApplicationEntity.class))).thenReturn(entity);
 
+    // When
     final var saved = adapter.save(application());
 
+    // Then
     assertThat(saved).as("saved application returned").isEqualTo(toDomain(entity));
     verify(repository, description("repository invoked with flush")).saveAndFlush(any(JobApplicationEntity.class));
   }
 
   @Test
+  void shouldMapStaleUpdateToOptimisticLockConflict() {
+    // Given
+    when(repository.saveAndFlush(any(JobApplicationEntity.class)))
+      .thenThrow(new OptimisticLockingFailureException("stale version"));
+    final var application = application();
+
+    // When, then
+    assertThatThrownBy(() -> adapter.save(application))
+      .as("a stale update is rejected as an optimistic lock conflict")
+      .isInstanceOf(OptimisticLockException.class)
+      .hasMessage("Application was modified concurrently");
+  }
+
+  @Test
   void shouldDeleteApplication() {
+    // Given
     final var id = UUID.randomUUID();
 
-    assertThatCode(() -> adapter.delete(id)).as("delete does not throw").doesNotThrowAnyException();
+    // When
+    adapter.delete(id);
+
+    // Then
     verify(repository, description("repository delete invoked")).deleteById(id);
   }
 
   @Test
   void shouldFindById() {
+    // Given
     final var entity = entity();
     when(repository.findById(entity.getId())).thenReturn(Optional.of(entity));
 
-    assertThat(adapter.findById(entity.getId())).hasValue(toDomain(entity));
+    // When, then
+    assertThat(adapter.findById(entity.getId())).as("found application").hasValue(toDomain(entity));
   }
 
   @Test
   void shouldReturnEmptyWhenNotFound() {
+    // Given
     final var id = UUID.randomUUID();
     when(repository.findById(id)).thenReturn(Optional.empty());
 
-    assertThat(adapter.findById(id)).isEmpty();
+    // When, then
+    assertThat(adapter.findById(id)).as("missing application").isEmpty();
   }
 
   @Test
-  void shouldFindByUserAndStatusAndSource() {
+  void shouldFindByIdAndUser() {
+    // Given
     final var userId = UserId.generate();
     final var entity = entity(userId);
-    when(repository.findByUserIdAndStatusAndSourceOrderByDateAppliedDesc(
-      userId.value(), "SAVED", "LINKEDIN")).thenReturn(List.of(entity));
+    when(repository.findByIdAndUserId(entity.getId(), userId.value())).thenReturn(Optional.of(entity));
 
-    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED, Source.LINKEDIN))
-      .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
+    // When, then
+    assertThat(adapter.findByIdAndUser(entity.getId(), userId)).as("application scoped by user").hasValue(toDomain(entity));
+  }
+
+  @Test
+  void shouldReturnEmptyWhenFindByIdAndUserMisses() {
+    // Given
+    final var id = UUID.randomUUID();
+    final var userId = UserId.generate();
+    when(repository.findByIdAndUserId(id, userId.value())).thenReturn(Optional.empty());
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(id, userId)).as("missing or foreign application").isEmpty();
   }
 
   @Test
   void shouldFindByUserAndStatus() {
+    // Given
     final var userId = UserId.generate();
     final var entity = entity(userId);
     when(repository.findByUserIdAndStatusOrderByDateAppliedDesc(
       userId.value(), "SAVED")).thenReturn(List.of(entity));
 
-    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED, null))
+    // When, then
+    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED))
       .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
-  }
-
-  @Test
-  void shouldFindByUserAndSource() {
-    final var userId = UserId.generate();
-    final var entity = entity(userId);
-    when(repository.findByUserIdAndSourceOrderByDateAppliedDesc(
-      userId.value(), "LINKEDIN")).thenReturn(List.of(entity));
-
-    assertThat(adapter.findByUserId(userId, null, Source.LINKEDIN))
-      .as("single result list size").hasSize(SINGLE_RESULT_SIZE);
-  }
-
-  @Test
-  void shouldFindAllByUser() {
-    final var userId = UserId.generate();
-    final var entity = entity(userId);
-    when(repository.findByUserIdOrderByDateAppliedDesc(userId.value())).thenReturn(List.of(entity));
-
-    assertThat(adapter.findByUserId(userId, null, null)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
   @Test
   void shouldFindAllByUserId() {
+    // Given
     final var userId = UserId.generate();
     final var entity = entity(userId);
     when(repository.findByUserIdOrderByDateAppliedDesc(userId.value())).thenReturn(List.of(entity));
 
+    // When, then
     assertThat(adapter.findAllByUserId(userId)).as("single result list size").hasSize(SINGLE_RESULT_SIZE);
   }
 
@@ -129,21 +147,17 @@ class JobApplicationPersistenceAdapterTest {
     return new JobApplication(
       entity.getId(),
       new UserId(entity.getUserId()),
-      CompanyName.of(entity.getCompany()),
-      RoleName.of(entity.getRole()),
-      Source.valueOf(entity.getSource()),
-      Url.of(entity.getPostingUrl()),
+      entity.getJobPostingId(),
       ApplicationStatus.valueOf(entity.getStatus()),
       entity.getDateApplied(),
       entity.getLastUpdated(),
-      Notes.of(entity.getNotes()),
+      entity.getNotes() != null ? Notes.of(entity.getNotes()) : null,
       entity.getVersion());
   }
 
   private static JobApplication application() {
     final var userId = UserId.generate();
-    return new JobApplication(UUID.randomUUID(), userId, CompanyName.of("Acme"),
-      RoleName.of("SWE"), Source.LINKEDIN, Url.of("https://example.com/job"),
+    return new JobApplication(UUID.randomUUID(), userId, UUID.randomUUID(),
       ApplicationStatus.SAVED, Instant.EPOCH, Instant.EPOCH, Notes.of("notes"), 0L);
   }
 
@@ -155,10 +169,7 @@ class JobApplicationPersistenceAdapterTest {
     final var entity = new JobApplicationEntity();
     entity.setId(UUID.randomUUID());
     entity.setUserId(userId.value());
-    entity.setCompany("Acme");
-    entity.setRole("SWE");
-    entity.setSource("LINKEDIN");
-    entity.setPostingUrl("https://example.com/job");
+    entity.setJobPostingId(UUID.randomUUID());
     entity.setStatus("SAVED");
     entity.setDateApplied(Instant.EPOCH);
     entity.setLastUpdated(Instant.EPOCH);

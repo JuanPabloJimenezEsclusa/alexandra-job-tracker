@@ -33,7 +33,11 @@ services:
       - "../data:/app/deploy/data"
     environment:
       SPRING_PROFILES_ACTIVE: "dev"
-      LLM_API_KEY: ${LLM_API_KEY:-NOT_SET}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      LLM_BASE_URL: ${LLM_BASE_URL:-}
+      LLM_CHAT_MODEL: ${LLM_CHAT_MODEL:-}
+      LC_CTYPE: ${LC_CTYPE:-}
+      JWT_SECRET: ${JWT_SECRET:-}
       APP_OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf

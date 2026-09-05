@@ -1,6 +1,6 @@
 package dev.jpje.jobtracker.auth;
 
-import dev.jpje.jobtracker.domain.port.out.PasswordEncoderPort;
+import dev.jpje.jobtracker.domain.port.outbound.PasswordEncoderPort;
 import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Component;
 
