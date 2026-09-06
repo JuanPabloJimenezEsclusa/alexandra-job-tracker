@@ -22,22 +22,21 @@ graphql:
       }
   auth: inherit
 
-docs:
-  content: |
-    Registers a new user with the given role (USER or ADMIN).
-    Requires an ADMIN token: run mutation.loginAdmin first.
-
 runtime:
   variables:
     - name: randomUsername
-      value: newuser
+      value: JPJE
     - name: randomPassword
-      value: password123
+      value: JPJE
     - name: randomRole
-      value: USER
+      value: ADMIN
 
 settings:
   encodeUrl: true
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  Registers a new user with the given role (USER or ADMIN).
+  Requires an ADMIN token: run mutation.loginAdmin first.

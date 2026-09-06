@@ -20,11 +20,6 @@ graphql:
       }
   auth: inherit
 
-docs:
-  content: |
-    Deletes a job analysis. Admin only: requires an ADMIN token,
-    run mutation.loginAdmin first.
-
 runtime:
   variables:
     - name: analysisId

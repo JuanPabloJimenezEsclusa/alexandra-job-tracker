@@ -338,8 +338,10 @@ Load the extension:
 chrome://extensions → Developer mode → Load unpacked → browser-extension/
 ```
 
-Configure the server URL (`http://localhost:8880/api/graphql`) and log in via the
-Options page.
+Configure the server URL and log via the `Options` page:
+
+* DEV: `http://localhost:8880/api/graphql`
+* AWS: `https://ajt.jpje.net:443/api/graphql`
 
 ---
 

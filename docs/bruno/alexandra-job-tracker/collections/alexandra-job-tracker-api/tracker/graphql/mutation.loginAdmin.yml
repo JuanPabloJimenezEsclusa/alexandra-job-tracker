@@ -20,11 +20,6 @@ graphql:
         "password": "password123"
       }
 
-docs:
-  content: |
-    Admin login (alexandra / password123).
-    Stores an ADMIN token in authToken, required for register and deleteAnalysis.
-
 runtime:
   scripts:
     - type: after-response
@@ -37,3 +32,7 @@ settings:
   timeout: 0
   followRedirects: true
   maxRedirects: 5
+
+docs: |-
+  Admin login (alexandra / password123).
+  Stores an ADMIN token in authToken, required for register and deleteAnalysis.

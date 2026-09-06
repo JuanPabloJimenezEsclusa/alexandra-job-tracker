@@ -23,11 +23,6 @@ graphql:
       }
   auth: inherit
 
-docs:
-  content: |
-    Tracks a new application for an existing job posting (company, role, source and
-    URL come from the posting: run mutation.submitJobPosting first and use its id).
-
 runtime:
   variables:
     - name: randomPostingId
