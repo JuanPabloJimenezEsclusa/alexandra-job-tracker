@@ -32,14 +32,17 @@ public class DelegatingEventPublisher implements EventPublisher {
 
   @Override
   public void publish(final DomainEvent event) {
+    log.debug("Publishing event {} to transport {}", event, transport);
     if ("sns".equals(transport) && !topicArn.isBlank()) {
       final var snsTemplate = snsTemplateProvider.getIfAvailable();
+      log.debug("Sns template is {}", snsTemplate);
       if (snsTemplate != null) {
-        log.debug("Publishing domain event {} to SNS topic {}", event, topicArn);
-        snsTemplate.sendNotification(topicArn, SnsNotification.builder(event)
+        final var snsNotification = SnsNotification.builder(event)
           .subject(event.getClass().getSimpleName())
           .header("eventType", event.getClass().getSimpleName())
-          .build());
+          .build();
+        log.debug("Sns notification is {}", snsNotification);
+        snsTemplate.sendNotification(topicArn, snsNotification);
         return;
       }
     }

@@ -11,8 +11,12 @@ import dev.jpje.jobtracker.domain.port.outbound.SaveJobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import io.micrometer.core.instrument.Counter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 final class JobPostingEventHelper {
+
+  private static final Logger log = LoggerFactory.getLogger(JobPostingEventHelper.class);
 
   private JobPostingEventHelper() {
   }
@@ -31,6 +35,7 @@ final class JobPostingEventHelper {
       now,
       null,
       null);
+    log.debug("Creating tracking: {}", tracking);
     saveAppPort.save(tracking);
     applicationCreatedCounter.increment();
   }
@@ -49,6 +54,7 @@ final class JobPostingEventHelper {
       posting.userId(),
       analysis,
       now);
+    log.debug("Job Analysis Record: {}", jobAnalysisRecord);
     saveAnalysisPort.saveOrReplace(jobAnalysisRecord);
   }
 }

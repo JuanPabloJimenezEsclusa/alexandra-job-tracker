@@ -87,6 +87,7 @@ public class SqsJobPostingListener {
 
   void processMessage(final Message<JobPostingCreated> received, final SqsAsyncClient sqsAsyncClient) {
     try {
+      log.info("Received JobPostingCreated from SQS queue {}", queueUrl);
       eventProcessor.process(received.getPayload());
       deleteMessage(received, sqsAsyncClient);
     } catch (final ResourceAlreadyExistsException e) {
@@ -108,6 +109,7 @@ public class SqsJobPostingListener {
   private void deleteMessage(final Message<JobPostingCreated> received, final SqsAsyncClient sqsAsyncClient) {
     final var receipt = received.getHeaders().get(SqsHeaders.SQS_RECEIPT_HANDLE_HEADER, String.class);
     if (receipt != null) {
+      log.debug("Received JobPostingCreated from SQS receipt {}", receipt);
       sqsAsyncClient.deleteMessage(builder -> builder.queueUrl(queueUrl).receiptHandle(receipt));
     }
   }

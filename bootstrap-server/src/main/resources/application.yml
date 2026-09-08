@@ -176,6 +176,7 @@ logging:
   level:
     root: WARN
     dev.jpje.jobtracker: INFO
+    dev.jpje.jobtracker.server.event: DEBUG
     org.springframework: WARN
     org.hibernate: ERROR
     com.zaxxer.hikari: ERROR
