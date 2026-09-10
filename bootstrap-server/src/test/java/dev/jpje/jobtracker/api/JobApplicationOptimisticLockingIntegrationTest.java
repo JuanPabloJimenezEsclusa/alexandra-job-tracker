@@ -43,7 +43,7 @@ class JobApplicationOptimisticLockingIntegrationTest extends GraphQlIntegrationT
   void shouldIncrementVersionAcrossUpdates() {
     // Given
     final var created = createSavedApplication("version-increments");
-    assertThat(created.version()).as("new application version").isEqualTo(0L);
+    assertThat(created.version()).as("new application version").isZero();
 
     // When
     final var firstUpdate = adapter.save(created.withStatus(ApplicationStatus.APPLIED, NOW));

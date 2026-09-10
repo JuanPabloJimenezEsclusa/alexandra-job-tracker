@@ -29,8 +29,11 @@ public class JobPostingEventProcessor {
     this.applicationCreatedCounter = applicationCreatedCounter;
   }
 
-  public void process(final JobPostingCreated event) {
+  public void createTracking(final JobPostingCreated event) {
     JobPostingEventHelper.createTracking(saveAppPort, applicationCreatedCounter, event, clock.instant());
+  }
+
+  public void analyzePosting(final JobPostingCreated event) {
     JobPostingEventHelper.analyzePosting(analysisPort, saveAnalysisPort, event, clock.instant());
   }
 }

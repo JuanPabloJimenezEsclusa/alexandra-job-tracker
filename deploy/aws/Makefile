@@ -14,6 +14,7 @@ IMAGE_TAG           ?= git-$(GIT_SHA)
 REGION              ?= eu-west-1
 AWS_ACCOUNT         ?= $(shell aws sts get-caller-identity --query Account --output text 2>/dev/null)
 ECR_REPO            ?= ajt-serverless
+FUNCTION            ?= ajt-serverless
 IMAGE_URI           ?= $(AWS_ACCOUNT).dkr.ecr.$(REGION).amazonaws.com/$(ECR_REPO):$(IMAGE_TAG)
 ECR_REGISTRY        ?= $(AWS_ACCOUNT).dkr.ecr.$(REGION).amazonaws.com
 
@@ -99,12 +100,16 @@ info:
 	aws lambda get-function-configuration --function-name ajt-serverless --region $(REGION)
 	@echo "---"
 	aws lambda list-aliases --function-name ajt-serverless --region $(REGION) --query 'Aliases[*].{Name:Name,Version:FunctionVersion,Routing:RoutingConfig}'
+	@echo "---"
+	aws lambda get-function-configuration --function-name ajt-serverless-worker --region $(REGION)
+	@echo "---"
+	aws lambda list-aliases --function-name ajt-serverless-worker --region $(REGION) --query 'Aliases[*].{Name:Name,Version:FunctionVersion,Routing:RoutingConfig}'
 
 rollback:
-	@if [ -z "$(ROLLBACK_TO)" ]; then echo "Usage: make rollback ROLLBACK_TO=<version>"; exit 1; fi
-	aws lambda update-alias --function-name ajt-serverless --name live \
+	@if [ -z "$(ROLLBACK_TO)" ]; then echo "Usage: make rollback ROLLBACK_TO=<version> [FUNCTION=ajt-serverless]"; exit 1; fi
+	aws lambda update-alias --function-name $(FUNCTION) --name live \
 	  --function-version $(ROLLBACK_TO) --region $(REGION)
-	@echo "Alias 'live' now points to version $(ROLLBACK_TO)"
+	@echo "Alias 'live' on $(FUNCTION) now points to version $(ROLLBACK_TO)"
 
 #################################################################################################
 # Help
@@ -121,10 +126,11 @@ help:
 	@echo "  infra             Deploy/update infrastructure (via selected IaC)"
 	@echo "  destroy           Tear down infrastructure"
 	@echo "  test              Smoke test the API health endpoint"
-	@echo "  info              Show Lambda config and alias status"
-	@echo "  rollback          make rollback ROLLBACK_TO=<N>"
+	@echo "  info              Show Lambda config and alias status (both functions)"
+	@echo "  rollback          make rollback ROLLBACK_TO=<N> [FUNCTION=ajt-serverless|ajt-serverless-worker]"
 	@echo ""
 	@echo "Variables:"
 	@echo "  IA_C              IaC tool: terraform (default) or cloud-formation"
 	@echo "  IMAGE_TAG         Docker image tag (default: git-<sha>)"
 	@echo "  REGION            AWS region (default: eu-west-1)"
+	@echo "  FUNCTION          Lambda function for rollback (default: ajt-serverless)"

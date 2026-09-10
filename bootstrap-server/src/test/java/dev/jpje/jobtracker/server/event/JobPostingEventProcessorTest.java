@@ -4,6 +4,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -57,18 +58,28 @@ class JobPostingEventProcessorTest {
   }
 
   @Test
-  void shouldCreateTrackingAndAnalyzeOnPostingCreated() {
+  void shouldCreateTrackingIndependentlyOfAnalysis() {
+    final var event = event();
+
+    processor.createTracking(event);
+
+    verify(saveAppPort, description("tracking application saved")).save(any(JobApplication.class));
+    verify(applicationCreatedCounter, description("creation counter incremented")).increment();
+    verifyNoInteractions(analysisPort, saveAnalysisPort);
+  }
+
+  @Test
+  void shouldAnalyzePostingIndependentlyOfTracking() {
     final var event = event();
     final var posting = event.jobPosting();
     final var jobAnalysis = mock(JobAnalysis.class);
     when(analysisPort.analyze(posting.title().value(), posting.company().value(),
       posting.source().name(), posting.description())).thenReturn(jobAnalysis);
 
-    processor.process(event);
+    processor.analyzePosting(event);
 
-    verify(saveAppPort, description("tracking application saved")).save(any(JobApplication.class));
-    verify(applicationCreatedCounter, description("creation counter incremented")).increment();
     verify(saveAnalysisPort, description("analysis persisted")).saveOrReplace(any());
+    verifyNoInteractions(saveAppPort, applicationCreatedCounter);
   }
 
   private static JobPostingCreated event() {

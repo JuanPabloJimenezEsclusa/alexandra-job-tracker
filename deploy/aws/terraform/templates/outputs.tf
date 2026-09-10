@@ -28,7 +28,17 @@ output "job_events_topic_arn" {
   value       = aws_sns_topic.job_events.arn
 }
 
+output "job_tracking_queue_url" {
+  description = "SQS queue for async job tracking"
+  value       = aws_sqs_queue.job_tracking.id
+}
+
 output "job_analysis_queue_url" {
   description = "SQS queue for async job analysis"
   value       = aws_sqs_queue.job_analysis.id
+}
+
+output "worker_function_name" {
+  description = "Lambda function name for the async worker"
+  value       = aws_lambda_function.worker.function_name
 }

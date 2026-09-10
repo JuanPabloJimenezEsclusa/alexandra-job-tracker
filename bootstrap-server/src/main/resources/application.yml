@@ -164,7 +164,6 @@ ajt:
   events:
     transport: sns
     sns-topic: "${SNS_TOPIC_ARN:}"
-    sqs-queue: "${SQS_QUEUE_URL:}"
 
 management:
   endpoints:

@@ -68,16 +68,43 @@ Resources:
                 Action:
                   - sns:Publish
                 Resource: !Ref JobEventsTopic
+
+  WorkerLambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: ajt-worker-execution-role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: ecr-pull-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - ecr:GetDownloadUrlForLayer
+                  - ecr:BatchGetImage
+                  - ecr:GetAuthorizationToken
+                Resource: "*"
+        - PolicyName: worker-sqs-policy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
               - Effect: Allow
                 Action:
                   - sqs:ReceiveMessage
                   - sqs:DeleteMessage
                   - sqs:GetQueueAttributes
-                Resource: !GetAtt JobAnalysisQueue.Arn
-              - Effect: Allow
-                Action:
-                  - kms:Decrypt
-                Resource: !GetAtt JobEventsKmsKey.Arn
+                Resource:
+                  - !GetAtt JobTrackingQueue.Arn
+                  - !GetAtt JobAnalysisQueue.Arn
 
   #################################################################################################
   ###################################### Events (SNS + SQS) #######################################
@@ -88,46 +115,25 @@ Resources:
       DisplayName: AJT Job Events
       KmsMasterKeyId: alias/aws/sns
 
-  JobEventsKmsKey:
-    Type: AWS::KMS::Key
+  JobTrackingQueue:
+    Type: AWS::SQS::Queue
     Properties:
-      Description: KMS key for the AJT SQS queues (grants SNS delivery)
-      EnableKeyRotation: true
-      KeyPolicy:
-        Version: "2012-10-17"
-        Id: ajt-job-analysis-key
-        Statement:
-          - Sid: Enable IAM User Permissions
-            Effect: Allow
-            Principal:
-              AWS: !Sub "arn:aws:iam::${AWS::AccountId}:root"
-            Action: kms:*
-            Resource: "*"
-          - Sid: Allow SNS to encrypt messages delivered to the queue
-            Effect: Allow
-            Principal:
-              Service: sns.amazonaws.com
-            Action:
-              - kms:Decrypt
-              - kms:GenerateDataKey
-              - kms:GenerateDataKeyWithoutPlaintext
-            Resource: "*"
-            Condition:
-              ArnEquals:
-                aws:SourceArn: !Ref JobEventsTopic
+      QueueName: ajt-job-tracking
+      VisibilityTimeout: 180
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt JobTrackingDlq.Arn
+        maxReceiveCount: 3
 
-  JobEventsKmsAlias:
-    Type: AWS::KMS::Alias
+  JobTrackingDlq:
+    Type: AWS::SQS::Queue
     Properties:
-      AliasName: alias/ajt-job-analysis-kms
-      TargetKeyId: !Ref JobEventsKmsKey
+      QueueName: ajt-job-tracking-dlq
 
   JobAnalysisQueue:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: ajt-job-analysis
-      VisibilityTimeout: 120
-      KmsMasterKeyId: !Ref JobEventsKmsKey
+      VisibilityTimeout: 180
       RedrivePolicy:
         deadLetterTargetArn: !GetAtt JobAnalysisDlq.Arn
         maxReceiveCount: 3
@@ -136,9 +142,20 @@ Resources:
     Type: AWS::SQS::Queue
     Properties:
       QueueName: ajt-job-analysis-dlq
-      KmsMasterKeyId: !Ref JobEventsKmsKey
 
-  JobEventsSubscription:
+  JobTrackingSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref JobEventsTopic
+      Protocol: sqs
+      Endpoint: !GetAtt JobTrackingQueue.Arn
+      RawMessageDelivery: true
+      FilterPolicyScope: MessageAttributes
+      FilterPolicy:
+        eventType:
+          - JobPostingCreated
+
+  JobAnalysisSubscription:
     Type: AWS::SNS::Subscription
     Properties:
       TopicArn: !Ref JobEventsTopic
@@ -149,6 +166,23 @@ Resources:
       FilterPolicy:
         eventType:
           - JobPostingCreated
+
+  JobTrackingQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues:
+        - !Ref JobTrackingQueue
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: sns.amazonaws.com
+            Action: sqs:SendMessage
+            Resource: !GetAtt JobTrackingQueue.Arn
+            Condition:
+              ArnEquals:
+                aws:SourceArn: !Ref JobEventsTopic
 
   JobAnalysisQueuePolicy:
     Type: AWS::SQS::QueuePolicy
@@ -173,13 +207,13 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: ajt-serverless
-      Description: Spring Boot native-image job tracker (GraalVM)
+      Description: Spring Boot native-image job tracker
       PackageType: Image
       Code:
         ImageUri: !Ref ImageUri
       Role: !GetAtt LambdaExecutionRole.Arn
       MemorySize: 1024
-      Timeout: 60
+      Timeout: 30
       EphemeralStorage:
         Size: 512
       Environment:
@@ -190,10 +224,10 @@ Resources:
           LLM_BASE_URL: !Ref LLMBaseUrl
           LLM_CHAT_MODEL: !Ref LLMChatModel
           SNS_TOPIC_ARN: !Ref JobEventsTopic
-          SQS_QUEUE_URL: !Ref JobAnalysisQueue
           SPRING_PROFILES_ACTIVE: "aws"
           LOGGING_LEVEL_ROOT: WARN
           LOGGING_LEVEL_COM_JOBTRACKER: INFO
+          LOGGING_LEVEL_COM_JOBTRACKER_SERVER_EVENT: DEBUG
           AWS_LAMBDA_SERVER_PORT: "8080"
           SERVER_PORT: "8080"
       Tags:
@@ -231,6 +265,69 @@ Resources:
       Action: lambda:InvokeFunctionUrl
       Principal: "*"
       FunctionUrlAuthType: NONE
+
+  WorkerLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: ajt-serverless-worker
+      Description: Spring Boot native-image job tracker worker (SNS/SQS fanout consumer)
+      PackageType: Image
+      Code:
+        ImageUri: !Ref ImageUri
+      Role: !GetAtt WorkerLambdaExecutionRole.Arn
+      MemorySize: 1024
+      Timeout: 30
+      EphemeralStorage:
+        Size: 512
+      Environment:
+        Variables:
+          NEON_PASSWORD: !Ref NeonPass
+          JWT_SECRET: !Ref JwtSecret
+          LLM_API_KEY: !Ref LLMApiKey
+          LLM_BASE_URL: !Ref LLMBaseUrl
+          LLM_CHAT_MODEL: !Ref LLMChatModel
+          SPRING_PROFILES_ACTIVE: "aws"
+          LOGGING_LEVEL_ROOT: WARN
+          LOGGING_LEVEL_COM_JOBTRACKER: INFO
+          LOGGING_LEVEL_COM_JOBTRACKER_SERVER_EVENT: DEBUG
+          AWS_LAMBDA_SERVER_PORT: "8080"
+          SERVER_PORT: "8080"
+          AWS_LWA_PASS_THROUGH_PATH: "/api/events/sqs"
+          AWS_LWA_ERROR_STATUS_CODES: "500"
+      Tags:
+        - Key: Name
+          Value: ajt-serverless-worker
+
+  WorkerLambdaVersion:
+    Type: AWS::Lambda::Version
+    Properties:
+      FunctionName: !Ref WorkerLambdaFunction
+
+  WorkerLambdaLiveAlias:
+    Type: AWS::Lambda::Alias
+    DependsOn: WorkerLambdaVersion
+    Properties:
+      FunctionName: !Ref WorkerLambdaFunction
+      FunctionVersion: !GetAtt WorkerLambdaVersion.Version
+      Name: live
+
+  JobTrackingEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt JobTrackingQueue.Arn
+      FunctionName: !Ref WorkerLambdaLiveAlias
+
+  JobAnalysisEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt JobAnalysisQueue.Arn
+      FunctionName: !Ref WorkerLambdaLiveAlias
+
+  WorkerLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: "/aws/lambda/ajt-serverless-worker"
+      RetentionInDays: 1
 
   #################################################################################################
   ###################################### API Gateway ##############################################
@@ -352,6 +449,12 @@ Outputs:
   JobEventsTopicArn:
     Description: SNS topic for job events
     Value: !Ref JobEventsTopic
+  JobTrackingQueueUrl:
+    Description: SQS queue for async job tracking
+    Value: !Ref JobTrackingQueue
   JobAnalysisQueueUrl:
     Description: SQS queue for async job analysis
     Value: !Ref JobAnalysisQueue
+  WorkerLambdaFunctionName:
+    Description: Lambda function name for the async worker
+    Value: !Ref WorkerLambdaFunction
