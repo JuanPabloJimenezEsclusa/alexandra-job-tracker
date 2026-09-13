@@ -1,7 +1,7 @@
 package dev.jpje.jobtracker.server;
 
-import dev.jpje.jobtracker.server.event.SqsEventEnvelope;
-import dev.jpje.jobtracker.server.event.SqsEventRecord;
+import dev.jpje.jobtracker.events.SqsEventEnvelope;
+import dev.jpje.jobtracker.events.SqsEventRecord;
 import io.awspring.cloud.sns.core.SnsTemplate;
 import io.awspring.cloud.sns.core.TopicMessageChannel;
 import org.jspecify.annotations.Nullable;

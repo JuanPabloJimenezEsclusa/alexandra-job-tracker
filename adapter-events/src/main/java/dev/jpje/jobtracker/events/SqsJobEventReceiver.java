@@ -1,7 +1,8 @@
-package dev.jpje.jobtracker.server.event;
+package dev.jpje.jobtracker.events;
 
 import dev.jpje.jobtracker.domain.event.JobPostingCreated;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
@@ -21,11 +22,12 @@ public class SqsJobEventReceiver {
   private static final String TRACKING_QUEUE_MARKER = "ajt-job-tracking";
   private static final String ANALYSIS_QUEUE_MARKER = "ajt-job-analysis";
 
-  private final JobPostingEventProcessor eventProcessor;
+  private final JobPostingEventHandlerFactory handlerFactory;
   private final ObjectMapper objectMapper;
 
-  public SqsJobEventReceiver(final JobPostingEventProcessor eventProcessor, final ObjectMapper objectMapper) {
-    this.eventProcessor = eventProcessor;
+  public SqsJobEventReceiver(final JobPostingEventHandlerFactory handlerFactory,
+                             final ObjectMapper objectMapper) {
+    this.handlerFactory = handlerFactory;
     this.objectMapper = objectMapper;
   }
 
@@ -48,17 +50,14 @@ public class SqsJobEventReceiver {
       log.error("Failed to deserialize SQS record from {}: {}", sqsEvent.eventSourceArn(), e.getMessage());
       return HttpStatus.INTERNAL_SERVER_ERROR;
     }
+    final var type = typeFor(sqsEvent.eventSourceArn());
+    if (type == null) {
+      log.warn("Ignoring SQS message from unrecognized queue {}", sqsEvent.eventSourceArn());
+      return HttpStatus.OK;
+    }
     try {
-      final var arn = sqsEvent.eventSourceArn();
-      if (arn != null && arn.contains(TRACKING_QUEUE_MARKER)) {
-        log.info("Received JobPostingCreated from tracking queue {}: {}", arn, event);
-        eventProcessor.createTracking(event);
-      } else if (arn != null && arn.contains(ANALYSIS_QUEUE_MARKER)) {
-        log.info("Received JobPostingCreated from analysis queue {}: {}", arn, event);
-        eventProcessor.analyzePosting(event);
-      } else {
-        log.warn("Ignoring SQS message from unrecognized queue {}", arn);
-      }
+      log.info("Received JobPostingCreated from {} queue {}: {}", type, sqsEvent.eventSourceArn(), event);
+      handlerFactory.get(type).handle(event);
       return HttpStatus.OK;
     } catch (final ResourceAlreadyExistsException e) {
       log.warn("Ignoring duplicate SQS message from {}: {}", sqsEvent.eventSourceArn(), e.getMessage());
@@ -67,5 +66,18 @@ public class SqsJobEventReceiver {
       log.error("Failed to process SQS record from {}", sqsEvent.eventSourceArn(), e);
       return HttpStatus.INTERNAL_SERVER_ERROR;
     }
+  }
+
+  private static @Nullable JobPostingEventType typeFor(final @Nullable String arn) {
+    if (arn == null) {
+      return null;
+    }
+    if (arn.contains(TRACKING_QUEUE_MARKER)) {
+      return JobPostingEventType.TRACKING;
+    }
+    if (arn.contains(ANALYSIS_QUEUE_MARKER)) {
+      return JobPostingEventType.ANALYSIS;
+    }
+    return null;
   }
 }

@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.server.event;
+package dev.jpje.jobtracker.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -7,7 +7,6 @@ import java.time.Duration;
 
 import dev.jpje.jobtracker.api.GraphQlIntegrationTestBase;
 import dev.jpje.jobtracker.api.config.IntegrationTestConfig;
-import dev.jpje.jobtracker.server.JobTrackerServerApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;

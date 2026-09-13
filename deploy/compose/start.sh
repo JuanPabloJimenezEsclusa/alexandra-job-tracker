@@ -15,15 +15,18 @@ workspace="$(pwd)"
 
 __initServices() {
   local type="${1:-jvm}"
-  local dockerfile="deploy/compose/Dockerfile"
+  local dockerfile="${workspace}/Dockerfile"
 
   cd "${workspace}"
 
   if [[ "${type}" == "native" ]]; then
-    dockerfile="deploy/compose/Dockerfile.native"
+    dockerfile="${workspace}/Dockerfile.native"
   fi
-  DOCKERFILE="${dockerfile}" docker compose --file docker-compose.yml up -d --build -V --force-recreate --always-recreate-deps
-  docker compose --file docker-compose.yml ps
+
+  echo "dockerfile: ${dockerfile}"
+  DOCKERFILE="${dockerfile}" \
+    docker compose --file "${workspace}/docker-compose.yml" --progress=plain \
+    up -d --build -V --force-recreate --always-recreate-deps
 }
 
 main() {

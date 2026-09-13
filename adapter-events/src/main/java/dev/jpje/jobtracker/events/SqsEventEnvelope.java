@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.server.event;
+package dev.jpje.jobtracker.events;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

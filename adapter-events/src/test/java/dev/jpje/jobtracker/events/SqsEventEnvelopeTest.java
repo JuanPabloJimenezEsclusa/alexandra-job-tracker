@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.server.event;
+package dev.jpje.jobtracker.events;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

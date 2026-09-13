@@ -6,13 +6,14 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
+import org.springframework.context.annotation.Configuration;
 
 /**
  * Hexagonal architecture tests.
  *
- * <p>Scans all non-bootstrap modules. Each module's allowed dependencies are explicitly
- * whitelisted. Bootstrap modules are not on the classpath (excluded from coverage-jacoco
- * dependencies), so they are not scanned.
+ * <p>Scans every module, including the bootstrap composition roots. Each module's allowed
+ * dependencies are explicitly whitelisted, and the composition-root rules ensure the bootstrap
+ * modules only assemble adapters and use cases instead of implementing business orchestration.
  */
 @AnalyzeClasses(packages = "dev.jpje.jobtracker")
 class HexagonalArchitectureTest {
@@ -24,7 +25,10 @@ class HexagonalArchitectureTest {
   private static final String ADAPTER_AUTH = "dev.jpje.jobtracker.auth..";
   private static final String ADAPTER_AI = "dev.jpje.jobtracker.ai..";
   private static final String ADAPTER_CACHE = "dev.jpje.jobtracker.cache..";
+  private static final String ADAPTER_EVENTS = "dev.jpje.jobtracker.events..";
+  private static final String BOOTSTRAP_SERVER = "dev.jpje.jobtracker.server..";
   private static final String ADAPTER_CLI = "dev.jpje.jobtracker.cli..";
+  private static final String BOOTSTRAP_CLI = "dev.jpje.jobtracker.bootstrap..";
 
   // --- Common allowed packages (applied to all layers) ---
 
@@ -40,7 +44,7 @@ class HexagonalArchitectureTest {
     .that().resideInAPackage(DOMAIN)
     .should().dependOnClassesThat().resideInAnyPackage("org.springframework..")
     .as("Domain must not depend on Spring")
-    .because("the domain layer is pure Java with zero framework imports");
+    .because("domain layer is pure Java with zero framework imports");
 
   @ArchTest
   static final ArchRule APPLICATION_MUST_NOT_DEPEND_ON_ADAPTERS = noClasses()
@@ -88,7 +92,7 @@ class HexagonalArchitectureTest {
         "org.slf4j..",
         "reactor.core.."))
     .as("Adapter API module dependencies")
-    .because("the GraphQL adapter translates HTTP to use case calls");
+    .because("GraphQL adapter translates HTTP to use case calls");
 
   @ArchTest
   static final ArchRule ADAPTER_PERSISTENCE_DEPENDENCIES = classes()
@@ -124,7 +128,7 @@ class HexagonalArchitectureTest {
         "org.springaicommunity.agent.(utils|tools)..",
         "com.fasterxml.jackson.."))
     .as("AI module dependencies")
-    .because("the AI adapter integrates with LLMs via Spring AI");
+    .because("AI adapter integrates with LLMs via Spring AI");
 
   @ArchTest
   static final ArchRule ADAPTER_CACHE_DEPENDENCIES = classes()
@@ -137,6 +141,19 @@ class HexagonalArchitectureTest {
     .because("cache decorates persistence adapters with Caffeine");
 
   @ArchTest
+  static final ArchRule ADAPTER_EVENTS_DEPENDENCIES = classes()
+    .that().resideInAPackage(ADAPTER_EVENTS)
+    .should().onlyDependOnClassesThat().resideInAnyPackage(
+      concat(DOMAIN, ADAPTER_EVENTS,
+        "io.awspring.cloud.sns..",
+        "org.springframework.(stereotype|context|http|web|transaction|scheduling|beans|boot)..",
+        "org.slf4j..",
+        "tools.jackson..",
+        "com.fasterxml.jackson.."))
+    .as("Events adapter module dependencies")
+    .because("events adapter translates Spring/SQS events to ports and publishes via Spring/SNS");
+
+  @ArchTest
   static final ArchRule ADAPTER_CLI_DEPENDENCIES = classes()
     .that().resideInAPackage(ADAPTER_CLI)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
@@ -145,33 +162,44 @@ class HexagonalArchitectureTest {
         "com.fasterxml.jackson..",
         "net.thisptr.jackson.jq.."))
     .as("Adapter CLI module dependencies")
-    .because("the CLI adapter is a standalone Spring Shell client");
+    .because("CLI adapter is a standalone Spring Shell client");
 
   // --- Hexagonal best practices ---
 
   @ArchTest
   static final ArchRule API_ADAPTER_ISOLATED = adapterIsolationRule(
-    "API adapter", ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CACHE, ADAPTER_CLI);
+    "API adapter", ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CACHE,
+    ADAPTER_CLI, ADAPTER_EVENTS);
 
   @ArchTest
   static final ArchRule PERSISTENCE_ADAPTER_ISOLATED = adapterIsolationRule(
-    "Persistence adapter", ADAPTER_PERSISTENCE, ADAPTER_API, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CACHE, ADAPTER_CLI);
+    "Persistence adapter", ADAPTER_PERSISTENCE, ADAPTER_API, ADAPTER_AUTH, ADAPTER_AI,
+    ADAPTER_CACHE, ADAPTER_CLI, ADAPTER_EVENTS);
 
   @ArchTest
   static final ArchRule AUTH_ADAPTER_ISOLATED = adapterIsolationRule(
-    "Auth adapter", ADAPTER_AUTH, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AI, ADAPTER_CACHE, ADAPTER_CLI);
+    "Auth adapter", ADAPTER_AUTH, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AI, ADAPTER_CACHE,
+    ADAPTER_CLI, ADAPTER_EVENTS);
 
   @ArchTest
   static final ArchRule AI_ADAPTER_ISOLATED = adapterIsolationRule(
-    "AI adapter", ADAPTER_AI, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_CACHE, ADAPTER_CLI);
+    "AI adapter", ADAPTER_AI, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_CACHE,
+    ADAPTER_CLI, ADAPTER_EVENTS);
 
   @ArchTest
   static final ArchRule CACHE_ADAPTER_ISOLATED = adapterIsolationRule(
-    "Cache adapter", ADAPTER_CACHE, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CLI);
+    "Cache adapter", ADAPTER_CACHE, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
+    ADAPTER_CLI, ADAPTER_EVENTS);
+
+  @ArchTest
+  static final ArchRule EVENTS_ADAPTER_ISOLATED = adapterIsolationRule(
+    "Events adapter", ADAPTER_EVENTS, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
+    ADAPTER_CACHE, ADAPTER_CLI);
 
   @ArchTest
   static final ArchRule CLI_ADAPTER_ISOLATED = adapterIsolationRule(
-    "CLI adapter", ADAPTER_CLI, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CACHE);
+    "CLI adapter", ADAPTER_CLI, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
+    ADAPTER_CACHE, ADAPTER_EVENTS);
 
   @ArchTest
   static final ArchRule PERSISTENCE_INTERNALS_CONFINED = noClasses()
@@ -182,6 +210,34 @@ class HexagonalArchitectureTest {
     .as("Persistence internals stay in the persistence adapter")
     .because("JPA entities and repositories are adapter types that must not leak into the core (boundary isolation)");
 
+  // --- Composition root rules ---
+
+  @ArchTest
+  static final ArchRule CORE_AND_ADAPTERS_MUST_NOT_DEPEND_ON_BOOTSTRAP = noClasses()
+    .that().resideInAnyPackage(DOMAIN, APPLICATION, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH,
+      ADAPTER_AI, ADAPTER_CACHE, ADAPTER_CLI, ADAPTER_EVENTS)
+    .should().dependOnClassesThat().resideInAnyPackage(BOOTSTRAP_SERVER, BOOTSTRAP_CLI)
+    .as("Core and adapters must not depend on bootstrap modules")
+    .because("bootstrap is the composition root and dependencies point inward");
+
+  @ArchTest
+  static final ArchRule ADAPTERS_MUST_NOT_DEPEND_ON_USE_CASE_IMPLEMENTATIONS = noClasses()
+    .that().resideInAnyPackage(ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
+      ADAPTER_CACHE, ADAPTER_CLI, ADAPTER_EVENTS)
+    .should().dependOnClassesThat().resideInAPackage("dev.jpje.jobtracker.application.usecase..")
+    .as("Adapters must reach the application through inbound ports")
+    .because("use-case implementations are assembled only in the bootstrap composition root");
+
+  @ArchTest
+  static final ArchRule BOOTSTRAP_NON_CONFIG_MUST_NOT_DEPEND_ON_OUTBOUND_PORTS = noClasses()
+    .that().resideInAnyPackage(BOOTSTRAP_SERVER, BOOTSTRAP_CLI)
+    .and().areNotAnnotatedWith(Configuration.class)
+    .should().dependOnClassesThat().resideInAPackage("dev.jpje.jobtracker.domain.port.outbound..")
+    .as("Composition root only wires outbound ports from @Configuration classes")
+    .because("business orchestration belongs in the application layer, not in bootstrap");
+
+  // --- Helper ---
+
   private static ArchRule adapterIsolationRule(final String label, final String adapter,
                                                final String... siblings) {
     return noClasses()
@@ -190,8 +246,6 @@ class HexagonalArchitectureTest {
       .as(label + " must not depend on other adapters")
       .because("adapters reach the core only through ports; cross-adapter wiring happens in the composition root");
   }
-
-  // --- Helper ---
 
   private static String[] concat(String... rest) {
     var result = new String[HexagonalArchitectureTest.COMMON.length + rest.length];

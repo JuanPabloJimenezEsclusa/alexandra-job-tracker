@@ -11,6 +11,7 @@ COPY adapter-cache/pom.xml adapter-cache/
 COPY adapter-auth/pom.xml adapter-auth/
 COPY adapter-ai/pom.xml adapter-ai/
 COPY adapter-api/pom.xml adapter-api/
+COPY adapter-events/pom.xml adapter-events/
 COPY adapter-cli/pom.xml adapter-cli/
 COPY bootstrap-server/pom.xml bootstrap-server/
 COPY bootstrap-cli/pom.xml bootstrap-cli/

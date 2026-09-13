@@ -61,10 +61,6 @@ jwt:
   secret: ${JWT_SECRET:}
   expiration: 1800000
 
-ajt:
-  events:
-    transport: spring
-
 management:
   endpoints:
     web:
@@ -91,7 +87,7 @@ otel:
 logging:
   level:
     root: INFO
-    dev.jpje.jobtracker.server.event: DEBUG
+    dev.jpje.jobtracker.events: DEBUG
 
 ---
 
@@ -162,7 +158,6 @@ spring:
 
 ajt:
   events:
-    transport: sns
     sns-topic: "${SNS_TOPIC_ARN:}"
 
 management:
@@ -175,7 +170,7 @@ logging:
   level:
     root: WARN
     dev.jpje.jobtracker: INFO
-    dev.jpje.jobtracker.server.event: DEBUG
+    dev.jpje.jobtracker.events: DEBUG
     org.springframework: WARN
     org.hibernate: ERROR
     com.zaxxer.hikari: ERROR

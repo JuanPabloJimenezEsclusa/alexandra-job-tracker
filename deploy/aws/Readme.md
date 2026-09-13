@@ -199,9 +199,15 @@ function as messages arrive; inside the worker, the Lambda Web Adapter forwards
 each event to `POST /api/events/sqs`, where it is routed by source queue ARN:
 tracking events create the SAVED application, analysis events run the AI analysis:
 
-```
-submitJobPosting (HTTP) → SNS topic ─(filter: eventType=JobPostingCreated)─┬→ SQS ajt-job-tracking ─(ESM)─→ worker → create tracking (SAVED)
-                                                                           └→ SQS ajt-job-analysis  ─(ESM)─→ worker → AI analysis → persisted
+```mermaid
+flowchart LR
+  submit["submitJobPosting (HTTP)"] --> sns["SNS topic ajt-job-events"]
+  sns -->|"filter: eventType=JobPostingCreated"| tracking["SQS ajt-job-tracking"]
+  sns -->|"filter: eventType=JobPostingCreated"| analysis["SQS ajt-job-analysis"]
+  tracking -->|ESM| worker["ajt-serverless-worker<br/>POST /api/events/sqs"]
+  analysis -->|ESM| worker
+  worker -->|"ARN ajt-job-tracking"| create["create tracking (SAVED)"]
+  worker -->|"ARN ajt-job-analysis"| persist["AI analysis → persisted"]
 ```
 
 The HTTP call returns immediately. There is no in-process polling thread: AWS

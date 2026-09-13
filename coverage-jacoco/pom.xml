@@ -57,6 +57,11 @@
       <artifactId>adapter-cache</artifactId>
       <version>${project.version}</version>
     </dependency>
+    <dependency>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-events</artifactId>
+      <version>${project.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>dev.jpje.jobtracker</groupId>
@@ -156,6 +161,10 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <configuration>
           <skip>false</skip>
+          <additionalClasspathElements>
+            <additionalClasspathElement>${session.executionRootDirectory}/bootstrap-server/target/classes</additionalClasspathElement>
+            <additionalClasspathElement>${session.executionRootDirectory}/bootstrap-cli/target/classes</additionalClasspathElement>
+          </additionalClasspathElements>
         </configuration>
         <executions>
           <execution>
