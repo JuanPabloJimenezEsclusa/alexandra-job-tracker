@@ -34,11 +34,9 @@
 
 ## Alexandra Job Tracker
 
-**Alexandra Job Tracker** is a multi-tenant job application tracking system. It exposes a
-GraphQL API for server-side operations and a Spring Shell CLI for terminal workflows, and
-it follows [hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/)
-with ports and adapters. The domain layer is pure Java with no framework dependencies, and
-ArchUnit checks the module boundaries at build time.
+**Alexandra Job Tracker** is a job application tracking system. It exposes a GraphQL API
+for server-side operations and a Spring Shell CLI for terminal workflows, and it follows
+[hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/) with ports and adapters.
 
 **Stack:** Java 25 · Spring Boot 4.1 · Maven multi-module · GraalVM native · OpenTelemetry
 
@@ -82,7 +80,8 @@ ArchUnit checks the module boundaries at build time.
 | `adapter-auth`       | Outbound  | JWT provider, GraphQL auth interceptor, bcrypt password hashing  |
 | `adapter-ai`         | Outbound  | Job analysis via Spring AI + skill-based prompts                 |
 | `adapter-cache`      | Outbound  | Caffeine cache with hexagonal `CachePort` decorators             |
-| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API: wires use cases, adapters, events      |
+| `adapter-events`     | Both      | SQS/LWA receiver, Spring event listeners, Spring/SNS publishers  |
+| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API: wires use cases, adapters, domain services |
 | `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI: standalone HTTP client                   |
 | `coverage-jacoco`    | Testing   | JaCoCo aggregated coverage reports + ArchUnit architecture tests |
 | `testing-pentest`    | Testing   | k6 GraphQL security tests + OWASP ZAP active scan                |
@@ -111,12 +110,13 @@ flowchart LR
     adapter-ai
     adapter-cache
     adapter-cli
+    adapter-events
   end
 
   application --> domain
   adapter-cli -.-> |HTTP| adapter-api
-  bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth
-  adapter-api & adapter-persistence & adapter-ai & adapter-cache & adapter-auth --> domain
+  bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth & adapter-events
+  adapter-api & adapter-persistence & adapter-ai & adapter-cache & adapter-auth & adapter-events --> domain
   bootstrap-cli --> adapter-cli
 ```
 
@@ -125,8 +125,12 @@ flowchart LR
 - `application`: implements inbound ports. Framework-free by design.
 - `adapter-*`: implement outbound ports. `adapter-cli` is a standalone delivery mechanism
   that communicates with the server exclusively over HTTP.
-- `bootstrap-server`: composition root. Wires use cases, adapters, domain services, and
-  the event publisher. Includes OpenTelemetry tracing via `TracingFilter`.
+- `adapter-events`: inbound SQS/LWA receiver and Spring event listeners, plus outbound
+  Spring/SNS event publishers. Profile-selected (`aws` → SNS, otherwise Spring).
+- `bootstrap-server`: composition root. Wires use cases, adapters, and domain services.
+  Includes OpenTelemetry tracing via `TracingFilter`. The composition-root role is enforced
+  by ArchUnit (core/adapters never depend on bootstrap; non-configuration bootstrap classes
+  never depend on outbound ports).
 - `bootstrap-cli`: depends only on `adapter-cli`. The domain layer is never on its
   classpath.
 

@@ -27,8 +27,12 @@ public class SubmitJobPostingUseCase implements SubmitJobPostingPort {
   }
 
   @Override
-  public JobPosting submit(final UserId userId, final Url url, final JobTitle title,
-                           final CompanyName company, final String description, final Source source) {
+  public JobPosting submit(final UserId userId,
+                           final Url url,
+                           final JobTitle title,
+                           final CompanyName company,
+                           final String description,
+                           final Source source) {
     final var posting = new JobPosting(UUID.randomUUID(), userId, url, source, title, company, description, clock.instant());
     savePostingPort.save(posting);
     jobPostingService.submit(posting);

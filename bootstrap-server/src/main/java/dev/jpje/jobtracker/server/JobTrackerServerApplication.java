@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
   "dev.jpje.jobtracker.persistence",
   "dev.jpje.jobtracker.ai",
   "dev.jpje.jobtracker.cache",
+  "dev.jpje.jobtracker.events",
   "dev.jpje.jobtracker.observability",
   "dev.jpje.jobtracker.server"
 })

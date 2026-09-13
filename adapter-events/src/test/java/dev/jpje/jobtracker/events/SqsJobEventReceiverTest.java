@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.server.event;
+package dev.jpje.jobtracker.events;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -6,6 +6,7 @@ import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.List;
 
@@ -23,57 +24,74 @@ class SqsJobEventReceiverTest {
 
   private static final String TRACKING_ARN = "arn:aws:sqs:eu-west-1:123456789012:ajt-job-tracking";
   private static final String ANALYSIS_ARN = "arn:aws:sqs:eu-west-1:123456789012:ajt-job-analysis";
+  private static final String UNKNOWN_ARN = "arn:aws:sqs:eu-west-1:123456789012:ajt-job-unknown";
 
   @Mock
-  private JobPostingEventProcessor eventProcessor;
+  private JobPostingEventHandlerFactory handlerFactory;
+
+  @Mock
+  private JobPostingEventHandler trackingHandler;
+
+  @Mock
+  private JobPostingEventHandler analysisHandler;
 
   private SqsJobEventReceiver receiver;
   private final ObjectMapper mapper = new ObjectMapper();
 
   @BeforeEach
   void setUp() {
-    receiver = new SqsJobEventReceiver(eventProcessor, mapper);
+    receiver = new SqsJobEventReceiver(handlerFactory, mapper);
   }
 
   @Test
-  void shouldRouteTrackingRecordToCreateTracking() {
+  void shouldRouteTrackingRecordToTrackingHandler() {
+    when(handlerFactory.get(JobPostingEventType.TRACKING)).thenReturn(trackingHandler);
     final var envelope = envelope(TRACKING_ARN);
 
     final var response = receiver.receive(envelope);
 
     assertThat(response.getStatusCode()).as("tracking event accepted").isEqualTo(HttpStatus.OK);
-    verify(eventProcessor, description("tracking created")).createTracking(any());
-    verify(eventProcessor, never()).analyzePosting(any());
+    verify(trackingHandler, description("tracking handled")).handle(any());
+    verify(analysisHandler, never()).handle(any());
   }
 
   @Test
-  void shouldRouteAnalysisRecordToAnalyzePosting() {
+  void shouldRouteAnalysisRecordToAnalysisHandler() {
+    when(handlerFactory.get(JobPostingEventType.ANALYSIS)).thenReturn(analysisHandler);
     final var envelope = envelope(ANALYSIS_ARN);
 
     final var response = receiver.receive(envelope);
 
     assertThat(response.getStatusCode()).as("analysis event accepted").isEqualTo(HttpStatus.OK);
-    verify(eventProcessor, description("posting analyzed")).analyzePosting(any());
-    verify(eventProcessor, never()).createTracking(any());
+    verify(analysisHandler, description("analysis handled")).handle(any());
+    verify(trackingHandler, never()).handle(any());
+  }
+
+  @Test
+  void shouldAcknowledgeUnrecognizedQueue() {
+    final var response = receiver.receive(envelope(UNKNOWN_ARN));
+
+    assertThat(response.getStatusCode()).as("unrecognized queue acknowledged").isEqualTo(HttpStatus.OK);
+    verify(handlerFactory, never()).get(any());
   }
 
   @Test
   void shouldAcknowledgeDuplicateTrackingMessage() {
-    final var envelope = envelope(TRACKING_ARN);
+    when(handlerFactory.get(JobPostingEventType.TRACKING)).thenReturn(trackingHandler);
     doThrow(new ResourceAlreadyExistsException("Application already exists"))
-      .when(eventProcessor).createTracking(any());
+      .when(trackingHandler).handle(any());
 
-    final var response = receiver.receive(envelope);
+    final var response = receiver.receive(envelope(TRACKING_ARN));
 
     assertThat(response.getStatusCode()).as("duplicate acknowledged").isEqualTo(HttpStatus.OK);
   }
 
   @Test
   void shouldFailInvocationOnProcessingError() {
-    final var envelope = envelope(ANALYSIS_ARN);
-    doThrow(new IllegalStateException("boom")).when(eventProcessor).analyzePosting(any());
+    when(handlerFactory.get(JobPostingEventType.ANALYSIS)).thenReturn(analysisHandler);
+    doThrow(new IllegalStateException("boom")).when(analysisHandler).handle(any());
 
-    final var response = receiver.receive(envelope);
+    final var response = receiver.receive(envelope(ANALYSIS_ARN));
 
     assertThat(response.getStatusCode())
       .as("transient failure marked as server error for retry")

@@ -9,15 +9,18 @@ import dev.jpje.jobtracker.application.usecase.AuthenticationUseCase;
 import dev.jpje.jobtracker.application.usecase.GetAnalyticsUseCase;
 import dev.jpje.jobtracker.application.usecase.ListJobPostingsUseCase;
 import dev.jpje.jobtracker.application.usecase.ManageJobAnalysisUseCase;
+import dev.jpje.jobtracker.application.usecase.ProcessJobPostingCreatedUseCase;
 import dev.jpje.jobtracker.application.usecase.SubmitJobPostingUseCase;
 import dev.jpje.jobtracker.application.usecase.TrackJobApplicationUseCase;
 import dev.jpje.jobtracker.domain.event.EventPublisher;
+import dev.jpje.jobtracker.domain.event.JobPostingCreated;
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.port.inbound.AnalyzeJobPostingPort;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
 import dev.jpje.jobtracker.domain.port.inbound.GetAnalyticsPort;
 import dev.jpje.jobtracker.domain.port.inbound.ListJobPostingsPort;
 import dev.jpje.jobtracker.domain.port.inbound.ManageJobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.inbound.ProcessJobPostingCreatedPort;
 import dev.jpje.jobtracker.domain.port.inbound.SubmitJobPostingPort;
 import dev.jpje.jobtracker.domain.port.inbound.TrackJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.outbound.JobAnalysisPort;
@@ -127,22 +130,25 @@ public class UseCaseConfig {
     final var impl = new TrackJobApplicationUseCase(savePort, loadPort, loadPostingPort, clock, eventPublisher);
     return new TrackJobApplicationPort() {
       @Override
-      public JobApplication create(final UserId userId, final UUID jobPostingId,
-                                    @Nullable final Notes notes) {
+      public JobApplication create(final UserId userId,
+                                   final UUID jobPostingId,
+                                   @Nullable final Notes notes) {
         final var result = impl.create(userId, jobPostingId, notes);
         applicationCreatedCounter.increment();
         return result;
       }
 
       @Override
-      public JobApplication updateStatus(final UserId userId, final UUID applicationId,
-                                          final ApplicationStatus newStatus,
-                                          @Nullable final Notes notes) {
+      public JobApplication updateStatus(final UserId userId,
+                                         final UUID applicationId,
+                                         final ApplicationStatus newStatus,
+                                         @Nullable final Notes notes) {
         return impl.updateStatus(userId, applicationId, newStatus, notes);
       }
 
       @Override
-      public List<JobApplication> list(final UserId userId, @Nullable final ApplicationStatus status) {
+      public List<JobApplication> list(final UserId userId,
+                                       @Nullable final ApplicationStatus status) {
         return impl.list(userId, status);
       }
 
@@ -154,12 +160,36 @@ public class UseCaseConfig {
   }
 
   @Bean
-  AuthenticationPort authenticationUseCase(final Clock clock,
-                                           final SaveUserPort saveUserPort,
-                                           final LoadUserPort loadUserPort,
-                                           final TokenGeneratorPort tokenGenerator,
-                                           final PasswordEncoderPort passwordEncoder,
-                                           final EventPublisher eventPublisher) {
+  ProcessJobPostingCreatedPort processJobPostingCreatedUseCase(
+      final Clock clock,
+      final SaveJobApplicationPort saveApplicationPort,
+      final JobAnalysisPort analysisPort,
+      final SaveJobAnalysisPort saveAnalysisPort,
+      final Counter applicationCreatedCounter) {
+    final var impl = new ProcessJobPostingCreatedUseCase(saveApplicationPort, analysisPort,
+      saveAnalysisPort, clock);
+    return new ProcessJobPostingCreatedPort() {
+      @Override
+      public void createTracking(final JobPostingCreated event) {
+        impl.createTracking(event);
+        applicationCreatedCounter.increment();
+      }
+
+      @Override
+      public void analyzePosting(final JobPostingCreated event) {
+        impl.analyzePosting(event);
+      }
+    };
+  }
+
+  @Bean
+  AuthenticationPort authenticationUseCase(
+      final Clock clock,
+      final SaveUserPort saveUserPort,
+      final LoadUserPort loadUserPort,
+      final TokenGeneratorPort tokenGenerator,
+      final PasswordEncoderPort passwordEncoder,
+      final EventPublisher eventPublisher) {
     return new AuthenticationUseCase(saveUserPort, loadUserPort, tokenGenerator, passwordEncoder, clock,
       eventPublisher);
   }

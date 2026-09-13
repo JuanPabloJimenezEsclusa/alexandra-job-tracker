@@ -50,9 +50,9 @@ public class TrackJobApplicationUseCase implements TrackJobApplicationPort {
 
   @Override
   public JobApplication updateStatus(final UserId userId,
-                                      final UUID applicationId,
-                                      final ApplicationStatus newStatus,
-                                      @Nullable final Notes notes) {
+                                     final UUID applicationId,
+                                     final ApplicationStatus newStatus,
+                                     @Nullable final Notes notes) {
     final var app = loadPort.findByIdAndUser(applicationId, userId)
       .orElseThrow(() -> new ResourceNotFoundException("Application not found"));
     final var now = clock.instant();
@@ -69,7 +69,7 @@ public class TrackJobApplicationUseCase implements TrackJobApplicationPort {
 
   @Override
   public List<JobApplication> list(final UserId userId,
-                                    @Nullable final ApplicationStatus status) {
+                                   @Nullable final ApplicationStatus status) {
     return loadPort.findByUserId(userId, status);
   }
 
