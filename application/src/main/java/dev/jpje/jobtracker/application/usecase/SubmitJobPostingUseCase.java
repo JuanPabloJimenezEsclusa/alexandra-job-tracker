@@ -4,8 +4,8 @@ import java.time.Clock;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobPosting;
-import dev.jpje.jobtracker.domain.port.in.SubmitJobPostingPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobPostingPort;
+import dev.jpje.jobtracker.domain.port.inbound.SubmitJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.service.JobPostingService;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.JobTitle;
@@ -27,8 +27,12 @@ public class SubmitJobPostingUseCase implements SubmitJobPostingPort {
   }
 
   @Override
-  public JobPosting submit(final UserId userId, final Url url, final JobTitle title,
-                           final CompanyName company, final String description, final Source source) {
+  public JobPosting submit(final UserId userId,
+                           final Url url,
+                           final JobTitle title,
+                           final CompanyName company,
+                           final String description,
+                           final Source source) {
     final var posting = new JobPosting(UUID.randomUUID(), userId, url, source, title, company, description, clock.instant());
     savePostingPort.save(posting);
     jobPostingService.submit(posting);

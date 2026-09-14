@@ -45,7 +45,7 @@ class AuthCommandsTest {
     return Stream.of(
       arguments(named("register", "{\"data\":{\"register\":{\"token\":\"tok\"}}}"),
         "Registered and logged in as alice",
-        (Function<AuthCommands, String>) c -> c.register("alice", "secret")),
+        (Function<AuthCommands, String>) c -> c.register("alice", "secret", null)),
       arguments(named("login", "{\"data\":{\"login\":{\"token\":\"tok\"}}}"),
         "Logged in as alice",
         (Function<AuthCommands, String>) c -> c.login("alice", "secret"))
@@ -55,11 +55,11 @@ class AuthCommandsTest {
   private static Stream<Arguments> nullDataScenarios() {
     return Stream.of(
       arguments(named("register", "{\"data\":null}"),
-        (Function<AuthCommands, String>) c -> c.register("alice", "secret")),
+        (Function<AuthCommands, String>) c -> c.register("alice", "secret", null)),
       arguments(named("login", "{\"data\":null}"),
         (Function<AuthCommands, String>) c -> c.login("alice", "secret")),
       arguments(named("register without token", "{\"errors\":[{\"message\":\"Username already taken\"}],\"data\":{}}"),
-        (Function<AuthCommands, String>) c -> c.register("alice", "secret"))
+        (Function<AuthCommands, String>) c -> c.register("alice", "secret", null))
     );
   }
 
@@ -99,7 +99,7 @@ class AuthCommandsTest {
   @ParameterizedTest(name = "{0}")
   @MethodSource("missingPasswordScenarios")
   void shouldRequirePasswordWhenNotProvided(final String password) {
-    assertThatThrownBy(() -> commands.register("alice", password))
+    assertThatThrownBy(() -> commands.register("alice", password, null))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Password required. Use --password/-p in non-interactive mode.");
   }

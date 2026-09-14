@@ -1,26 +1,18 @@
 # alexandra-job-tracker (compose)
 
-## 📜 Summary
+## Summary
 
----
+This environment runs the job-tracker server under `docker-compose` for development.
 
-This environment is based on `docker-compose` and is designed for development purposes.
+It starts the server with an observability stack (OpenTelemetry collector, Prometheus, Grafana, Tempo, Loki) and container monitoring (cadvisor). The server can be built in JVM mode (default) or native mode.
 
-It runs the job-tracker server with a full observability stack (OpenTelemetry collector, Prometheus, Grafana, Tempo, Loki) and container monitoring (cadvisor). The server can be built in **JVM** (default) or **native** mode.
+## Architecture
 
-## 🏗️ Architecture
+![Docker Compose diagram](./images/ajt-docker-compose-diagram.svg)
 
----
+Docker Compose runs each service in its own container, which keeps local development close to the deployed stack.
 
-Docker Compose orchestrates containerized services, making it ideal for local development and testing.
-
-![High Throughput Docker](./images/ajt-docker-compose-diagram.svg)
-
-## 🚀 Usage
-
----
-
-### Using Scripts
+## Usage
 
 ```bash
 cd deploy/compose
@@ -35,39 +27,30 @@ cd deploy/compose
 ./stop.sh
 
 # Stop and also remove built images
-./stop.sh removeImages=true
+./stop.sh removeImages
 ```
 
-## 🔗 Links
+## Links
 
----
-
-* **Job Tracker (API):**
+* Job Tracker (API):
   * [GraphQL API](http://localhost:8880/api/graphql)
   * [GraphiQL IDE](http://localhost:8880/api/graphiql)
   * [H2 Console](http://localhost:8880/api/h2-console) (JDBC URL: `jdbc:h2:file:./deploy/data/jobtracker;AUTO_SERVER=TRUE`, user: `sa`, password: _blank_)
   * [Actuator health](http://localhost:8880/api/actuator/health)
-  * [Prometheus metrics](http://localhost:8880/api/actuator/prometheus)
-* **Prometheus (Metrics Storage):**
+* Observability:
   * [Prometheus dashboard](http://localhost:9090)
-* **Tempo (Distributed Tracing):**
   * [Tempo search](http://localhost:3200/status)
-* **Loki (Log Aggregation):**
   * [Loki dashboard](http://localhost:3100/services/loki)
-* **Grafana (Visualization):**
   * [Grafana dashboard](http://localhost:3000) (admin / admin)
-* **Cadvisor (Container Monitoring):**
   * [Cadvisor dashboard](http://localhost:8080)
-* **k6 (Performance/Security Testing):**
-  * Runs load/spike/soak/security scripts from `testing-pentest/src/test/k6/`
-  * Activated via `docker compose --profile perf-test up` or `docker compose --profile pen-test up`
-* **ZAP (Penetration Testing):**
-  * Runs automated OWASP security scan against the GraphQL endpoint
-  * Activated via `docker compose --profile pen-test up`
+* k6 (performance and security testing):
+  * Runs load, spike, soak, and security scripts from `testing-pentest/src/test/k6/`
+  * Activated with `docker compose --profile perf-test up` or `docker compose --profile pen-test up`
+* ZAP (penetration testing):
+  * Runs an automated OWASP scan against the GraphQL endpoint
+  * Activated with `docker compose --profile pen-test up`
 
-## 🧪 How to Validate the Changes
-
----
+## Validate the changes
 
 ```bash
 # Check server health

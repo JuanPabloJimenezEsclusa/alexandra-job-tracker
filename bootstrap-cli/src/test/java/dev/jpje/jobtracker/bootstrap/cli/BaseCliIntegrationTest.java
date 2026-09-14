@@ -49,6 +49,10 @@ abstract class BaseCliIntegrationTest {
   @BeforeEach
   void setUpBase() {
     WireMock.configureFor("localhost", wireMockServer.port());
+  }
+
+  protected void authenticate() throws Exception {
+    WireMock.configureFor("localhost", wireMockServer.port());
     stubFor(post(urlPathEqualTo("/api/graphql"))
       .withRequestBody(containing("login"))
       .willReturn(aResponse()
@@ -56,10 +60,6 @@ abstract class BaseCliIntegrationTest {
         .withBody("""
           {"data": {"login": {"token": "test-jwt-token", "user": {"id": "1", "username": "preloaded"}}}}
           """)));
-  }
-
-  protected void authenticate() throws Exception {
-    WireMock.configureFor("localhost", wireMockServer.port());
     shell.sendCommand("login --username preloaded --password pass");
   }
 

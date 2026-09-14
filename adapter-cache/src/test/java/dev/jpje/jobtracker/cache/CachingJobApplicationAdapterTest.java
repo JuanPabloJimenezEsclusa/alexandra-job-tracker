@@ -3,7 +3,9 @@ package dev.jpje.jobtracker.cache;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
 import static org.mockito.Mockito.description;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -13,14 +15,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobApplication;
-import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
-import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
@@ -56,10 +54,16 @@ class CachingJobApplicationAdapterTest {
 
   @Test
   void shouldLoadAndCacheApplicationOnMiss() {
+    // Given
     final var app = jobApplication();
     when(loadDelegate.findById(app.id())).thenReturn(Optional.of(app));
 
-    assertThat(adapter.findById(app.id())).hasValue(app);
+    // When
+    assertThat(adapter.findById(app.id())).as("loaded application returned").hasValue(app);
+
+    // Then
+    assertThat(adapter.findById(app.id())).as("second read served from cache").hasValue(app);
+    verify(loadDelegate).findById(app.id());
   }
 
   @Test
@@ -68,17 +72,23 @@ class CachingJobApplicationAdapterTest {
     final var app = jobApplication(userId);
     primeListCache(userId, List.of(app));
 
-    assertThat(adapter.findByUserId(userId, null, null)).as("cached list should be returned").containsExactly(app);
+    assertThat(adapter.findByUserId(userId, null)).as("cached list should be returned").containsExactly(app);
     verify(loadDelegate, description("load delegate should be hit only on cache miss")).findAllByUserId(userId);
   }
 
   @Test
   void shouldLoadAndCacheListOnMiss() {
+    // Given
     final var userId = UserId.generate();
     final var app = jobApplication(userId);
     when(loadDelegate.findAllByUserId(userId)).thenReturn(List.of(app));
 
-    assertThat(adapter.findAllByUserId(userId)).isEqualTo(List.of(app));
+    // When
+    assertThat(adapter.findAllByUserId(userId)).as("loaded list returned").isEqualTo(List.of(app));
+
+    // Then
+    assertThat(adapter.findAllByUserId(userId)).as("second read served from cache").isEqualTo(List.of(app));
+    verify(loadDelegate).findAllByUserId(userId);
   }
 
   @Test
@@ -88,43 +98,68 @@ class CachingJobApplicationAdapterTest {
     final var applied = jobApplication(userId, ApplicationStatus.APPLIED);
     primeListCache(userId, List.of(saved, applied));
 
-    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED, null))
+    assertThat(adapter.findByUserId(userId, ApplicationStatus.SAVED))
       .extracting(JobApplication::status)
       .containsExactly(ApplicationStatus.SAVED);
   }
 
   @Test
-  void shouldFilterCachedApplicationsBySource() {
-    final var userId = UserId.generate();
-    final var linkedIn = jobApplication(userId, Source.LINKEDIN);
-    final var indeed = jobApplication(userId, Source.INDEED);
-    primeListCache(userId, List.of(linkedIn, indeed));
+  void shouldScopeApplicationByIdToOwner() {
+    // Given
+    final var owner = UserId.generate();
+    final var app = jobApplication(owner);
+    primeByIdCache(app.id(), app);
 
-    assertThat(adapter.findByUserId(userId, null, Source.INDEED))
-      .extracting(JobApplication::source)
-      .containsExactly(Source.INDEED);
+    // When, then
+    assertThat(adapter.findByIdAndUser(app.id(), owner)).as("owned application returned").hasValue(app);
+    assertThat(adapter.findByIdAndUser(app.id(), UserId.generate()))
+      .as("another user's application indistinguishable from missing").isEmpty();
+    verify(loadDelegate, description("load delegate should be hit only on cache miss")).findById(app.id());
+  }
+
+  @Test
+  void shouldReturnEmptyWhenApplicationMissingForUser() {
+    // Given
+    final var userId = UserId.generate();
+    final var id = UUID.randomUUID();
+    when(loadDelegate.findById(id)).thenReturn(Optional.empty());
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(id, userId)).as("missing application scoped by user").isEmpty();
+    verify(loadDelegate, description("load delegate should be hit on a scoped miss")).findById(id);
   }
 
   @Test
   void shouldSaveAndCacheApplication() {
+    // Given
     final var app = jobApplication();
     when(saveDelegate.save(app)).thenReturn(app);
 
+    // When
     adapter.save(app);
 
+    // Then
+    assertThat(adapter.findById(app.id())).as("saved application served from cache").hasValue(app);
     assertThat(cache.asMap()).as("saved application should be cached").containsKey("jobapp:" + app.id());
     verify(saveDelegate, description("save should be delegated")).save(app);
+    verifyNoInteractions(loadDelegate);
   }
 
   @Test
   void shouldDeleteAndEvictCaches() {
+    // Given
     final var app = jobApplication();
     when(loadDelegate.findById(app.id())).thenReturn(Optional.of(app));
 
+    // When
     adapter.delete(app.id());
 
+    // Then
+    when(loadDelegate.findById(app.id())).thenReturn(Optional.empty());
+    assertThat(adapter.findById(app.id())).as("evicted application reloaded from delegate").isEmpty();
     assertThat(cache.asMap()).as("deleted application should be evicted from cache").doesNotContainKey("jobapp:" + app.id());
     verify(saveDelegate, description("delete should be delegated")).delete(app.id());
+    verify(loadDelegate, times(2)).findById(app.id());
   }
 
   private void primeByIdCache(final UUID id, final JobApplication app) {
@@ -134,7 +169,7 @@ class CachingJobApplicationAdapterTest {
 
   private void primeListCache(final UserId userId, final List<JobApplication> apps) {
     when(loadDelegate.findAllByUserId(userId)).thenReturn(apps);
-    adapter.findByUserId(userId, null, null);
+    adapter.findByUserId(userId, null);
   }
 
   private static JobApplication jobApplication() {
@@ -149,24 +184,6 @@ class CachingJobApplicationAdapterTest {
     return Instancio.of(JobApplication.class)
       .set(field(JobApplication::userId), userId)
       .set(field(JobApplication::status), status)
-      .set(field(JobApplication::company), CompanyName.of("Acme"))
-      .set(field(JobApplication::role), RoleName.of("SWE"))
-      .set(field(JobApplication::source), Source.LINKEDIN)
-      .set(field(JobApplication::postingUrl), Url.of("https://example.com/job"))
-      .set(field(JobApplication::notes), Notes.of("notes"))
-      .set(field(JobApplication::dateApplied), Instant.EPOCH)
-      .set(field(JobApplication::lastUpdated), Instant.EPOCH)
-      .create();
-  }
-
-  private static JobApplication jobApplication(final UserId userId, final Source source) {
-    return Instancio.of(JobApplication.class)
-      .set(field(JobApplication::userId), userId)
-      .set(field(JobApplication::status), ApplicationStatus.SAVED)
-      .set(field(JobApplication::company), CompanyName.of("Acme"))
-      .set(field(JobApplication::role), RoleName.of("SWE"))
-      .set(field(JobApplication::source), source)
-      .set(field(JobApplication::postingUrl), Url.of("https://example.com/job"))
       .set(field(JobApplication::notes), Notes.of("notes"))
       .set(field(JobApplication::dateApplied), Instant.EPOCH)
       .set(field(JobApplication::lastUpdated), Instant.EPOCH)

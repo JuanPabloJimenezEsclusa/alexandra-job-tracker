@@ -3,8 +3,8 @@ package dev.jpje.jobtracker.persistence.adapter;
 import java.util.Optional;
 
 import dev.jpje.jobtracker.domain.model.User;
-import dev.jpje.jobtracker.domain.port.out.LoadUserPort;
-import dev.jpje.jobtracker.domain.port.out.SaveUserPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadUserPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.persistence.mapper.UserMapper;
 import dev.jpje.jobtracker.persistence.repository.UserJpaRepository;

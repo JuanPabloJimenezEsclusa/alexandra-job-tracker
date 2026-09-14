@@ -1,7 +1,7 @@
 info:
   name: query.applications
   type: graphql
-  seq: 10
+  seq: 11
 
 graphql:
   method: POST
@@ -11,15 +11,14 @@ graphql:
       value: application/json
   body:
     query: |
-      query($status: ApplicationStatus, $source: Source) {
-        applications(status: $status, source: $source) {
-          id, company, role, source, postingUrl, status, dateApplied, lastUpdated, notes
+      query($status: ApplicationStatus) {
+        applications(status: $status) {
+          id, jobPostingId, status, dateApplied, lastUpdated, notes
         }
       }
     variables: |-
       {
-        "status": null,
-        "source": null
+        "status": null
       }
   auth: inherit
 

@@ -6,15 +6,15 @@ import java.util.Optional;
 import dev.jpje.jobtracker.domain.event.EventPublisher;
 import dev.jpje.jobtracker.domain.event.UserRegistered;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
-import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.User;
-import dev.jpje.jobtracker.domain.port.in.AuthenticationPort;
-import dev.jpje.jobtracker.domain.port.out.LoadUserPort;
-import dev.jpje.jobtracker.domain.port.out.PasswordEncoderPort;
-import dev.jpje.jobtracker.domain.port.out.SaveUserPort;
-import dev.jpje.jobtracker.domain.port.out.TokenGeneratorPort;
+import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadUserPort;
+import dev.jpje.jobtracker.domain.port.outbound.PasswordEncoderPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
+import dev.jpje.jobtracker.domain.port.outbound.TokenGeneratorPort;
 import dev.jpje.jobtracker.domain.vo.AuthPayload;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.domain.vo.UserRole;
 import dev.jpje.jobtracker.domain.vo.Username;
 
 public class AuthenticationUseCase implements AuthenticationPort {
@@ -40,24 +40,24 @@ public class AuthenticationUseCase implements AuthenticationPort {
   }
 
   @Override
-  public AuthPayload register(final Username username, final String password) {
+  public AuthPayload register(final Username username, final String password, final UserRole role) {
     if (loadUserPort.findByUsername(username.value()).isPresent()) {
       throw new ResourceAlreadyExistsException("Username already taken");
     }
-    final var user = new User(UserId.generate(), username, passwordEncoder.encode(password), clock.instant());
+    final var user = new User(UserId.generate(), username, passwordEncoder.encode(password), role, clock.instant());
     saveUserPort.save(user);
     eventPublisher.publish(new UserRegistered(user.id(), username, clock.instant()));
-    return new AuthPayload(tokenGenerator.generateToken(user.id()), user);
+    return new AuthPayload(tokenGenerator.generateToken(user.id(), user.role()), user);
   }
 
   @Override
   public AuthPayload login(final Username username, final String password) {
     final var user = loadUserPort.findByUsername(username.value())
-      .orElseThrow(() -> new ResourceNotFoundException("Invalid credentials"));
+      .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
     if (!passwordEncoder.matches(password, user.passwordHash())) {
       throw new IllegalArgumentException("Invalid credentials");
     }
-    return new AuthPayload(tokenGenerator.generateToken(user.id()), user);
+    return new AuthPayload(tokenGenerator.generateToken(user.id(), user.role()), user);
   }
 
   @Override

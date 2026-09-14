@@ -7,7 +7,6 @@ import dev.jpje.jobtracker.server.JobTrackerServerApplication;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.http.HttpHeaders;
 import tools.jackson.databind.JsonNode;
 
 @SpringBootTest(
@@ -16,11 +15,28 @@ import tools.jackson.databind.JsonNode;
 @Import(IntegrationTestConfig.class)
 class JobPostingIntegrationTest extends GraphQlIntegrationTestBase {
 
-  private static final String SUBMIT_BODY = """
-    {"query":"mutation($i:SubmitJobInput!){submitJobPosting(input:$i){id title company source}}",\
-    "variables":{"i":{"url":"https://example.com/job/%s","title":"%s",\
-    "description":"No empty","company":"%s","source":"%s"}}}
-    """;
+  @Test
+  void shouldRejectDuplicateUrlSubmissionWithConflict() {
+    final var headers = authHeaders("dup-url-user");
+    submitJobPosting(headers, "dup-job", "Dup Engineer", "DupCorp", "LINKEDIN");
+
+    final var duplicate = submitJobPosting(headers, "dup-job", "Dup Engineer", "DupCorp", "LINKEDIN");
+    assertThat(duplicate.findValue("message").asString()).as("duplicate url submission rejected")
+      .isEqualTo("Job posting already exists");
+    assertThat(duplicate.findValue("errorCode").asString()).as("duplicate url submission error code")
+      .isEqualTo("CONFLICT");
+  }
+
+  @Test
+  void shouldAcceptSameUrlForDifferentUsers() {
+    final var firstUser = authHeaders("dup-first-user");
+    final var secondUser = authHeaders("dup-second-user");
+    submitJobPosting(firstUser, "shared-job", "Shared Engineer", "SharedCorp", "LINKEDIN");
+
+    final var second = submitJobPosting(secondUser, "shared-job", "Shared Engineer", "SharedCorp", "LINKEDIN");
+    assertThat(second.findValues("title")).as("same url accepted for another user")
+      .extracting(JsonNode::asString).contains("Shared Engineer");
+  }
 
   @Test
   void shouldListJobPostings() {
@@ -34,7 +50,7 @@ class JobPostingIntegrationTest extends GraphQlIntegrationTestBase {
   @Test
   void shouldSubmitJobPosting() {
     final var headers = authHeaders("submit-user");
-    final var submitted = graphql(headers, submitBody("test-engineer", "Test Engineer", "TestCorp", "LINKEDIN"));
+    final var submitted = submitJobPosting(headers, "test-engineer", "Test Engineer", "TestCorp", "LINKEDIN");
     assertThat(submitted.findValues("title")).as("submitted posting title")
       .extracting(JsonNode::asString).contains("Test Engineer");
     assertThat(submitted.findValues("company")).as("submitted posting company")
@@ -46,7 +62,7 @@ class JobPostingIntegrationTest extends GraphQlIntegrationTestBase {
   @Test
   void shouldListSubmittedPosting() {
     final var headers = authHeaders("submit-list-user");
-    graphql(headers, submitBody("listed-job", "Listed Engineer", "ListedCorp", "LINKEDIN"));
+    submitJobPosting(headers, "listed-job", "Listed Engineer", "ListedCorp", "LINKEDIN");
 
     final var postings = graphql(headers, """
       {"query": "{ jobPostings { title company } }"}
@@ -58,21 +74,11 @@ class JobPostingIntegrationTest extends GraphQlIntegrationTestBase {
   @Test
   void shouldFilterPostingsBySource() {
     final var headers = authHeaders("jp-filter-user");
-    graphql(headers, submitBody("linkedin-job", "LinkedIn Job", "LinkedCorp", "LINKEDIN"));
+    submitJobPosting(headers, "linkedin-job", "LinkedIn Job", "LinkedCorp", "LINKEDIN");
 
     final var postings = graphql(headers, """
       {"query": "{ jobPostings(source: INDEED) { title } }"}
       """);
     assertThat(postings.findValues("title")).as("postings filtered by source").isEmpty();
-  }
-
-  private HttpHeaders authHeaders(final String username) {
-    final var headers = jsonHeaders();
-    headers.setBearerAuth(registerAndGetToken(username));
-    return headers;
-  }
-
-  private static String submitBody(final String url, final String title, final String company, final String source) {
-    return SUBMIT_BODY.formatted(url, title, company, source);
   }
 }

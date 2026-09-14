@@ -34,11 +34,9 @@
 
 ## Alexandra Job Tracker
 
-**Alexandra Job Tracker** is a multi-tenant job application tracking system built with
-[hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/). It provides
-a GraphQL API for server-side operations and a CLI client for terminal-based workflows.
-Architected around **ports and adapters**, the domain layer is pure Java with zero framework
-dependencies, validated at build time by ArchUnit.
+**Alexandra Job Tracker** is a job application tracking system. It exposes a GraphQL API
+for server-side operations and a Spring Shell CLI for terminal workflows, and it follows
+[hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/) with ports and adapters.
 
 **Stack:** Java 25 · Spring Boot 4.1 · Maven multi-module · GraalVM native · OpenTelemetry
 
@@ -74,76 +72,83 @@ dependencies, validated at build time by ArchUnit.
 
 | Module               | Layer     | Description                                                      |
 |----------------------|-----------|------------------------------------------------------------------|
-| `domain`             | Core      | Pure Java — domain models, value objects, ports, domain services |
+| `domain`             | Core      | Pure Java: domain models, value objects, ports, domain services |
 | `application`        | Core      | Use cases orchestrating domain logic through inbound ports       |
-| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs — Spring for GraphQL        |
+| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs: Spring for GraphQL        |
 | `adapter-cli`        | Inbound   | Spring Shell commands, HTTP GraphQL client, session management   |
 | `adapter-persistence`| Outbound  | JPA entities, repositories, mappers, Flyway migrations           |
 | `adapter-auth`       | Outbound  | JWT provider, GraphQL auth interceptor, bcrypt password hashing  |
 | `adapter-ai`         | Outbound  | Job analysis via Spring AI + skill-based prompts                 |
 | `adapter-cache`      | Outbound  | Caffeine cache with hexagonal `CachePort` decorators             |
-| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API — wires use cases, adapters, events      |
-| `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI — standalone HTTP client                   |
+| `adapter-events`     | Both      | SQS/LWA receiver, Spring event listeners, Spring/SNS publishers  |
+| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API: wires use cases, adapters, domain services |
+| `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI: standalone HTTP client                   |
 | `coverage-jacoco`    | Testing   | JaCoCo aggregated coverage reports + ArchUnit architecture tests |
 | `testing-pentest`    | Testing   | k6 GraphQL security tests + OWASP ZAP active scan                |
 
-> **browser-extension** — Chrome extension for capturing LinkedIn/Indeed job postings
+> **browser-extension**: Chrome extension for capturing LinkedIn/Indeed job postings
 > (separate JavaScript project, not a Maven module).
 
 ### Dependency Graph
 
 ```mermaid
 flowchart LR
-    subgraph core [Core]
-        domain
-        application
-    end
+  subgraph bootstrap [Boot]
+    bootstrap-server
+    bootstrap-cli
+  end
 
-    subgraph adapters [Adapters]
-        adapter-api
-        adapter-auth
-        adapter-persistence
-        adapter-ai
-        adapter-cache
-        adapter-cli
-    end
+  subgraph core [Core]
+    domain
+    application
+  end
 
-    application --> domain
-    adapter-cli -.-> |HTTP| adapter-api
-    bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth
-    adapter-api & adapter-persistence & adapter-ai & adapter-cache & adapter-auth --> domain
-    adapter-api --> adapter-auth
-    bootstrap-cli --> adapter-cli
+  subgraph adapters [Adapters]
+    adapter-api
+    adapter-auth
+    adapter-persistence
+    adapter-ai
+    adapter-cache
+    adapter-cli
+    adapter-events
+  end
+
+  application --> domain
+  adapter-cli -.-> |HTTP| adapter-api
+  bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth & adapter-events
+  adapter-api & adapter-persistence & adapter-ai & adapter-cache & adapter-auth & adapter-events --> domain
+  bootstrap-cli --> adapter-cli
 ```
 
-- `domain` — zero framework imports. Contains entities, value objects, port interfaces,
+- `domain`: zero framework imports. Contains entities, value objects, port interfaces,
   domain services, and domain events. Enforced by ArchUnit.
-- `application` — implements inbound ports. Framework-free by design.
-- `adapter-*` — implement outbound ports. `adapter-cli` is a standalone delivery mechanism
+- `application`: implements inbound ports. Framework-free by design.
+- `adapter-*`: implement outbound ports. `adapter-cli` is a standalone delivery mechanism
   that communicates with the server exclusively over HTTP.
-- `bootstrap-server` — composition root. Wires use cases, adapters, domain services, and
-  the event publisher. Includes OpenTelemetry tracing via `TracingFilter`.
-- `bootstrap-cli` — depends only on `adapter-cli`. The domain layer is never on its
+- `adapter-events`: inbound SQS/LWA receiver and Spring event listeners, plus outbound
+  Spring/SNS event publishers. Profile-selected (`aws` → SNS, otherwise Spring).
+- `bootstrap-server`: composition root. Wires use cases, adapters, and domain services.
+  Includes OpenTelemetry tracing via `TracingFilter`. The composition-root role is enforced
+  by ArchUnit (core/adapters never depend on bootstrap; non-configuration bootstrap classes
+  never depend on outbound ports).
+- `bootstrap-cli`: depends only on `adapter-cli`. The domain layer is never on its
   classpath.
 
 ### CQRS Resolver Pattern
 
-All GraphQL resolvers follow **Command Query Responsibility Segregation** — every
+All GraphQL resolvers follow **Command Query Responsibility Segregation**: every
 endpoint is either a `QueryResolver` (read) or `MutationResolver` (write).
 
-| Query Resolver              | Endpoint               |
-|-----------------------------|------------------------|
-| `UserQueryResolver`         | `me`                   |
-| `ApplicationQueryResolver`  | `applications`         |
-| `JobPostingQueryResolver`   | `jobPostings`          |
-| `JobAnalysisQueryResolver`  | `analyses`, `analysis` |
-| `AnalyticsQueryResolver`    | `analytics`            |
-
-| Mutation Resolver             | Endpoint                                                            |
-|-------------------------------|---------------------------------------------------------------------|
-| `UserMutationResolver`        | `register`, `login`, `logout`                                       |
-| `ApplicationMutationResolver` | `createApplication`, `updateApplicationStatus`, `deleteApplication` |
-| `JobPostingMutationResolver`  | `submitJobPosting`, `analyzeJobPosting`, `deleteAnalysis`           |
+| Type     | Resolver                      | Endpoint               |
+|----------|-------------------------------|------------------------|
+| Query    | `UserQueryResolver`           | `me`                   |
+| Query    | `ApplicationQueryResolver`    | `applications`         |
+| Query    | `JobPostingQueryResolver`     | `jobPostings`          |
+| Query    | `JobAnalysisQueryResolver`    | `analyses`, `analysis` |
+| Query    | `AnalyticsQueryResolver`      | `analytics`            |
+| Mutation | `UserMutationResolver`        | `register`, `login`, `logout` |
+| Mutation | `ApplicationMutationResolver` | `createApplication`, `updateApplicationStatus`, `deleteApplication` |
+| Mutation | `JobPostingMutationResolver`  | `submitJobPosting`, `analyzeJobPosting`, `deleteAnalysis` |
 
 ### Data Flow
 
@@ -225,7 +230,7 @@ java -jar bootstrap-server/target/bootstrap-server-*.jar
 java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost:8880/api
 
 # Native server
-./bootstrap-server/target/job-tracker-server --spring.profiles.active=loc
+./bootstrap-server/target/job-tracker-server --spring.profiles.active=dev
 
 # Native CLI
 ./bootstrap-cli/target/job-tracker-cli --server.url=http://localhost:8880/api
@@ -240,21 +245,21 @@ passed in the `Authorization: Bearer <token>` header.
 
 | Operation                                        | Description                                   |
 |--------------------------------------------------|-----------------------------------------------|
-| `register(username, password)`                   | Create account, returns JWT                   |
+| `register(username, password, role)`             | Create account with role `USER`/`ADMIN` (admin only), returns JWT |
 | `login(username, password)`                      | Authenticate, returns JWT                     |
 | `logout`                                         | Invalidate current session                    |
-| `me`                                             | Current user info                             |
-| `applications(status, source)`                   | List job applications with optional filters   |
-| `createApplication(company, role, source, ...)`  | Track a new application                       |
+| `me`                                             | Current user info (id, username, role, createdAt) |
+| `applications(status)`                           | List job applications (company/role/source via `jobPostingId` join with `jobPostings`) |
+| `createApplication(jobPostingId, notes)`         | Track an application for an existing job posting |
 | `updateApplicationStatus(id, status)`            | Move through pipeline                         |
 | `deleteApplication(id)`                          | Remove an application                         |
 | `analytics(since)`                               | Per-status counts and conversion rate         |
 | `jobPostings(source)`                            | List submitted job postings                   |
 | `submitJobPosting(input)`                        | Submit a job posting from raw data            |
-| `analyzeJobPosting(jobPostingId)`                | AI analysis — summary, skills, fit score, company rating/type, salary range; persisted |
+| `analyzeJobPosting(jobPostingId)`                | AI analysis: summary, skills, fit score, company rating/type, salary range; persisted |
 | `analyses`                                       | List saved analyses for the current user      |
 | `analysis(id)`                                   | Fetch a single saved analysis                 |
-| `deleteAnalysis(id)`                             | Remove a saved analysis                       |
+| `deleteAnalysis(id)`                             | Remove a saved analysis (admin only)          |
 
 ### Status Pipeline
 
@@ -282,11 +287,11 @@ the user's home directory.
 
 | Command         | Alias | Description                                |
 |-----------------|-------|--------------------------------------------|
-| `register`      | `reg` | Create account                             |
+| `register`      | `reg` | Create account (admin only, `-r USER\|ADMIN`) |
 | `login`         | `li`  | Authenticate, stores session token         |
 | `logout`        | `lo`  | Invalidate session                         |
 | `whoami`        | `who` | Show current user                          |
-| `add`           | `a`   | Track a new job application                |
+| `add`           | `a`   | Track an application for a job posting (`-i <posting-id>`) |
 | `list`          | `l`   | List job applications                      |
 | `update`        | `u`   | Update application status                  |
 | `delete`        | `d`   | Remove an application                      |
@@ -295,15 +300,15 @@ the user's home directory.
 | `postings`      | `po`  | List submitted job postings                  |
 | `analyze`       | `anlz`| AI analysis of a job posting               |
 | `analyses`      | `al`  | List saved analyses                        |
-| `delete-analysis` | `dal`| Delete a saved analysis                  |
+| `delete-analysis` | `dal`| Delete a saved analysis (admin only)     |
 
 ```bash
 # Examples
-register --username alice --password secret
-login --username alice --password secret
+register --username alice --password secret -r USER
+login --username alexandra --password password123
 
-add --company Acme --role SWE --source LINKEDIN --url https://example.com -n "Followed up"
-list --source LINKEDIN -j ".[].company"
+add -i 7c9e6679-7425-40de-944b-e07fc1f90ae7 -n "Followed up"
+list -s APPLIED -j ".[].jobPostingId"
 update -i <app-id> --status INTERVIEWING -n "Had screening call"
 delete -i <app-id>
 
@@ -337,8 +342,10 @@ Load the extension:
 chrome://extensions → Developer mode → Load unpacked → browser-extension/
 ```
 
-Configure the server URL (`http://localhost:8880/api/graphql`) and log in via the
-Options page.
+Configure the server URL and log via the `Options` page:
+
+* DEV: `http://localhost:8880/api/graphql`
+* AWS: `https://ajt.jpje.net:443/api/graphql`
 
 ---
 
@@ -362,21 +369,23 @@ Coverage reports are available at:
 
 ## Configuration
 
-| Property                                | Default                               | Description                                  |
-|-----------------------------------------|---------------------------------------|----------------------------------------------|
-| `jwt.secret`                            | `change-me-...`                       | Signing key (min 32 chars, use `JWT_SECRET`) |
-| `spring.ai.openai.api-key`              | `sk-placeholder`                      | LLM key (use `LLM_API_KEY`)             |
-| `cache.max-size`                        | `1000`                                | Caffeine max entries                         |
-| `cache.default-ttl-seconds`             | `300`                                 | Cache time-to-live                           |
-| `server.url` (CLI)                      | `http://localhost:8880/api`           | GraphQL API base URL                         |
+| Property                      | Default                     | Description                                  |
+|-------------------------------|-----------------------------|----------------------------------------------|
+| `jwt.secret`                  |                             | Signing key (min 32 chars, use `JWT_SECRET`) |
+| `spring.ai.openai.api-key`    |                             | LLM key (use `LLM_API_KEY`)                  |
+| `spring.ai.openai.base-url`   |                             | LLM base url (use `LLM_BASE_URL`)            |
+| `spring.ai.openai.chat.model` |                             | LLM chat model (use `LLM_CHAT_MODEL`)        |
+| `cache.max-size`              | `1000`                      | Caffeine max entries                         |
+| `cache.default-ttl-seconds`   | `300`                       | Cache time-to-live                           |
+| `server.url` (CLI)            | `http://localhost:8880/api` | GraphQL API base URL                         |
 
 **Spring profiles:**
 
-| Profile  | Storage                     | Use case                            |
-|----------|-----------------------------|-------------------------------------|
-| default  | H2 in-memory, Flyway auto   | Local development                   |
-| dev / loc| H2 file (`./data/jobtracker`)| Persistent local data               |
-| aws      | Neon PostgreSQL, Lambda     | Production deployment               |
+| Profile | Storage                       | Use case               |
+|---------|-------------------------------|------------------------|
+| default | H2 in-memory, Flyway auto     | Local development      |
+| dev     | H2 file (`./data/jobtracker`) | Persistent local data  |
+| aws     | Neon PostgreSQL, Lambda       | Production deployment  |
 
 ---
 
@@ -385,9 +394,9 @@ Coverage reports are available at:
 The `adapter-cache` module decorates persistence adapters with Caffeine caches via the
 `CachePort` abstraction:
 
-- **JobApplication** — individual (`jobapp:<id>`) and per-user list
+- **JobApplication**: individual (`jobapp:<id>`) and per-user list
   (`jobapps:user:<id>`) caches, evicted on create, update, and delete.
-- **JobPosting** — individual (`jobpost:<id>`) and per-user list
+- **JobPosting**: individual (`jobpost:<id>`) and per-user list
   (`jobposts:user:<id>`) caches, evicted on create. Cache hit avoids the
   persistence adapter entirely.
 
@@ -399,13 +408,13 @@ exposure of cache statistics (`asMap()`).
 
 ## CI/CD
 
-| Workflow             | Triggers                        | Job                                                 |
-|----------------------|---------------------------------|-----------------------------------------------------|
-| `ci.yml`             | PR → `develop`                  | `mvn verify` + SonarCloud + dependency review       |
-| `pages.yml`          | Push → `develop`                | `mvn site` → GitHub Pages                           |
-| `native-release.yml` | Tag `v*`                        | Native compile → Docker push + release assets       |
-| `pen-test.yml`       | Manual / schedule               | k6 security + OWASP ZAP active scan                 |
-| `perf-test.yml`      | Manual / schedule               | k6 load (20), spike (100), soak (10 min)            |
+| Workflow             | Triggers          | Job                                           |
+|----------------------|-------------------|-----------------------------------------------|
+| `ci.yml`             | PR → `develop`    | `mvn verify` + SonarCloud + dependency review |
+| `pages.yml`          | PR → `develop`    | `mvn site` → GitHub Pages                     |
+| `native-release.yml` | PR → `develop`    | Native compile → Docker push + release assets |
+| `pen-test.yml`       | Manual / schedule | k6 security + OWASP ZAP active scan           |
+| `perf-test.yml`      | PR → `develop`    | k6 load (20), spike (100), soak (10 min)      |
 
 ---
 
@@ -420,4 +429,4 @@ mvn clean verify site site:stage-deploy
 
 ## License
 
-[GNU General Public License v3.0](LICENSE) — see `LICENSE` for the full text.
+[GNU General Public License v3.0](LICENSE): see `LICENSE` for the full text.

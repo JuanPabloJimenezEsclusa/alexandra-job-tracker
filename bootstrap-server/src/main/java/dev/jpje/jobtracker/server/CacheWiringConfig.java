@@ -2,7 +2,7 @@ package dev.jpje.jobtracker.server;
 
 import dev.jpje.jobtracker.cache.CachingJobApplicationAdapter;
 import dev.jpje.jobtracker.cache.CachingJobPostingAdapter;
-import dev.jpje.jobtracker.domain.port.out.CachePort;
+import dev.jpje.jobtracker.domain.port.outbound.CachePort;
 import dev.jpje.jobtracker.persistence.adapter.JobApplicationPersistenceAdapter;
 import dev.jpje.jobtracker.persistence.adapter.JobPostingPersistenceAdapter;
 import org.springframework.context.annotation.Bean;

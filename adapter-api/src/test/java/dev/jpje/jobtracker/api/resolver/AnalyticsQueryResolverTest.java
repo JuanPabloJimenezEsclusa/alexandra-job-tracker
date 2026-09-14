@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.api.dto.AnalyticsResponse;
-import dev.jpje.jobtracker.domain.port.in.GetAnalyticsPort;
+import dev.jpje.jobtracker.domain.port.inbound.GetAnalyticsPort;
 import dev.jpje.jobtracker.domain.vo.Analytics;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import dev.jpje.jobtracker.domain.vo.UserId;

@@ -5,9 +5,9 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobPosting;
-import dev.jpje.jobtracker.domain.port.out.CachePort;
-import dev.jpje.jobtracker.domain.port.out.LoadJobPostingPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.CachePort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 
 public class CachingJobPostingAdapter implements LoadJobPostingPort, SaveJobPostingPort {
@@ -36,6 +36,11 @@ public class CachingJobPostingAdapter implements LoadJobPostingPort, SaveJobPost
     final var result = loadDelegate.findById(id);
     result.ifPresent(p -> cache.put(KEY_PREFIX + id, p));
     return result;
+  }
+
+  @Override
+  public Optional<JobPosting> findByIdAndUser(final UUID id, final UserId userId) {
+    return findById(id).filter(posting -> posting.userId().equals(userId));
   }
 
   @Override

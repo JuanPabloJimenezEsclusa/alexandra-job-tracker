@@ -12,7 +12,7 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.api.dto.JobPostingResponse;
 import dev.jpje.jobtracker.domain.model.JobPosting;
-import dev.jpje.jobtracker.domain.port.in.ListJobPostingsPort;
+import dev.jpje.jobtracker.domain.port.inbound.ListJobPostingsPort;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Source;

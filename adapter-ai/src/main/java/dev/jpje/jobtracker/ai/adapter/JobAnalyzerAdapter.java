@@ -1,6 +1,6 @@
 package dev.jpje.jobtracker.ai.adapter;
 
-import dev.jpje.jobtracker.domain.port.out.JobAnalysisPort;
+import dev.jpje.jobtracker.domain.port.outbound.JobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.JobAnalysis;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.prompt.DefaultChatOptionsBuilder;

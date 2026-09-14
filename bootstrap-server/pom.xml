@@ -34,6 +34,11 @@
     </dependency>
     <dependency>
       <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>adapter-events</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>adapter-cache</artifactId>
       <version>${project.version}</version>
     </dependency>
@@ -91,10 +96,6 @@
     <dependency>
       <groupId>io.awspring.cloud</groupId>
       <artifactId>spring-cloud-aws-starter-sns</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>io.awspring.cloud</groupId>
-      <artifactId>spring-cloud-aws-starter-sqs</artifactId>
     </dependency>
 
     <dependency>

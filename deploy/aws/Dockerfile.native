@@ -3,7 +3,7 @@ FROM ghcr.io/graalvm/native-image-community:25 AS graalvm-builder
 WORKDIR /app
 COPY . .
 RUN ./mvnw install -DskipTests -B -ntp -e \
-    && ./mvnw -Pnative native:compile -pl bootstrap-server -DskipTests -B -ntp -e
+    && SPRING_PROFILES_ACTIVE=aws ./mvnw -Pnative native:compile -pl bootstrap-server -DskipTests -B -ntp -e
 
 # Lambda adapter layer. Install the AWS Lambda adapter to allow the native image to run in AWS Lambda.
 FROM public.ecr.aws/awsguru/aws-lambda-adapter:1.1.0 AS adapter

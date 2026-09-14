@@ -4,18 +4,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.domain.exception.OptimisticLockException;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
 import dev.jpje.jobtracker.domain.model.JobApplication;
-import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.persistence.entity.JobApplicationEntity;
 import dev.jpje.jobtracker.persistence.mapper.JobApplicationMapper;
 import dev.jpje.jobtracker.persistence.repository.JobApplicationJpaRepository;
 import org.jspecify.annotations.Nullable;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,6 +36,8 @@ public class JobApplicationPersistenceAdapter implements SaveJobApplicationPort,
       return JobApplicationMapper.toDomain(repository.saveAndFlush(JobApplicationMapper.toEntity(application)));
     } catch (final DataIntegrityViolationException e) {
       throw new ResourceAlreadyExistsException("Application already exists", e);
+    } catch (final OptimisticLockingFailureException e) {
+      throw new OptimisticLockException("Application was modified concurrently", e);
     }
   }
 
@@ -50,22 +53,16 @@ public class JobApplicationPersistenceAdapter implements SaveJobApplicationPort,
   }
 
   @Override
+  public Optional<JobApplication> findByIdAndUser(final UUID id, final UserId userId) {
+    return repository.findByIdAndUserId(id, userId.value()).map(JobApplicationMapper::toDomain);
+  }
+
+  @Override
   public List<JobApplication> findByUserId(final UserId userId,
-                                           @Nullable final ApplicationStatus status,
-                                           @Nullable final Source source) {
-    final List<JobApplicationEntity> entities;
-    if (status != null && source != null) {
-      entities = repository.findByUserIdAndStatusAndSourceOrderByDateAppliedDesc(
-        userId.value(), status.name(), source.name());
-    } else if (status != null) {
-      entities = repository.findByUserIdAndStatusOrderByDateAppliedDesc(
-        userId.value(), status.name());
-    } else if (source != null) {
-      entities = repository.findByUserIdAndSourceOrderByDateAppliedDesc(
-        userId.value(), source.name());
-    } else {
-      entities = repository.findByUserIdOrderByDateAppliedDesc(userId.value());
-    }
+                                           @Nullable final ApplicationStatus status) {
+    final List<JobApplicationEntity> entities = status != null
+      ? repository.findByUserIdAndStatusOrderByDateAppliedDesc(userId.value(), status.name())
+      : repository.findByUserIdOrderByDateAppliedDesc(userId.value());
     return entities.stream().map(JobApplicationMapper::toDomain).toList();
   }
 

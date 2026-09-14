@@ -4,12 +4,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
 import dev.jpje.jobtracker.domain.model.JobPosting;
-import dev.jpje.jobtracker.domain.port.out.LoadJobPostingPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.persistence.mapper.JobPostingMapper;
 import dev.jpje.jobtracker.persistence.repository.JobPostingJpaRepository;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,12 +27,21 @@ public class JobPostingPersistenceAdapter implements SaveJobPostingPort, LoadJob
   @Override
   @Transactional
   public void save(final JobPosting posting) {
-    repository.save(JobPostingMapper.toEntity(posting));
+    try {
+      repository.saveAndFlush(JobPostingMapper.toEntity(posting));
+    } catch (final DataIntegrityViolationException e) {
+      throw new ResourceAlreadyExistsException("Job posting already exists", e);
+    }
   }
 
   @Override
   public Optional<JobPosting> findById(final UUID id) {
     return repository.findById(id).map(JobPostingMapper::toDomain);
+  }
+
+  @Override
+  public Optional<JobPosting> findByIdAndUser(final UUID id, final UserId userId) {
+    return repository.findByIdAndUserId(id, userId.value()).map(JobPostingMapper::toDomain);
   }
 
   @Override

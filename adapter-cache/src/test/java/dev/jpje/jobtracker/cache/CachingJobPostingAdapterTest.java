@@ -3,7 +3,9 @@ package dev.jpje.jobtracker.cache;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
 import static org.mockito.Mockito.description;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.time.Duration;
@@ -12,8 +14,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobPosting;
-import dev.jpje.jobtracker.domain.port.out.LoadJobPostingPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Source;
@@ -53,10 +55,16 @@ class CachingJobPostingAdapterTest {
 
   @Test
   void shouldLoadAndCachePostingOnMiss() {
+    // Given
     final var posting = jobPosting();
     when(loadDelegate.findById(posting.id())).thenReturn(Optional.of(posting));
 
-    assertThat(adapter.findById(posting.id())).hasValue(posting);
+    // When
+    assertThat(adapter.findById(posting.id())).as("loaded posting returned").hasValue(posting);
+
+    // Then
+    assertThat(adapter.findById(posting.id())).as("second read served from cache").hasValue(posting);
+    verify(loadDelegate, times(1)).findById(posting.id());
   }
 
   @Test
@@ -71,21 +79,58 @@ class CachingJobPostingAdapterTest {
 
   @Test
   void shouldLoadAndCacheListOnMiss() {
+    // Given
     final var userId = UserId.generate();
     final var posting = jobPosting(userId);
     when(loadDelegate.findByUserId(userId)).thenReturn(List.of(posting));
 
-    assertThat(adapter.findByUserId(userId)).isEqualTo(List.of(posting));
+    // When
+    assertThat(adapter.findByUserId(userId)).as("loaded list returned").isEqualTo(List.of(posting));
+
+    // Then
+    assertThat(adapter.findByUserId(userId)).as("second read served from cache").isEqualTo(List.of(posting));
+    verify(loadDelegate, times(1)).findByUserId(userId);
+  }
+
+  @Test
+  void shouldScopePostingByIdToOwner() {
+    // Given
+    final var owner = UserId.generate();
+    final var posting = jobPosting(owner);
+    primeByIdCache(posting.id(), posting);
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(posting.id(), owner)).as("owned posting returned").hasValue(posting);
+    assertThat(adapter.findByIdAndUser(posting.id(), UserId.generate()))
+      .as("another user's posting indistinguishable from missing").isEmpty();
+    verify(loadDelegate, description("load delegate should be hit only on cache miss")).findById(posting.id());
+  }
+
+  @Test
+  void shouldReturnEmptyWhenPostingMissingForUser() {
+    // Given
+    final var userId = UserId.generate();
+    final var id = UUID.randomUUID();
+    when(loadDelegate.findById(id)).thenReturn(Optional.empty());
+
+    // When, then
+    assertThat(adapter.findByIdAndUser(id, userId)).as("missing posting scoped by user").isEmpty();
+    verify(loadDelegate, description("load delegate should be hit on a scoped miss")).findById(id);
   }
 
   @Test
   void shouldSaveAndCachePosting() {
+    // Given
     final var posting = jobPosting();
 
+    // When
     adapter.save(posting);
 
+    // Then
+    assertThat(adapter.findById(posting.id())).as("saved posting served from cache").hasValue(posting);
     assertThat(cache.asMap()).as("saved posting should be cached").containsKey("jobpost:" + posting.id());
     verify(saveDelegate, description("save should be delegated")).save(posting);
+    verifyNoInteractions(loadDelegate);
   }
 
   private void primeByIdCache(final UUID id, final JobPosting posting) {

@@ -12,13 +12,9 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.api.dto.JobApplicationResponse;
 import dev.jpje.jobtracker.domain.model.JobApplication;
-import dev.jpje.jobtracker.domain.port.in.TrackJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.inbound.TrackJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.RoleName;
-import dev.jpje.jobtracker.domain.vo.Source;
-import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
@@ -42,24 +38,20 @@ class ApplicationQueryResolverTest {
     final var app = Instancio.of(JobApplication.class)
       .set(field(JobApplication::userId), userId)
       .set(field(JobApplication::status), ApplicationStatus.SAVED)
-      .set(field(JobApplication::company), CompanyName.of("Acme"))
-      .set(field(JobApplication::role), RoleName.of("Engineer"))
-      .set(field(JobApplication::source), Source.LINKEDIN)
-      .set(field(JobApplication::postingUrl), Url.of("https://example.com/job"))
       .set(field(JobApplication::notes), Notes.of("notes"))
       .create();
     final var input = List.of(app);
 
-    when(useCase.list(userId, null, null)).thenReturn(input);
+    when(useCase.list(userId, null)).thenReturn(input);
 
-    final var result = resolver.applications(userId, null, null);
+    final var result = resolver.applications(userId, null);
     assertThat(result)
       .as("listed applications should contain the stored application")
       .singleElement()
-      .extracting(JobApplicationResponse::company, JobApplicationResponse::role)
-      .containsExactly("Acme", "Engineer");
+      .extracting(JobApplicationResponse::jobPostingId, JobApplicationResponse::status)
+      .containsExactly(app.jobPostingId(), ApplicationStatus.SAVED);
 
-    verify(useCase, description("applications should be loaded once")).list(userId, null, null);
+    verify(useCase, description("applications should be loaded once")).list(userId, null);
     verifyNoMoreInteractions(useCase);
   }
 }

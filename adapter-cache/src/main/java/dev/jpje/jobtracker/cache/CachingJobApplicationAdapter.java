@@ -5,11 +5,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.model.JobApplication;
-import dev.jpje.jobtracker.domain.port.out.CachePort;
-import dev.jpje.jobtracker.domain.port.out.LoadJobApplicationPort;
-import dev.jpje.jobtracker.domain.port.out.SaveJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.CachePort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 
@@ -42,13 +41,16 @@ public class CachingJobApplicationAdapter implements LoadJobApplicationPort, Sav
   }
 
   @Override
+  public Optional<JobApplication> findByIdAndUser(final UUID id, final UserId userId) {
+    return findById(id).filter(app -> app.userId().equals(userId));
+  }
+
+  @Override
   public List<JobApplication> findByUserId(final UserId userId,
-                                           @Nullable final ApplicationStatus status,
-                                           @Nullable final Source source) {
+                                           @Nullable final ApplicationStatus status) {
     final var apps = getCachedOrLoad(userId);
     return apps.stream()
       .filter(a -> status == null || a.status() == status)
-      .filter(a -> source == null || a.source() == source)
       .toList();
   }
 

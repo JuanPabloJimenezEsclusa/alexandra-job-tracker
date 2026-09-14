@@ -2,11 +2,14 @@
   "extends": ["@commitlint/config-conventional"],
   "rules": {
     "body-max-line-length": [1, "always", 150],
+    "type-empty": [2, "never"],
+    "scope-empty": [2, "never"],
+    "subject-empty": [2, "never"],
     "scope-enum": [2, "always", [
       "domain", "application", "adapter",
       "bootstrap", "testdata", "coverage",
       "ai", "docker", "ci", "config",
-      "architecture", "deps"
+      "architecture", "deps", "docs"
     ]],
     "subject-case": [2, "always", [
       "lower-case", "sentence-case", "camel-case"

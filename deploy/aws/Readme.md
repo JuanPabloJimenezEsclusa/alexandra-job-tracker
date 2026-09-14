@@ -1,4 +1,4 @@
-# AJT Serverless — AWS Lambda + API Gateway
+# AJT Serverless: AWS Lambda + API Gateway
 
 ## Architecture
 
@@ -19,7 +19,7 @@ Lambda's cold start is negligible for this use case (single-user CLI). The cost 
 
 ### Flyway strategy
 
-**Disabled on Lambda** — schema migrations are a deployment-time concern, not a runtime one. Run them as a one-shot step before deploying a new Lambda version (see [Migrations](#migrations)).
+**Disabled on Lambda**: schema migrations are a deployment-time concern, not a runtime one. Run them as a one-shot step before deploying a new Lambda version (see [Migrations](#migrations)).
 
 ## Deploy
 
@@ -37,10 +37,10 @@ IA_C=cloud-formation make all
 # Tear down
 IA_C=terraform make destroy
 
-# Rollback (instant — alias switch, no rebuild)
+# Rollback (instant alias switch, no rebuild)
 make rollback ROLLBACK_TO=2
 
-# Canary — shift 10% traffic to v4 for 5 min
+# Canary, shifting 10% of traffic to v4 for 5 min
 aws lambda update-alias --function-name ajt-serverless --name live \
   --function-version 4 \
   --routing-config AdditionalVersionWeights={3=0.1}
@@ -53,7 +53,7 @@ aws lambda update-alias --function-name ajt-serverless --name live \
 make info   # Lambda config + alias listing
 ```
 
-Image tag auto-derives from git SHA (`git-abc1234`). Each deploy publishes a new Lambda version and shifts the `live` alias. Rollback is an alias pointer change — instant, no rebuild.
+Image tag auto-derives from git SHA (`git-abc1234`). Each deploy publishes a new Lambda version and shifts the `live` alias. Rollback is an alias pointer change: instant, no rebuild.
 
 ### Option A: CloudFormation
 
@@ -88,7 +88,7 @@ IMAGE_URI="$(aws ecr describe-repositories ...):git-abc1234" \
 ./destroy-aws-plan.sh
 ```
 
-The Terraform workspace is self-contained in `terraform/templates/` (provider, variables, outputs). Image build/push remains separate — Terraform only manages infrastructure.
+The Terraform workspace is self-contained in `terraform/templates/` (provider, variables, outputs). Image build/push remains separate: Terraform only manages infrastructure.
 
 ## Security
 
@@ -98,9 +98,9 @@ The Terraform workspace is self-contained in `terraform/templates/` (provider, v
 | API auth | JWT (app-layer, validated by Spring Security) |
 | Lambda URL | Public (auth decisions delegated to app) |
 | API Gateway | Public with rate limiting (20 burst, 5/s) |
-| Secrets | Env vars — `NEON_PASSWORD`, `JWT_SECRET`, `LLM_API_KEY` |
-| IAM | Least-privilege — only Lambda execution + ECR pull |
-| Encryption at rest | SNS topic: AWS-managed KMS (`alias/aws/sns`). SQS queues: customer-managed KMS (`alias/ajt-job-analysis-kms`) |
+| Secrets | Env vars: `NEON_PASSWORD`, `JWT_SECRET`, `LLM_API_KEY` |
+| IAM | Least-privilege: only Lambda execution + ECR pull |
+| Encryption at rest | SNS topic: AWS-managed KMS (`alias/aws/sns`). SQS queues: AWS-managed SQS SSE |
 | Database | SSL enforced, password auth, IP-restricted by Neon |
 
 ## Lambda configuration
@@ -108,32 +108,40 @@ The Terraform workspace is self-contained in `terraform/templates/` (provider, v
 | Setting | Value | Rationale |
 |---------|-------|-----------|
 | Memory | 1024 MB | Native-image perf sweet spot (CPU scales with RAM) |
-| Timeout | 60 s | Covers Neon cold-start (auto-pause wake) + response |
+| Timeout | 30 s | Covers Neon cold-start (auto-pause wake) + response |
 | Ephemeral storage | 512 MB | Sufficient for native-image runtime |
-| Pool size | 3 | Matches Lambda concurrency ceiling |
-| `initialization-fail-timeout` | -1 | Startup proceeds even if Neon is cold (lazy init) |
 
 ## Operations
 
 ### Monitor
 
 ```bash
-# Recent invocations
+# Recent invocations (API function)
 aws logs filter-log-events --log-group-name /aws/lambda/ajt-serverless \
+  --query 'events[0:10].[timestamp,message]' --output table
+
+# Recent invocations (worker function)
+aws logs filter-log-events --log-group-name /aws/lambda/ajt-serverless-worker \
   --query 'events[0:10].[timestamp,message]' --output table
 
 # Tail live
 aws logs tail /aws/lambda/ajt-serverless --follow
+aws logs tail /aws/lambda/ajt-serverless-worker --follow
 
-# Queue depth (async analysis backlog)
+# Queue depth (async tracking / analysis backlog)
+aws sqs get-queue-attributes --queue-url <JOB_TRACKING_QUEUE_URL> \
+  --attribute-names ApproximateNumberOfMessages
 aws sqs get-queue-attributes --queue-url <JOB_ANALYSIS_QUEUE_URL> \
   --attribute-names ApproximateNumberOfMessages
 
-# Messages stuck in DLQ (analysis failed 3 times)
+# Messages stuck in DLQ (retried 3 times and failed)
+aws sqs get-queue-attributes --queue-url <JOB_TRACKING_DLQ_URL> \
+  --attribute-names ApproximateNumberOfMessages
 aws sqs get-queue-attributes --queue-url <JOB_ANALYSIS_DLQ_URL> \
   --attribute-names ApproximateNumberOfMessages
 
-# Drain DLQ back to main queue after fixing the cause
+# Drain a DLQ back after fixing the cause
+aws sqs purge-queue --queue-url <JOB_TRACKING_DLQ_URL>
 aws sqs purge-queue --queue-url <JOB_ANALYSIS_DLQ_URL>
 ```
 
@@ -157,7 +165,7 @@ SPRING_PROFILES_ACTIVE=aws,db-migrate \
   java -jar bootstrap-server/target/bootstrap-server-*.jar
 ```
 
-CI/CD pattern — add this step before deploying a new Lambda image:
+CI/CD pattern: add this step before deploying a new Lambda image:
 
 ```yaml
 - name: Run database migrations
@@ -175,46 +183,54 @@ CI/CD pattern — add this step before deploying a new Lambda image:
 | API Gateway (1M req/mo) | Free tier |
 | SNS (100k publishes/mo) | Free tier |
 | SQS (1M requests/mo) | Free tier |
-| KMS (customer-managed key) | ~$1.00 |
 | ECR (~500MB private) | ~$0.05 |
 | Route53 hosted zone | $0.50 |
 | CloudWatch Logs | ~$0.50 |
 | Neon PostgreSQL | Free tier |
-| **Total** | **~$2.05** |
+| **Total** | **~$1.05** |
 
-### Async event flow (SNS + SQS)
+### Async event flow (SNS fanout + SQS + worker Lambda)
 
 `submitJobPosting` publishes a `JobPostingCreated` event to SNS, tagged with an
-`eventType` message attribute. An SNS subscription (with a filter policy for
-`eventType=JobPostingCreated`) delivers matching events to an SQS queue. A
-background poller thread inside the Lambda container consumes the queue and
-creates the tracking application and runs the AI analysis asynchronously:
+`eventType` message attribute. SNS fans the event out to two independent SQS
+queues via subscriptions whose filter policy is `eventType=JobPostingCreated`.
+AWS Lambda Event Source Mappings wake the dedicated `ajt-serverless-worker`
+function as messages arrive; inside the worker, the Lambda Web Adapter forwards
+each event to `POST /api/events/sqs`, where it is routed by source queue ARN:
+tracking events create the SAVED application, analysis events run the AI analysis:
 
-```
-submitJobPosting (HTTP) → SNS topic ─(filter: eventType=JobPostingCreated)─→ SQS queue
-                                                                             ↓ (in-process poller)
-                                                                  ├─ create tracking (SAVED)
-                                                                  └─ AI analysis → persisted
+```mermaid
+flowchart LR
+  submit["submitJobPosting (HTTP)"] --> sns["SNS topic ajt-job-events"]
+  sns -->|"filter: eventType=JobPostingCreated"| tracking["SQS ajt-job-tracking"]
+  sns -->|"filter: eventType=JobPostingCreated"| analysis["SQS ajt-job-analysis"]
+  tracking -->|ESM| worker["ajt-serverless-worker<br/>POST /api/events/sqs"]
+  analysis -->|ESM| worker
+  worker -->|"ARN ajt-job-tracking"| create["create tracking (SAVED)"]
+  worker -->|"ARN ajt-job-analysis"| persist["AI analysis → persisted"]
 ```
 
-The HTTP call returns immediately; the analysis runs on a background thread so it
-never competes with the request timeout. The poller only starts when the `sns`
-event transport is active (AWS profile). Failures are retried up to 3 times by
-SQS before landing in the dead-letter queue (`ajt-job-analysis-dlq`); duplicate
-events are acknowledged without reprocessing.
+The HTTP call returns immediately. There is no in-process polling thread: AWS
+polls the queues on behalf of the worker, and each queue has its own dead-letter
+queue. Failures are retried up to 3 times by SQS before landing in the
+corresponding DLQ (`ajt-job-tracking-dlq` / `ajt-job-analysis-dlq`); duplicate
+tracking events are acknowledged without reprocessing.
 
 ### Rollback
 
-Lambda has a `live` alias that API Gateway routes to. Rollback is an alias pointer change — instant, no rebuild required:
+Both Lambda functions have a `live` alias (API Gateway routes to the API alias,
+and the SQS Event Source Mappings target the worker alias). Rollback points the
+alias elsewhere, so it is instant and needs no rebuild:
 
 ```bash
-make rollback ROLLBACK_TO=2
+make rollback ROLLBACK_TO=2                       # API function
+make rollback ROLLBACK_TO=2 FUNCTION=ajt-serverless-worker   # worker function
 # or directly:
 aws lambda update-alias --function-name ajt-serverless --name live \
   --function-version 2 --region eu-west-1
 ```
 
-The previous version remains deployed and available — only the alias moves.
+The previous version remains deployed and available: only the alias moves.
 
 ### Canary deploys
 
@@ -241,19 +257,22 @@ aws lambda update-alias --function-name ajt-serverless --name live \
 
 Both IaC paths create the same resource set:
 
-- **IAM role** — Lambda execution with `AWSLambdaBasicExecutionRole` + ECR pull policy
-- **Lambda** — Container image function (1024 MB, 60s, 512 MB ephemeral), auto-publishes versions on deploy
-- **Lambda alias `live`** — API Gateway routes here, not `$LATEST`. Rollback = alias pointer change
-- **Lambda URL** — Public function URL pointing to `$LATEST` (for testing/debugging)
-- **API Gateway HTTP API** — `$default` route, `AWS_PROXY` to `live` alias, throttled 20/5
-- **SNS topic `ajt-job-events`** — publishes `JobPostingCreated` events, SSE with AWS-managed KMS (`alias/aws/sns`)
-- **SQS queue `ajt-job-analysis`** — async analysis workload, visibility timeout 120s, DLQ after 3 failures, SSE with customer-managed KMS
-- **SQS DLQ `ajt-job-analysis-dlq`** — dead-letter queue for failed events
-- **KMS key `alias/ajt-job-analysis-kms`** — customer-managed, key rotation enabled, grants SNS `kms:Decrypt`/`kms:GenerateDataKey` for queue delivery
-- **ACM certificate** — DNS-validated for `ajt.jpje.net`
-- **API Gateway domain name** — Regional endpoint, TLS 1.2
-- **Route53 records** — DNS validation CNAME + A alias to API Gateway domain
-- **CloudWatch log group** — 1-day retention
+- **IAM roles**: `ajt-lambda-execution-role` (API: SNS publish) and `ajt-worker-execution-role` (worker: SQS poll) with `AWSLambdaBasicExecutionRole` + ECR pull policy
+- **Lambda `ajt-serverless`**: Container image function (1024 MB, 60s, 512 MB ephemeral), auto-publishes versions on deploy
+- **Lambda `ajt-serverless-worker`**: Container image function (1024 MB, 120s, 512 MB ephemeral, reserved concurrency 2), receives SQS events via Event Source Mappings and LWA pass-through to `POST /api/events/sqs`
+- **Lambda alias `live`** (both functions): rollback = alias pointer change
+- **Lambda URL**: Public function URL on the API function pointing to `$LATEST` (for testing/debugging)
+- **API Gateway HTTP API**: `$default` route, `AWS_PROXY` to `live` alias, throttled 20/5
+- **SNS topic `ajt-job-events`**: publishes `JobPostingCreated` events, SSE with AWS-managed KMS (`alias/aws/sns`)
+- **SQS queue `ajt-job-tracking`**: async tracking workload, visibility timeout 30s, DLQ after 3 failures, AWS-managed SQS SSE
+- **SQS DLQ `ajt-job-tracking-dlq`**: dead-letter queue for failed tracking events
+- **SQS queue `ajt-job-analysis`**: async analysis workload, visibility timeout 120s, DLQ after 3 failures, AWS-managed SQS SSE
+- **SQS DLQ `ajt-job-analysis-dlq`**: dead-letter queue for failed analysis events
+- **SNS subscriptions**: fan out `eventType=JobPostingCreated` to both queues (raw message delivery)
+- **ACM certificate**: DNS-validated for `ajt.jpje.net`
+- **API Gateway domain name**: Regional endpoint, TLS 1.2
+- **Route53 records**: DNS validation CNAME + A alias to API Gateway domain
+- **CloudWatch log groups**: `/aws/lambda/ajt-serverless`, `/aws/lambda/ajt-serverless-worker`, API Gateway (1-day retention)
 
 Templates: CloudFormation (`cloud-formation/ajt-serverless-stack.yml`) | Terraform (`terraform/templates/main.tf`)
 
@@ -268,5 +287,4 @@ Templates: CloudFormation (`cloud-formation/ajt-serverless-stack.yml`) | Terrafo
 7. [AWS Route53](https://console.aws.amazon.com/route53/home?region=eu-west-1#HostedZones:)
 8. [AWS SNS](https://eu-west-1.console.aws.amazon.com/sns/v3/home?region=eu-west-1)
 9. [AWS SQS](https://eu-west-1.console.aws.amazon.com/sqs/home?region=eu-west-1)
-10. [AWS KMS](https://eu-west-1.console.aws.amazon.com/kms/home?region=eu-west-1)
-11. [Neon Console](https://console.neon.tech)
+10. [Neon Console](https://console.neon.tech)

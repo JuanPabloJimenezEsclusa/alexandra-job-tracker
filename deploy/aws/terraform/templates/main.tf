@@ -12,6 +12,10 @@ provider "aws" {
   region = var.region
 }
 
+data "aws_caller_identity" "current" {}
+
+data "aws_region" "current" {}
+
 #################################################################################################
 # IAM
 #################################################################################################
@@ -64,7 +68,55 @@ resource "aws_iam_role_policy" "events" {
         Effect   = "Allow"
         Action   = ["sns:Publish"]
         Resource = [aws_sns_topic.job_events.arn]
-      },
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "worker_exec" {
+  name = "ajt-worker-execution-role"
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "lambda.amazonaws.com" }
+        Action    = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "worker_exec" {
+  role       = aws_iam_role.worker_exec.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "worker_ecr_pull" {
+  name = "ecr-pull-policy"
+  role = aws_iam_role.worker_exec.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ecr:GetDownloadUrlForLayer",
+          "ecr:BatchGetImage",
+          "ecr:GetAuthorizationToken"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "worker_sqs" {
+  name = "worker-sqs-policy"
+  role = aws_iam_role.worker_exec.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
       {
         Effect = "Allow"
         Action = [
@@ -72,7 +124,10 @@ resource "aws_iam_role_policy" "events" {
           "sqs:DeleteMessage",
           "sqs:GetQueueAttributes"
         ]
-        Resource = [aws_sqs_queue.job_analysis.arn]
+        Resource = [
+          aws_sqs_queue.job_tracking.arn,
+          aws_sqs_queue.job_analysis.arn
+        ]
       }
     ]
   })
@@ -89,11 +144,22 @@ resource "aws_sns_topic" "job_events" {
   kms_master_key_id = "alias/aws/sns"
 }
 
+resource "aws_sqs_queue" "job_tracking" {
+  name                       = "ajt-job-tracking"
+  visibility_timeout_seconds = 180
+  redrive_policy = jsonencode({
+    deadLetterTargetArn = aws_sqs_queue.job_tracking_dlq.arn
+    maxReceiveCount     = 3
+  })
+}
+
+resource "aws_sqs_queue" "job_tracking_dlq" {
+  name = "ajt-job-tracking-dlq"
+}
+
 resource "aws_sqs_queue" "job_analysis" {
   name                       = "ajt-job-analysis"
-  visibility_timeout_seconds = 120
-  # Non-sensitive job posting metadata only — AWS-managed KMS is sufficient.
-  kms_master_key_id = "alias/aws/sqs"
+  visibility_timeout_seconds = 180
   redrive_policy = jsonencode({
     deadLetterTargetArn = aws_sqs_queue.job_analysis_dlq.arn
     maxReceiveCount     = 3
@@ -102,20 +168,64 @@ resource "aws_sqs_queue" "job_analysis" {
 
 resource "aws_sqs_queue" "job_analysis_dlq" {
   name = "ajt-job-analysis-dlq"
-  # Non-sensitive job posting metadata only — AWS-managed KMS is sufficient.
-  kms_master_key_id = "alias/aws/sqs"
 }
 
-resource "aws_sns_topic_subscription" "job_events_to_sqs" {
-  topic_arn = aws_sns_topic.job_events.arn
-  protocol  = "sqs"
-  endpoint  = aws_sqs_queue.job_analysis.arn
+resource "aws_sns_topic_subscription" "job_events_to_tracking" {
+  topic_arn            = aws_sns_topic.job_events.arn
+  protocol             = "sqs"
+  endpoint             = aws_sqs_queue.job_tracking.arn
+  raw_message_delivery = true
+  filter_policy_scope  = "MessageAttributes"
+  filter_policy = jsonencode({
+    eventType = ["JobPostingCreated"]
+  })
 }
 
-resource "aws_lambda_event_source_mapping" "job_analysis" {
-  event_source_arn = aws_sqs_queue.job_analysis.arn
-  function_name    = aws_lambda_function.this.arn
-  batch_size       = 1
+resource "aws_sns_topic_subscription" "job_events_to_analysis" {
+  topic_arn            = aws_sns_topic.job_events.arn
+  protocol             = "sqs"
+  endpoint             = aws_sqs_queue.job_analysis.arn
+  raw_message_delivery = true
+  filter_policy_scope  = "MessageAttributes"
+  filter_policy = jsonencode({
+    eventType = ["JobPostingCreated"]
+  })
+}
+
+resource "aws_sqs_queue_policy" "job_tracking_sns" {
+  queue_url = aws_sqs_queue.job_tracking.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "sns.amazonaws.com" }
+        Action    = "sqs:SendMessage"
+        Resource  = aws_sqs_queue.job_tracking.arn
+        Condition = {
+          ArnEquals = { "aws:SourceArn" = aws_sns_topic.job_events.arn }
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_sqs_queue_policy" "job_analysis_sns" {
+  queue_url = aws_sqs_queue.job_analysis.id
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Service = "sns.amazonaws.com" }
+        Action    = "sqs:SendMessage"
+        Resource  = aws_sqs_queue.job_analysis.arn
+        Condition = {
+          ArnEquals = { "aws:SourceArn" = aws_sns_topic.job_events.arn }
+        }
+      }
+    ]
+  })
 }
 
 #################################################################################################
@@ -129,7 +239,7 @@ resource "aws_lambda_function" "this" {
   image_uri     = var.image_uri
   role          = aws_iam_role.lambda_exec.arn
   memory_size   = 1024
-  timeout       = 60
+  timeout       = 30
   publish       = true
 
   ephemeral_storage {
@@ -142,7 +252,6 @@ resource "aws_lambda_function" "this" {
       JWT_SECRET                   = var.jwt_secret
       LLM_API_KEY                  = var.llm_api_key
       SNS_TOPIC_ARN                = aws_sns_topic.job_events.arn
-      SQS_QUEUE_URL                = aws_sqs_queue.job_analysis.id
       SPRING_PROFILES_ACTIVE       = "aws"
       LOGGING_LEVEL_ROOT           = "WARN"
       LOGGING_LEVEL_COM_JOBTRACKER = "INFO"
@@ -160,6 +269,62 @@ resource "aws_lambda_alias" "live" {
   function_name    = aws_lambda_function.this.arn
   function_version = aws_lambda_function.this.version
   name             = "live"
+}
+
+resource "aws_lambda_function" "worker" {
+  function_name                  = "ajt-serverless-worker"
+  description                    = "Spring Boot native-image job tracker worker (SNS/SQS fanout consumer)"
+  package_type                   = "Image"
+  image_uri                      = var.image_uri
+  role                           = aws_iam_role.worker_exec.arn
+  memory_size                    = 1024
+  timeout                        = 30
+  publish                        = true
+  reserved_concurrent_executions = 2
+
+  ephemeral_storage {
+    size = 512
+  }
+
+  environment {
+    variables = {
+      NEON_PASSWORD                = var.neon_password
+      JWT_SECRET                   = var.jwt_secret
+      LLM_API_KEY                  = var.llm_api_key
+      SPRING_PROFILES_ACTIVE       = "aws"
+      LOGGING_LEVEL_ROOT           = "WARN"
+      LOGGING_LEVEL_COM_JOBTRACKER = "INFO"
+      AWS_LAMBDA_SERVER_PORT       = "8080"
+      SERVER_PORT                  = "8080"
+      AWS_LWA_PASS_THROUGH_PATH    = "/api/events/sqs"
+      AWS_LWA_ERROR_STATUS_CODES   = "500"
+    }
+  }
+
+  tags = {
+    Name = "ajt-serverless-worker"
+  }
+}
+
+resource "aws_lambda_alias" "worker_live" {
+  function_name    = aws_lambda_function.worker.arn
+  function_version = aws_lambda_function.worker.version
+  name             = "live"
+}
+
+resource "aws_lambda_event_source_mapping" "job_tracking" {
+  event_source_arn = aws_sqs_queue.job_tracking.arn
+  function_name    = aws_lambda_alias.worker_live.arn
+}
+
+resource "aws_lambda_event_source_mapping" "job_analysis" {
+  event_source_arn = aws_sqs_queue.job_analysis.arn
+  function_name    = aws_lambda_alias.worker_live.arn
+}
+
+resource "aws_cloudwatch_log_group" "worker" {
+  name              = "/aws/lambda/ajt-serverless-worker"
+  retention_in_days = 1
 }
 
 resource "aws_lambda_function_url" "this" {

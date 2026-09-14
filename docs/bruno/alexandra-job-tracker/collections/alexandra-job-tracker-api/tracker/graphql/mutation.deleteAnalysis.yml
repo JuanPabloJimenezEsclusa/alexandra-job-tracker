@@ -1,7 +1,7 @@
 info:
   name: mutation.deleteAnalysis
   type: graphql
-  seq: 15
+  seq: 16
 
 graphql:
   method: POST

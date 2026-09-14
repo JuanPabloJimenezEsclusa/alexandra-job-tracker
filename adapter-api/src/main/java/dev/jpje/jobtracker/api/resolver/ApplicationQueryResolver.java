@@ -4,9 +4,8 @@ import java.util.List;
 import java.util.Objects;
 
 import dev.jpje.jobtracker.api.dto.JobApplicationResponse;
-import dev.jpje.jobtracker.domain.port.in.TrackJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.inbound.TrackJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
@@ -24,10 +23,9 @@ public class ApplicationQueryResolver {
 
   @QueryMapping
   public List<JobApplicationResponse> applications(@ContextValue(required = false) @Nullable final UserId userId,
-                                                    @Argument @Nullable final ApplicationStatus status,
-                                                    @Argument @Nullable final Source source) {
+                                                    @Argument @Nullable final ApplicationStatus status) {
     Objects.requireNonNull(userId, "Authentication required");
-    return useCase.list(userId, status, source).stream()
+    return useCase.list(userId, status).stream()
       .map(JobApplicationResponse::from)
       .toList();
   }
