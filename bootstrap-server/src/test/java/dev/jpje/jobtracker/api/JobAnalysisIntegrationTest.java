@@ -85,6 +85,29 @@ class JobAnalysisIntegrationTest extends GraphQlIntegrationTestBase {
   }
 
   @Test
+  void shouldStoreNewAnalysisAfterPreviousWasDeleted() {
+    final var headers = authHeaders("reanalyze-deleted-user");
+    final var postingId = submitPostingAndGetId(headers);
+    final var deletedAnalysisId = awaitListenerAnalysis(postingId, headers);
+
+    final var deleted = graphql(adminHeaders(), """
+      {"query": "mutation { deleteAnalysis(id: \\"%s\\") }"}
+      """.formatted(deletedAnalysisId));
+    assertThat(deleted.findValue("deleteAnalysis").asBoolean()).as("delete mutation result").isTrue();
+
+    final var analysis = analyzePosting(postingId, headers);
+    final var newAnalysisId = analysis.findValue("id").asString();
+    assertThat(newAnalysisId).as("re-analysis stores a new analysis").isNotEqualTo(deletedAnalysisId);
+    assertThat(analysis.findValue("summary").asString()).as("re-analysis summary").isEqualTo(MOCKED_SUMMARY);
+
+    final var analyses = graphql(headers, """
+      {"query": "query { analyses { id } }"}
+      """);
+    assertThat(analyses.findValues("id")).as("new analysis listed").extracting(JsonNode::asString)
+      .contains(newAnalysisId);
+  }
+
+  @Test
   void shouldRejectDeleteAnalysisForNonAdmin() {
     final var headers = authHeaders("forbidden-delete-user");
     final var postingId = submitPostingAndGetId(headers);

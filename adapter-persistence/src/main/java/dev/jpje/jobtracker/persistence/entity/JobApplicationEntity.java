@@ -8,10 +8,12 @@ import jakarta.persistence.Version;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.SoftDelete;
 import org.jspecify.annotations.Nullable;
 
 @Entity
 @Table(name = "applications")
+@SoftDelete
 public class JobApplicationEntity {
   @Id
   private UUID id;

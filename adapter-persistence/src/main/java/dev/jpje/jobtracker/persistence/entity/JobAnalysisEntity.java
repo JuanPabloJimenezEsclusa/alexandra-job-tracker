@@ -7,8 +7,11 @@ import jakarta.persistence.Table;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.hibernate.annotations.SoftDelete;
+
 @Entity
 @Table(name = "job_analyses")
+@SoftDelete
 public class JobAnalysisEntity {
   @Id
   private UUID id;

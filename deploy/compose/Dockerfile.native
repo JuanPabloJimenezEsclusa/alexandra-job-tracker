@@ -2,7 +2,8 @@ FROM ghcr.io/graalvm/native-image-community:25 AS native-build
 WORKDIR /app
 COPY . .
 RUN ./mvnw clean install -DskipTests -B -ntp -e \
-    && SPRING_PROFILES_ACTIVE=dev ./mvnw -Pnative native:compile -pl bootstrap-server -DskipTests -B -ntp -e
+    && SPRING_PROFILES_ACTIVE=dev ./mvnw -Pnative native:compile -pl bootstrap-server \
+    -DskipTests -B -ntp -e -Dmaven.gitcommitid.skip=true
 
 # Use a lightweight runtime image
 FROM debian:13-slim

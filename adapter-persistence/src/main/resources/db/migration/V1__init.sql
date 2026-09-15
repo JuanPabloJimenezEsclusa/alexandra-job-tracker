@@ -31,7 +31,8 @@ CREATE TABLE applications
   date_applied   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   last_updated   TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
   notes          TEXT,
-  version        BIGINT                   NOT NULL DEFAULT 0
+  version        BIGINT                   NOT NULL DEFAULT 0,
+  deleted        BOOLEAN                  NOT NULL DEFAULT FALSE
 );
 
 CREATE INDEX idx_applications_user_id ON applications (user_id);
@@ -53,7 +54,8 @@ CREATE TABLE job_analyses
   salary_max       DOUBLE PRECISION         NOT NULL DEFAULT 0,
   salary_currency  VARCHAR(10)              NOT NULL DEFAULT 'USD',
   created_at       TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
-  UNIQUE (job_posting_id)
+  deleted          BOOLEAN                  NOT NULL DEFAULT FALSE,
+  UNIQUE (job_posting_id, deleted)
 );
 
 CREATE INDEX idx_job_analyses_user_id ON job_analyses (user_id);
