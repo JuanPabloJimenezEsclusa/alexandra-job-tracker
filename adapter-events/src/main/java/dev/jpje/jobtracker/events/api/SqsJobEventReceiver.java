@@ -2,8 +2,8 @@ package dev.jpje.jobtracker.events.api;
 
 import dev.jpje.jobtracker.domain.event.JobPostingCreated;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
-import dev.jpje.jobtracker.events.handler.JobPostingEventType;
 import dev.jpje.jobtracker.events.handler.JobPostingEventHandlerFactory;
+import dev.jpje.jobtracker.events.handler.JobPostingEventType;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -220,16 +220,19 @@ mvn -Pnative native:compile -pl bootstrap-cli -DskipTests       # CLI binary
 ### Run
 
 ```bash
-# Docker Compose (server + OpenTelemetry + Grafana observability stack)
+# Docker Compose (server on PostgreSQL + Adminer + OpenTelemetry + Grafana observability stack)
 docker compose -f deploy/compose/docker-compose.yml up -d
 
-# Standalone server (embedded H2, no telemetry)
+# Standalone server (embedded in-memory H2, no telemetry)
 java -jar bootstrap-server/target/bootstrap-server-*.jar
+
+# Standalone server with a file-backed H2 database and the H2 console
+java -jar bootstrap-server/target/bootstrap-server-*.jar --spring.profiles.active=loc
 
 # CLI client
 java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost:8880/api
 
-# Native server
+# Native server (PostgreSQL, use the `loc` profile for H2 instead)
 ./bootstrap-server/target/job-tracker-server --spring.profiles.active=dev
 
 # Native CLI
@@ -381,11 +384,13 @@ Coverage reports are available at:
 
 **Spring profiles:**
 
-| Profile | Storage                       | Use case               |
-|---------|-------------------------------|------------------------|
-| default | H2 in-memory, Flyway auto     | Local development      |
-| dev     | H2 file (`./data/jobtracker`) | Persistent local data  |
-| aws     | Neon PostgreSQL, Lambda       | Production deployment  |
+| Profile    | Storage                                                 | Use case                       |
+|------------|---------------------------------------------------------|--------------------------------|
+| default    | H2 in-memory, Flyway auto                               | Tests and bare `java -jar`     |
+| loc        | H2 file (`./deploy/data/jobtracker`), H2 console        | Local run without a database   |
+| dev        | PostgreSQL (`localhost:5432`, overridable), Flyway auto | Local run mirroring production |
+| aws        | Neon PostgreSQL, Lambda                                 | Production deployment          |
+| db-migrate | none (headless Flyway)                                  | Applying migrations            |
 
 ---
 

@@ -13,6 +13,15 @@ TYPE="${1:-jvm}"
 cd "$(dirname "$0")"
 workspace="$(pwd)"
 
+__prepareData() {
+  local dataDir="${workspace}/../data/postgres"
+  local image="${POSTGRES_IMAGE:-postgres:17-alpine}"
+
+  mkdir -p "${dataDir}" 2>/dev/null || true
+  docker run --rm --entrypoint sh -v "${dataDir}:/pg" "${image}" \
+    -c 'chown -R postgres:postgres /pg'
+}
+
 __initServices() {
   local type="${1:-jvm}"
   local dockerfile="${workspace}/Dockerfile"
@@ -30,6 +39,7 @@ __initServices() {
 }
 
 main() {
+  __prepareData
   __initServices "${TYPE}"
 }
 

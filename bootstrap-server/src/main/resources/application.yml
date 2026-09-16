@@ -94,7 +94,7 @@ logging:
 spring:
   config:
     activate:
-      on-profile: "dev"
+      on-profile: "loc"
   datasource:
     url: jdbc:h2:file:./deploy/data/jobtracker;MODE=PostgreSQL;AUTO_SERVER=TRUE
     driver-class-name: org.h2.Driver
@@ -108,6 +108,27 @@ spring:
       path: /h2-console
       settings:
         web-allow-others: true
+  graphql:
+    graphiql:
+      enabled: true
+
+---
+
+spring:
+  config:
+    activate:
+      on-profile: "dev"
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: "${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/jobtracker}"
+    username: "${SPRING_DATASOURCE_USERNAME:jobtracker}"
+    password: "${SPRING_DATASOURCE_PASSWORD:jobtracker}"
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate.ddl-auto: validate
+    show-sql: true
+  flyway:
+    enabled: true
   graphql:
     graphiql:
       enabled: true

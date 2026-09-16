@@ -35,7 +35,7 @@ cd deploy/compose
 * Job Tracker (API):
   * [GraphQL API](http://localhost:8880/api/graphql)
   * [GraphiQL IDE](http://localhost:8880/api/graphiql)
-  * [H2 Console](http://localhost:8880/api/h2-console) (JDBC URL: `jdbc:h2:file:./deploy/data/jobtracker;AUTO_SERVER=TRUE`, user: `sa`, password: _blank_)
+  * [Adminer](http://localhost:8081) (PostgreSQL client; server `postgres`, database `jobtracker`, user `jobtracker`, password `jobtracker`)
   * [Actuator health](http://localhost:8880/api/actuator/health)
 * Observability:
   * [Prometheus dashboard](http://localhost:9090)
@@ -49,6 +49,8 @@ cd deploy/compose
 * ZAP (penetration testing):
   * Runs an automated OWASP scan against the GraphQL endpoint
   * Activated with `docker compose --profile pen-test up`
+
+To inspect a file-backed H2 database instead, run the server standalone with the `loc` profile and open the H2 console at [http://localhost:8880/api/h2-console](http://localhost:8880/api/h2-console) (JDBC URL `jdbc:h2:file:./deploy/data/jobtracker;AUTO_SERVER=TRUE`, user `sa`, blank password).
 
 ## Validate the changes
 

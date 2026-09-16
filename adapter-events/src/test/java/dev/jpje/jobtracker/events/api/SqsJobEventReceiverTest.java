@@ -11,9 +11,9 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
-import dev.jpje.jobtracker.events.handler.JobPostingEventType;
 import dev.jpje.jobtracker.events.handler.JobPostingEventHandler;
 import dev.jpje.jobtracker.events.handler.JobPostingEventHandlerFactory;
+import dev.jpje.jobtracker.events.handler.JobPostingEventType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

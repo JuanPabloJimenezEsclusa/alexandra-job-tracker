@@ -28,11 +28,15 @@ services:
     build:
       context: ../..
       dockerfile: ${DOCKERFILE:-deploy/compose/Dockerfile}
+    depends_on:
+      postgres:
+        condition: service_healthy
     ports: [ "8880:8880", "127.0.0.1:5005:5005" ]
-    volumes:
-      - "../data:/app/deploy/data"
     environment:
       SPRING_PROFILES_ACTIVE: "dev"
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-jobtracker}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-jobtracker}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-jobtracker}
       LLM_API_KEY: ${LLM_API_KEY:-}
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_CHAT_MODEL: ${LLM_CHAT_MODEL:-}
@@ -59,6 +63,40 @@ services:
       timeout: 10s
       retries: 3
       start_period: 30s
+
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    container_name: alexandra-postgres
+    hostname: postgres
+    restart: unless-stopped
+    ports: [ "127.0.0.1:${POSTGRES_PORT:-5432}:5432" ]
+    volumes: [ "../data/postgres:/var/lib/postgresql/data" ]
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-jobtracker}
+      POSTGRES_USER: ${POSTGRES_USER:-jobtracker}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-jobtracker}
+    networks: [ jobtracker ]
+    <<: *default-resources
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jobtracker} -d ${POSTGRES_DB:-jobtracker}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  adminer:
+    image: adminer:5.3.0
+    container_name: alexandra-adminer
+    hostname: adminer
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports: [ "8081:8080" ]
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+    networks: [ jobtracker ]
+    <<: *default-resources
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.160.0
