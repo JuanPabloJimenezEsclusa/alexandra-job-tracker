@@ -8,6 +8,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import java.time.Duration;
 import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.cache.adapter.CaffeineCacheAdapter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

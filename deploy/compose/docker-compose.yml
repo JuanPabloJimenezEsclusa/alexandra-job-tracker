@@ -28,7 +28,7 @@ services:
     build:
       context: ../..
       dockerfile: ${DOCKERFILE:-deploy/compose/Dockerfile}
-    ports: [ "8880:8880" ]
+    ports: [ "8880:8880", "127.0.0.1:5005:5005" ]
     volumes:
       - "../data:/app/deploy/data"
     environment:
@@ -38,7 +38,7 @@ services:
       LLM_CHAT_MODEL: ${LLM_CHAT_MODEL:-}
       LC_CTYPE: ${LC_CTYPE:-}
       JWT_SECRET: ${JWT_SECRET:-}
-      APP_OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
+      OTEL_ENDPOINT: http://otel-collector:4318/v1/traces
       OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
       OTEL_SERVICE_NAME: job-tracker-server
@@ -47,6 +47,7 @@ services:
       OTEL_LOGS_EXPORTER: none
       JVM_OPTIONS: "-Xms1024m -Xmx2048m"
       JAVA_OPTS: "-XX:+UseCompactObjectHeaders -XX:+UseContainerSupport --enable-native-access=ALL-UNNAMED -Djava.security.egd=file:/dev/./urandom"
+      JAVA_TOOL_OPTIONS: ${JAVA_TOOL_OPTIONS:-}
     networks: [ jobtracker ]
     deploy:
       resources:

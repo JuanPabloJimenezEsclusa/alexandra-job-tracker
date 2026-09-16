@@ -1,5 +1,5 @@
 /**
- * Outbound port interfaces (driven side). Implemented by infrastructure adapters.
+ * Outbound (driven) ports implemented by infrastructure adapters.
  */
 @NullMarked
 package dev.jpje.jobtracker.domain.port.outbound;

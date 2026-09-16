@@ -3,7 +3,7 @@ package dev.jpje.jobtracker.api.resolver;
 import java.util.Objects;
 import java.util.UUID;
 
-import dev.jpje.jobtracker.api.Authorization;
+import dev.jpje.jobtracker.api.dto.Authorization;
 import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
 import dev.jpje.jobtracker.api.dto.JobPostingResponse;
 import dev.jpje.jobtracker.domain.port.inbound.AnalyzeJobPostingPort;

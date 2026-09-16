@@ -2,7 +2,7 @@ package dev.jpje.jobtracker.api.resolver;
 
 import java.util.Objects;
 
-import dev.jpje.jobtracker.api.Authorization;
+import dev.jpje.jobtracker.api.dto.Authorization;
 import dev.jpje.jobtracker.api.dto.AuthPayloadResponse;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
 import dev.jpje.jobtracker.domain.vo.UserId;

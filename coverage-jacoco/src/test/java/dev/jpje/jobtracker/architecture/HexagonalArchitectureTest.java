@@ -8,13 +8,6 @@ import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * Hexagonal architecture tests.
- *
- * <p>Scans every module, including the bootstrap composition roots. Each module's allowed
- * dependencies are explicitly whitelisted, and the composition-root rules ensure the bootstrap
- * modules only assemble adapters and use cases instead of implementing business orchestration.
- */
 @AnalyzeClasses(packages = "dev.jpje.jobtracker")
 class HexagonalArchitectureTest {
 
@@ -29,8 +22,6 @@ class HexagonalArchitectureTest {
   private static final String BOOTSTRAP_SERVER = "dev.jpje.jobtracker.server..";
   private static final String ADAPTER_CLI = "dev.jpje.jobtracker.cli..";
   private static final String BOOTSTRAP_CLI = "dev.jpje.jobtracker.bootstrap..";
-
-  // --- Common allowed packages (applied to all layers) ---
 
   private static final String[] COMMON = {
     "java..",
@@ -101,7 +92,7 @@ class HexagonalArchitectureTest {
       concat(DOMAIN, ADAPTER_PERSISTENCE,
         "jakarta.persistence..",
         "org.hibernate..",
-        "org.springframework.(stereotype|data|dao|transaction)..",
+        "org.springframework.(aot|stereotype|data|dao|transaction|beans|boot)..",
         "org.flywaydb.."))
     .as("Persistence module dependencies")
     .because("persistence implements domain ports with JPA and Flyway");
@@ -146,7 +137,8 @@ class HexagonalArchitectureTest {
     .should().onlyDependOnClassesThat().resideInAnyPackage(
       concat(DOMAIN, ADAPTER_EVENTS,
         "io.awspring.cloud.sns..",
-        "org.springframework.(stereotype|context|http|web|transaction|scheduling|beans|boot)..",
+        "software.amazon.awssdk.services..",
+        "org.springframework.(aot|stereotype|context|http|web|transaction|scheduling|beans|boot)..",
         "org.slf4j..",
         "tools.jackson..",
         "com.fasterxml.jackson.."))

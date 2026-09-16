@@ -1,5 +1,5 @@
 /**
- * Mappers converting between JPA entities and domain entities.
+ * Mappers between JPA entities and domain models.
  */
 @NullMarked
 package dev.jpje.jobtracker.persistence.mapper;

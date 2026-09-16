@@ -1,5 +1,5 @@
 /**
- * Value objects for the domain layer.
+ * Immutable value objects of the domain model.
  */
 @NullMarked
 package dev.jpje.jobtracker.domain.vo;

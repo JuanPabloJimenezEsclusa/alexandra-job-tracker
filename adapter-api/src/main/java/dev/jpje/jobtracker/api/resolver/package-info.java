@@ -1,5 +1,5 @@
 /**
- * GraphQL query and mutation resolvers delegating to application use cases.
+ * GraphQL query and mutation resolvers delegating to use cases.
  */
 @NullMarked
 package dev.jpje.jobtracker.api.resolver;

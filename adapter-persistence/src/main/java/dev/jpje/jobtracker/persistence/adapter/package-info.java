@@ -1,5 +1,5 @@
 /**
- * Persistence adapters implementing outbound domain ports.
+ * JPA implementations of the outbound persistence ports.
  */
 @NullMarked
 package dev.jpje.jobtracker.persistence.adapter;

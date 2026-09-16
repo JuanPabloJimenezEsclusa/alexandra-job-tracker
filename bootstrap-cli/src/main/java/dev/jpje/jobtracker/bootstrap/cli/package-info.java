@@ -1,5 +1,5 @@
 /**
- * Spring Boot CLI application entry point.
+ * Spring Shell CLI entry point (composition root).
  */
 @NullMarked
 package dev.jpje.jobtracker.bootstrap.cli;

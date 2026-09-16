@@ -1,5 +1,5 @@
 /**
- * Spring Boot server config.
+ * Server wiring for use cases, async execution, cache, and time.
  */
 @NullMarked
 package dev.jpje.jobtracker.server.config;

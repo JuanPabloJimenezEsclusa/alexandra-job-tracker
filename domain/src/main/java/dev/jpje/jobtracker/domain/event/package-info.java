@@ -1,5 +1,5 @@
 /**
- * Domain events
+ * Domain events emitted when aggregates change state.
  */
 @NullMarked
 package dev.jpje.jobtracker.domain.event;

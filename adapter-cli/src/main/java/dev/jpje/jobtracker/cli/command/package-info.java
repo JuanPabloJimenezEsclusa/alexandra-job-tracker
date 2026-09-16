@@ -1,5 +1,5 @@
 /**
- * Spring Shell CLI commands for user interaction.
+ * Spring Shell commands exposed to the user.
  */
 @NullMarked
 package dev.jpje.jobtracker.cli.command;

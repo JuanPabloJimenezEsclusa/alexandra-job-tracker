@@ -1,5 +1,5 @@
 /**
- * Domain services encapsulating business logic and validations.
+ * Stateless domain services for rules spanning multiple aggregates.
  */
 @NullMarked
 package dev.jpje.jobtracker.domain.service;

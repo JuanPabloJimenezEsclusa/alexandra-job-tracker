@@ -1,1 +1,1 @@
-dev.jpje.jobtracker.auth.JjwtRuntimeHints=org.springframework.aot.hint.RuntimeHintsRegistrar
+org.springframework.aot.hint.RuntimeHintsRegistrar=dev.jpje.jobtracker.auth.hint.JjwtRuntimeHints

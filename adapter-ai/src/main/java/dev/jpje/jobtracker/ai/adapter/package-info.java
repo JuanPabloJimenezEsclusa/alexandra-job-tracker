@@ -1,5 +1,5 @@
 /**
- * Spring AI adapters implementing outbound AI domain ports.
+ * Spring AI adapters implementing the outbound job-analysis port.
  */
 @NullMarked
 package dev.jpje.jobtracker.ai.adapter;

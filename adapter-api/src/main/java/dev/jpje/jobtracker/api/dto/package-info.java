@@ -1,5 +1,5 @@
 /**
- * Data transfer objects for the GraphQL API layer.
+ * GraphQL request and response data transfer objects.
  */
 @NullMarked
 package dev.jpje.jobtracker.api.dto;

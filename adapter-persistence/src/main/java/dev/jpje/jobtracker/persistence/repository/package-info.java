@@ -1,5 +1,5 @@
 /**
- * Spring Data JPA repositories for database access.
+ * Spring Data JPA repositories.
  */
 @NullMarked
 package dev.jpje.jobtracker.persistence.repository;

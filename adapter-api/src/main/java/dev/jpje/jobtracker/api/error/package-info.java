@@ -1,5 +1,5 @@
 /**
- * GraphQL error handling classes and utilities for the JobTracker API.
+ * GraphQL exception handling and error response mapping.
  */
 @NullMarked
 package dev.jpje.jobtracker.api.error;

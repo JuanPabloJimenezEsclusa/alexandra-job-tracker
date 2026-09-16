@@ -1,5 +1,5 @@
 /**
- * GraphQL auth interceptor
+ * GraphQL request interceptors for authentication and logging.
  */
 @NullMarked
 package dev.jpje.jobtracker.api.interceptor;
