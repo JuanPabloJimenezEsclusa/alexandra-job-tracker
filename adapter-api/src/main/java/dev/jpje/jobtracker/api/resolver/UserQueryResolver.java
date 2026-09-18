@@ -1,6 +1,7 @@
 package dev.jpje.jobtracker.api.resolver;
 
 import dev.jpje.jobtracker.api.dto.UserResponse;
+import dev.jpje.jobtracker.domain.exception.ForbiddenException;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
@@ -17,13 +18,12 @@ public class UserQueryResolver {
   }
 
   @QueryMapping
-  @Nullable
   public UserResponse me(@AuthenticationPrincipal @Nullable final UserId userId) {
     if (userId == null) {
-      return null;
+      throw new ForbiddenException("Authentication required");
     }
     return authUseCase.getCurrentUser(userId)
       .map(UserResponse::from)
-      .orElse(null);
+      .orElseThrow(() -> new ForbiddenException("Authentication required"));
   }
 }

@@ -24,7 +24,7 @@ public class JobPostingQueryResolver {
   @QueryMapping
   @PreAuthorize("@authz.requireUser(authentication)")
   public List<JobPostingResponse> jobPostings(@AuthenticationPrincipal final UserId userId,
-                                               @Argument @Nullable final Source source) {
+                                              @Argument @Nullable final Source source) {
     return useCase.listJobPostings(userId, source).stream()
       .map(JobPostingResponse::from)
       .toList();

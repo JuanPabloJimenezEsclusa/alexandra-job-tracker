@@ -126,11 +126,12 @@ class AuthIntegrationTest extends GraphQlIntegrationTestBase {
   }
 
   @Test
-  void shouldReturnNullMeWithoutAuth() {
+  void shouldRejectMeWithoutAuth() {
     final var me = graphql(jsonHeaders(), """
       {"query": "{ me { username } }"}
       """);
-    assertThat(me.findValue("username")).as("me without auth is null").isNull();
+    assertThat(me.findValue("message").asString()).as("me without auth rejected")
+      .isEqualTo(AUTHENTICATION_REQUIRED);
   }
 
   @Test

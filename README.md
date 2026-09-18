@@ -123,17 +123,8 @@ flowchart LR
 - `domain`: zero framework imports. Contains entities, value objects, port interfaces,
   domain services, and domain events. Enforced by ArchUnit.
 - `application`: implements inbound ports. Framework-free by design.
-- `adapter-*`: implement outbound ports. `adapter-cli` is a standalone delivery mechanism
-  that communicates with the server exclusively over HTTP.
-- `adapter-events`: inbound SQS/LWA receiver and Spring event listeners, plus outbound
-  Spring/SNS event publishers. Profile-selected (`aws` → SNS, otherwise Spring).
-- `adapter-auth`: driven Spring Security primitives — Nimbus JWT encoding/decoding
-  (HS512 over a SHA-512-derived key), bcrypt password hashing, a `UserDetailsService`
-  over the user load port, and an authentication manager behind an outbound port.
-- `adapter-api`: also hosts the inbound HTTP security — the stateless security filter
-  chain, the Bearer-token authentication filter, CORS, and method security. The caller's
-  identity is resolved once per request; protected operations declare their authorization
-  requirement.
+- `adapter-*`: implement inbound/outbound ports. `adapter-cli` is a standalone delivery 
+  mechanism that communicates with the server exclusively over HTTP.
 - `bootstrap-server`: composition root. Wires use cases, adapters, and domain services.
   Includes OpenTelemetry tracing via `TracingFilter`. The composition-root role is enforced
   by ArchUnit (core/adapters never depend on bootstrap; non-configuration bootstrap classes
@@ -161,38 +152,44 @@ endpoint is either a `QueryResolver` (read) or `MutationResolver` (write).
 
 ```mermaid
 flowchart LR
-    subgraph clients [Clients]
-        CLI["Spring Shell CLI"]
-        Ext["Chrome Extension"]
-    end
+  subgraph clients [Clients]
+    CLI["Spring Shell CLI"]
+    Ext["Chrome Extension"]
+  end
 
-    subgraph api [GraphQL Layer]
-        QR["QueryResolver"]
-        MR["MutationResolver"]
-    end
+  subgraph api [API Adapter]
+    QR["QueryResolver"]
+    MR["MutationResolver"]
+  end
 
-    subgraph core [Core]
-        UC["Use Case"]
-        Domain["Domain"]
-    end
+  subgraph inbound [Inbound Adapters]
+    api[GraphQL Layer]
+  end
 
-    subgraph outbound [Outbound Adapters]
-        JPA["JPA Adapter"]
-        AI["AI Adapter"]
-        JWT["Spring Security"]
-    end
+  subgraph core [Core]
+    UC["Use Case"]
+    Domain["Domain"]
+  end
 
-    subgraph storage [Infrastructure]
-        DB[("H2 / PostgreSQL")]
-        LLM["OpenAi LLM"]
-    end
+  subgraph outbound [Outbound Adapters]
+    JPA["Persistence Adapter"]
+    AI["AI Adapter"]
+    Auth["Auth Adapter"]
+    Cache["Cache Adapter"]
+    Events["Events Adapter"]
+  end
 
-    CLI --> |HTTP| QR & MR
-    Ext --> |HTTP| QR & MR
-    QR & MR --> UC --> Domain
-    Domain --> JPA & AI & JWT
-    JPA --> DB
-    AI --> LLM
+  subgraph storage [Infrastructure]
+    DB[("H2 / PostgreSQL")]
+    LLM["OpenAi LLM"]
+  end
+
+  CLI --> |HTTP| QR & MR
+  Ext --> |HTTP| QR & MR
+  QR & MR --> UC --> Domain
+  Domain --> JPA & AI & Auth & Cache & Events
+  JPA --> DB
+  AI --> LLM
 ```
 
 ---
@@ -251,8 +248,7 @@ java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost
 ## API Reference
 
 All operations are exposed via `POST /api/graphql`. Authentication uses JWT tokens
-passed in the `Authorization: Bearer <token>` header and is enforced centrally by
-Spring Security; protected operations declare their authorization requirement.
+passed in the `Authorization: Bearer <token>` header.
 
 | Operation                                        | Description                                   |
 |--------------------------------------------------|-----------------------------------------------|

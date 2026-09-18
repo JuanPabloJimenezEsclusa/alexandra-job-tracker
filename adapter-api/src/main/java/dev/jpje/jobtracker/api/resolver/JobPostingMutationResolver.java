@@ -35,7 +35,7 @@ public class JobPostingMutationResolver {
   @MutationMapping
   @PreAuthorize("@authz.requireUser(authentication)")
   public JobPostingResponse submitJobPosting(@AuthenticationPrincipal final UserId userId,
-                                              @Argument("input") final JobPostingInput raw) {
+                                             @Argument("input") final JobPostingInput raw) {
     return JobPostingResponse.from(submitUseCase.submit(userId,
       Url.of(StringSanitizer.sanitize(raw.url())),
       JobTitle.of(StringSanitizer.sanitize(raw.title())),

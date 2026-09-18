@@ -26,8 +26,8 @@ public class ApplicationMutationResolver {
   @MutationMapping
   @PreAuthorize("@authz.requireUser(authentication)")
   public JobApplicationResponse createApplication(@AuthenticationPrincipal final UserId userId,
-                                                   @Argument final UUID jobPostingId,
-                                                   @Argument @Nullable final String notes) {
+                                                  @Argument final UUID jobPostingId,
+                                                  @Argument @Nullable final String notes) {
     return JobApplicationResponse.from(useCase.create(userId, jobPostingId,
       notes != null ? Notes.of(StringSanitizer.sanitize(notes)) : null));
   }

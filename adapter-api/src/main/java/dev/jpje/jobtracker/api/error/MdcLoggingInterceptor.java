@@ -16,6 +16,7 @@ public class MdcLoggingInterceptor implements WebGraphQlInterceptor {
   public Mono<WebGraphQlResponse> intercept(final WebGraphQlRequest request, final Chain chain) {
     final var requestId = UUID.randomUUID().toString().substring(0, 8);
     MDC.put("requestId", requestId);
+    MDC.put("traceId", UUID.randomUUID().toString().replace("-", ""));
 
     final var document = request.getDocument();
     if (document.length() > 80) {

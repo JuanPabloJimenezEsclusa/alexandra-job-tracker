@@ -22,6 +22,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableMethodSecurity
 public class SecurityConfig {
 
+  // CSRF tokens add no protection to this stateless, Authorization-header-authenticated API and
+  // would break every non-browser client, so disabling the filter is intentional, not an oversight.
+  @SuppressWarnings("java:S4502")
   @Bean
   SecurityFilterChain securityFilterChain(final HttpSecurity http,
                                           final JwtDecoder jwtDecoder,

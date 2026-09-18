@@ -3,6 +3,8 @@ package dev.jpje.jobtracker.application.usecase;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -12,6 +14,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.event.EventPublisher;
 import dev.jpje.jobtracker.domain.event.UserRegistered;
@@ -28,6 +31,9 @@ import dev.jpje.jobtracker.domain.vo.Username;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -120,30 +126,26 @@ class AuthenticationUseCaseTest {
     verifyNoMoreInteractions(authenticateUserPort, tokenGeneratorPort);
   }
 
-  @Test
-  void shouldRejectLoginWithWrongPassword() {
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("failedLogins")
+  void shouldRejectInvalidLogin(final String username, final String password) {
     // Given
-    when(authenticateUserPort.authenticate("alice", "wrong-password"))
+    when(authenticateUserPort.authenticate(username, password))
       .thenThrow(new IllegalArgumentException("Invalid credentials"));
 
     // When, then
-    assertThatThrownBy(() -> useCase.login(Username.of("alice"), "wrong-password"))
+    final var usernameValueObject = Username.of(username);
+    assertThatThrownBy(() -> useCase.login(usernameValueObject, password))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Invalid credentials");
     verifyNoMoreInteractions(tokenGeneratorPort);
   }
 
-  @Test
-  void shouldRejectLoginForUnknownUser() {
-    // Given
-    when(authenticateUserPort.authenticate("nonexistent", "pass"))
-      .thenThrow(new IllegalArgumentException("Invalid credentials"));
-
-    // When, then
-    assertThatThrownBy(() -> useCase.login(Username.of("nonexistent"), "pass"))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Invalid credentials");
-    verifyNoMoreInteractions(tokenGeneratorPort);
+  private static Stream<Arguments> failedLogins() {
+    return Stream.of(
+      arguments(named("wrong password", "alice"), "wrong-password"),
+      arguments(named("unknown username", "nonexistent"), "pass")
+    );
   }
 
   @Test

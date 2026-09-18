@@ -5,6 +5,21 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**refactor(adapter): migrate authentication from jjwt to Spring Security**
+
+ * Replace hand-rolled JWT (jjwt) + bcrypt (jbcrypt) with Spring Security&#x27;s
+ * filter chain, method security, Nimbus JWT, and BCryptPasswordEncoder.
+ * - adapter-auth: AuthSecurityConfig, JwtProvider (NimbusJwtEncoder),
+ * AuthenticationManagerAdapter, DbUserDetailsService, SpringPasswordEncoder,
+ * JwtKeyMaterial, AuthUserDetails
+ * - adapter-api: SecurityConfig, JwtAuthenticationFilter, Authz, remove
+ * GraphQlAuthInterceptor
+ * - application: AuthenticationUseCase delegates to AuthenticateUserPort
+ * - domain: AuthenticateUserPort outbound port, remove TokenPayload/InvalidTokenException
+ * - Remove JjwtRuntimeHints and AOT factory (no longer needed)
+
+[582efc8253a937d](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/582efc8253a937d) juan.pablo.jimenez.esclusa *2026-09-18 09:56:31*
+
 **feat(domain): implement job tracker app**
 
  * feat(ai): improve capability adding skills (#62)

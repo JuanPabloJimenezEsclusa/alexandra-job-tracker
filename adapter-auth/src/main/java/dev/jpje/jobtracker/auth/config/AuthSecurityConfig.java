@@ -3,7 +3,6 @@ package dev.jpje.jobtracker.auth.config;
 import javax.crypto.SecretKey;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
-
 import dev.jpje.jobtracker.auth.crypto.JwtKeyMaterial;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

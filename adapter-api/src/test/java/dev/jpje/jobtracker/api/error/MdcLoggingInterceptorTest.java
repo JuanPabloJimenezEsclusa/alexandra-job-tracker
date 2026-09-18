@@ -130,6 +130,18 @@ class MdcLoggingInterceptorTest {
     assertThat(MDC.getCopyOfContextMap()).isNullOrEmpty();
   }
 
+  @Test
+  void shouldSetTraceId() {
+    // Given
+    final var captured = new AtomicReference<@Nullable String>();
+
+    // When
+    interceptor.intercept(mockRequest(new HttpHeaders(), "{ me }"), capturingChain(captured, "traceId")).block();
+
+    // Then
+    assertThat(captured.get()).isNotBlank();
+  }
+
   private WebGraphQlRequest mockRequest(final HttpHeaders headers, final String document) {
     var req = mock(WebGraphQlRequest.class);
     when(req.getHeaders()).thenReturn(headers);

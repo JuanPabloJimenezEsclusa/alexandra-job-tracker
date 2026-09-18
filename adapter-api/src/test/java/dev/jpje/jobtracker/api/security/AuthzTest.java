@@ -2,17 +2,25 @@ package dev.jpje.jobtracker.api.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Named.named;
+import static org.junit.jupiter.params.provider.Arguments.arguments;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.exception.ForbiddenException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 class AuthzTest {
+
+  private static final String AUTHENTICATION_REQUIRED = "Authentication required";
 
   private final Authz authz = new Authz();
 
@@ -21,18 +29,12 @@ class AuthzTest {
     assertThat(authz.requireUser(authentication("ROLE_USER"))).isTrue();
   }
 
-  @Test
-  void shouldRejectAnonymousUser() {
-    assertThatThrownBy(() -> authz.requireUser(anonymous()))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Authentication required");
-  }
-
-  @Test
-  void shouldRejectMissingAuthentication() {
-    assertThatThrownBy(() -> authz.requireUser(null))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Authentication required");
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("unauthenticatedRequests")
+  void shouldRejectUnauthenticatedUser(final Authentication authentication) {
+    assertThatThrownBy(() -> authz.requireUser(authentication))
+      .isInstanceOf(ForbiddenException.class)
+      .hasMessage(AUTHENTICATION_REQUIRED);
   }
 
   @Test
@@ -42,7 +44,8 @@ class AuthzTest {
 
   @Test
   void shouldRejectNonAdmin() {
-    assertThatThrownBy(() -> authz.requireAdmin(authentication("ROLE_USER")))
+    final var user = authentication("ROLE_USER");
+    assertThatThrownBy(() -> authz.requireAdmin(user))
       .isInstanceOf(ForbiddenException.class)
       .hasMessage("Admin access required");
   }
@@ -50,8 +53,15 @@ class AuthzTest {
   @Test
   void shouldRejectAdminWhenUnauthenticated() {
     assertThatThrownBy(() -> authz.requireAdmin(null))
-      .isInstanceOf(IllegalArgumentException.class)
-      .hasMessage("Authentication required");
+      .isInstanceOf(ForbiddenException.class)
+      .hasMessage(AUTHENTICATION_REQUIRED);
+  }
+
+  private static Stream<Arguments> unauthenticatedRequests() {
+    return Stream.of(
+      arguments(named("anonymous authentication", anonymous())),
+      arguments(named("missing authentication", (Authentication) null))
+    );
   }
 
   private static Authentication authentication(final String role) {

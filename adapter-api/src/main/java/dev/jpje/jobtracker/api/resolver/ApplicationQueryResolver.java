@@ -24,7 +24,7 @@ public class ApplicationQueryResolver {
   @QueryMapping
   @PreAuthorize("@authz.requireUser(authentication)")
   public List<JobApplicationResponse> applications(@AuthenticationPrincipal final UserId userId,
-                                                    @Argument @Nullable final ApplicationStatus status) {
+                                                   @Argument @Nullable final ApplicationStatus status) {
     return useCase.list(userId, status).stream()
       .map(JobApplicationResponse::from)
       .toList();

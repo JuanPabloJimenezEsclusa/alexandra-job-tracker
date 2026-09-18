@@ -12,7 +12,7 @@ public class Authz {
 
   public boolean requireUser(@Nullable final Authentication authentication) {
     if (!isAuthenticated(authentication)) {
-      throw new IllegalArgumentException("Authentication required");
+      throw new ForbiddenException("Authentication required");
     }
     return true;
   }

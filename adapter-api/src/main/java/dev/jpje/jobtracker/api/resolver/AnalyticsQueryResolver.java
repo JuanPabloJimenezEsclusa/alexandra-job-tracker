@@ -23,7 +23,7 @@ public class AnalyticsQueryResolver {
   @QueryMapping
   @PreAuthorize("@authz.requireUser(authentication)")
   public AnalyticsResponse analytics(@AuthenticationPrincipal final UserId userId,
-                                      @Argument @Nullable final Instant since) {
+                                     @Argument @Nullable final Instant since) {
     return AnalyticsResponse.from(useCase.getAnalytics(userId, since));
   }
 }

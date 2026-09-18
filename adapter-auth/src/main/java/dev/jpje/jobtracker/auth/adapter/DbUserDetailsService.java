@@ -5,9 +5,9 @@ import dev.jpje.jobtracker.domain.port.outbound.LoadUserPort;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 public class DbUserDetailsService implements UserDetailsService {
   private final LoadUserPort loadUserPort;
 
