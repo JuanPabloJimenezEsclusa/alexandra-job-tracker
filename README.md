@@ -74,10 +74,10 @@ for server-side operations and a Spring Shell CLI for terminal workflows, and it
 |----------------------|-----------|------------------------------------------------------------------|
 | `domain`             | Core      | Pure Java: domain models, value objects, ports, domain services |
 | `application`        | Core      | Use cases orchestrating domain logic through inbound ports       |
-| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs: Spring for GraphQL        |
+| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs, HTTP security: Spring for GraphQL + Spring Security |
 | `adapter-cli`        | Inbound   | Spring Shell commands, HTTP GraphQL client, session management   |
 | `adapter-persistence`| Outbound  | JPA entities, repositories, mappers, Flyway migrations           |
-| `adapter-auth`       | Outbound  | JWT provider, GraphQL auth interceptor, bcrypt password hashing  |
+| `adapter-auth`       | Outbound  | Spring Security auth primitives: Nimbus JWT, bcrypt, authentication manager |
 | `adapter-ai`         | Outbound  | Job analysis via Spring AI + skill-based prompts                 |
 | `adapter-cache`      | Outbound  | Caffeine cache with hexagonal `CachePort` decorators             |
 | `adapter-events`     | Both      | SQS/LWA receiver, Spring event listeners, Spring/SNS publishers  |
@@ -123,10 +123,8 @@ flowchart LR
 - `domain`: zero framework imports. Contains entities, value objects, port interfaces,
   domain services, and domain events. Enforced by ArchUnit.
 - `application`: implements inbound ports. Framework-free by design.
-- `adapter-*`: implement outbound ports. `adapter-cli` is a standalone delivery mechanism
-  that communicates with the server exclusively over HTTP.
-- `adapter-events`: inbound SQS/LWA receiver and Spring event listeners, plus outbound
-  Spring/SNS event publishers. Profile-selected (`aws` → SNS, otherwise Spring).
+- `adapter-*`: implement inbound/outbound ports. `adapter-cli` is a standalone delivery 
+  mechanism that communicates with the server exclusively over HTTP.
 - `bootstrap-server`: composition root. Wires use cases, adapters, and domain services.
   Includes OpenTelemetry tracing via `TracingFilter`. The composition-root role is enforced
   by ArchUnit (core/adapters never depend on bootstrap; non-configuration bootstrap classes
@@ -154,38 +152,44 @@ endpoint is either a `QueryResolver` (read) or `MutationResolver` (write).
 
 ```mermaid
 flowchart LR
-    subgraph clients [Clients]
-        CLI["Spring Shell CLI"]
-        Ext["Chrome Extension"]
-    end
+  subgraph clients [Clients]
+    CLI["Spring Shell CLI"]
+    Ext["Chrome Extension"]
+  end
 
-    subgraph api [GraphQL Layer]
-        QR["QueryResolver"]
-        MR["MutationResolver"]
-    end
+  subgraph api [API Adapter]
+    QR["QueryResolver"]
+    MR["MutationResolver"]
+  end
 
-    subgraph core [Core]
-        UC["Use Case"]
-        Domain["Domain"]
-    end
+  subgraph inbound [Inbound Adapters]
+    api[GraphQL Layer]
+  end
 
-    subgraph outbound [Outbound Adapters]
-        JPA["JPA Adapter"]
-        AI["AI Adapter"]
-        JWT["JWT Provider"]
-    end
+  subgraph core [Core]
+    UC["Use Case"]
+    Domain["Domain"]
+  end
 
-    subgraph storage [Infrastructure]
-        DB[("H2 / PostgreSQL")]
-        LLM["OpenAi LLM"]
-    end
+  subgraph outbound [Outbound Adapters]
+    JPA["Persistence Adapter"]
+    AI["AI Adapter"]
+    Auth["Auth Adapter"]
+    Cache["Cache Adapter"]
+    Events["Events Adapter"]
+  end
 
-    CLI --> |HTTP| QR & MR
-    Ext --> |HTTP| QR & MR
-    QR & MR --> UC --> Domain
-    Domain --> JPA & AI & JWT
-    JPA --> DB
-    AI --> LLM
+  subgraph storage [Infrastructure]
+    DB[("H2 / PostgreSQL")]
+    LLM["OpenAi LLM"]
+  end
+
+  CLI --> |HTTP| QR & MR
+  Ext --> |HTTP| QR & MR
+  QR & MR --> UC --> Domain
+  Domain --> JPA & AI & Auth & Cache & Events
+  JPA --> DB
+  AI --> LLM
 ```
 
 ---

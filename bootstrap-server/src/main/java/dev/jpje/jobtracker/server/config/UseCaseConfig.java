@@ -23,6 +23,7 @@ import dev.jpje.jobtracker.domain.port.inbound.ManageJobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.inbound.ProcessJobPostingCreatedPort;
 import dev.jpje.jobtracker.domain.port.inbound.SubmitJobPostingPort;
 import dev.jpje.jobtracker.domain.port.inbound.TrackJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.AuthenticateUserPort;
 import dev.jpje.jobtracker.domain.port.outbound.JobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.outbound.LoadJobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.outbound.LoadJobApplicationPort;
@@ -189,8 +190,9 @@ public class UseCaseConfig {
       final LoadUserPort loadUserPort,
       final TokenGeneratorPort tokenGenerator,
       final PasswordEncoderPort passwordEncoder,
+      final AuthenticateUserPort authenticateUserPort,
       final EventPublisher eventPublisher) {
-    return new AuthenticationUseCase(saveUserPort, loadUserPort, tokenGenerator, passwordEncoder, clock,
-      eventPublisher);
+    return new AuthenticationUseCase(saveUserPort, loadUserPort, tokenGenerator, passwordEncoder,
+      authenticateUserPort, clock, eventPublisher);
   }
 }

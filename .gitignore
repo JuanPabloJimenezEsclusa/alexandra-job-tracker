@@ -2,6 +2,7 @@
 **/reports/*.html
 **/reports/zap-*/**
 .opencode/
+.mimocode/
 openspec/
 /.compliance.json
 

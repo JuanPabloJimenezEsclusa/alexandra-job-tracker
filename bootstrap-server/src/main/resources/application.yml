@@ -59,7 +59,7 @@ info:
 
 jwt:
   secret: ${JWT_SECRET:}
-  expiration: 1800000
+  expiration: 600000
 
 management:
   endpoints:

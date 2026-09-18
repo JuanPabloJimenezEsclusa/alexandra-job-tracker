@@ -13,7 +13,7 @@ input SubmitJobInput {
 }
 
 type Query {
-  me: User
+  me: User!
   applications(status: ApplicationStatus): [JobApplication!]!
   analytics(since: Instant): Analytics!
   jobPostings(source: Source): [JobPosting!]!

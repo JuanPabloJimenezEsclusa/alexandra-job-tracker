@@ -1,15 +1,15 @@
 package dev.jpje.jobtracker.api.resolver;
 
 import java.time.Instant;
-import java.util.Objects;
 
 import dev.jpje.jobtracker.api.dto.AnalyticsResponse;
 import dev.jpje.jobtracker.domain.port.inbound.GetAnalyticsPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -21,9 +21,9 @@ public class AnalyticsQueryResolver {
   }
 
   @QueryMapping
-  public AnalyticsResponse analytics(@ContextValue(required = false) @Nullable final UserId userId,
-                                      @Argument @Nullable final Instant since) {
-    Objects.requireNonNull(userId, "Authentication required");
+  @PreAuthorize("@authz.requireUser(authentication)")
+  public AnalyticsResponse analytics(@AuthenticationPrincipal final UserId userId,
+                                     @Argument @Nullable final Instant since) {
     return AnalyticsResponse.from(useCase.getAnalytics(userId, since));
   }
 }

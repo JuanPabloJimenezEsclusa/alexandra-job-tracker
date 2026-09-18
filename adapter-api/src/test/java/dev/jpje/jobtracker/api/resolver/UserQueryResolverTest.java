@@ -1,6 +1,7 @@
 package dev.jpje.jobtracker.api.resolver;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.instancio.Select.field;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
@@ -11,6 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.api.dto.UserResponse;
+import dev.jpje.jobtracker.domain.exception.ForbiddenException;
 import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
@@ -52,14 +54,25 @@ class UserQueryResolverTest {
   }
 
   @Test
-  void shouldReturnNullWhenNoUser() {
+  void shouldThrowWhenNoUser() {
     final var userId = new UserId(UUID.randomUUID());
 
     when(authUseCase.getCurrentUser(userId)).thenReturn(Optional.empty());
 
-    assertThat(resolver.me(userId)).as("me should return null when no user is logged in").isNull();
+    assertThatThrownBy(() -> resolver.me(userId))
+      .as("me should throw when user is not found")
+      .isInstanceOf(ForbiddenException.class)
+      .hasMessage("Authentication required");
 
     verify(authUseCase, description("current user should be fetched once")).getCurrentUser(userId);
     verifyNoMoreInteractions(authUseCase);
+  }
+
+  @Test
+  void shouldThrowWithoutAuthentication() {
+    assertThatThrownBy(() -> resolver.me(null))
+      .as("me should throw without a user context")
+      .isInstanceOf(ForbiddenException.class)
+      .hasMessage("Authentication required");
   }
 }

@@ -79,8 +79,6 @@
     <spring-ai-agent-utils.version>0.12.0</spring-ai-agent-utils.version>
     <spring-cloud-aws.version>4.1.1</spring-cloud-aws.version>
     <archunit.version>1.5.0</archunit.version>
-    <jjwt.version>0.13.0</jjwt.version>
-    <jbcrypt.version>0.4</jbcrypt.version>
     <spring-shell.version>4.0.3</spring-shell.version>
     <graphql-java-extended-scalars.version>24.0</graphql-java-extended-scalars.version>
     <opentelemetry.version>1.64.0</opentelemetry.version>
@@ -160,30 +158,9 @@
         <version>${spring-shell.version}</version>
       </dependency>
       <dependency>
-        <groupId>io.jsonwebtoken</groupId>
-        <artifactId>jjwt-api</artifactId>
-        <version>${jjwt.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.jsonwebtoken</groupId>
-        <artifactId>jjwt-impl</artifactId>
-        <version>${jjwt.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>io.jsonwebtoken</groupId>
-        <artifactId>jjwt-jackson</artifactId>
-        <version>${jjwt.version}</version>
-        <scope>runtime</scope>
-      </dependency>
-      <dependency>
         <groupId>net.thisptr</groupId>
         <artifactId>jackson-jq</artifactId>
         <version>${jackson-jq.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.mindrot</groupId>
-        <artifactId>jbcrypt</artifactId>
-        <version>${jbcrypt.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

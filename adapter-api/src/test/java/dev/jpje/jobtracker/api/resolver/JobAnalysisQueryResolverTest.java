@@ -80,7 +80,8 @@ class JobAnalysisQueryResolverTest {
     assertThat(result)
       .as("owned analysis should be resolved")
       .isEqualTo(JobAnalysisResponse.from(analysis));
-    verify(useCase, description("analysis lookup should be scoped to the caller")).findByIdForUser(userId, analysis.id());
+    verify(useCase, description("analysis lookup should be scoped to the caller"))
+      .findByIdForUser(userId, analysis.id());
     verifyNoMoreInteractions(useCase);
   }
 
@@ -96,19 +97,8 @@ class JobAnalysisQueryResolverTest {
       .as("an analysis that is missing or not owned should be indistinguishable")
       .isInstanceOf(ResourceNotFoundException.class)
       .hasMessage("Analysis not found");
-    verify(useCase, description("inaccessible analysis lookup should surface not found")).findByIdForUser(userId, id);
-    verifyNoMoreInteractions(useCase);
-  }
-
-  @Test
-  void shouldRejectAnalysisWithoutAuthentication() {
-    // Given
-    final var id = UUID.randomUUID();
-
-    // When, then
-    assertThatThrownBy(() -> resolver.analysis(null, id))
-      .isInstanceOf(NullPointerException.class)
-      .hasMessage("Authentication required");
+    verify(useCase, description("inaccessible analysis lookup should surface not found"))
+      .findByIdForUser(userId, id);
     verifyNoMoreInteractions(useCase);
   }
 }

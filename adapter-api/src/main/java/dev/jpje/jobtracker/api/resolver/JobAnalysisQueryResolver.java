@@ -1,17 +1,16 @@
 package dev.jpje.jobtracker.api.resolver;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.port.inbound.ManageJobAnalysisPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
-import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -23,17 +22,17 @@ public class JobAnalysisQueryResolver {
   }
 
   @QueryMapping
-  public List<JobAnalysisResponse> analyses(@ContextValue(required = false) @Nullable final UserId userId) {
-    Objects.requireNonNull(userId, "Authentication required");
+  @PreAuthorize("@authz.requireUser(authentication)")
+  public List<JobAnalysisResponse> analyses(@AuthenticationPrincipal final UserId userId) {
     return useCase.findByUserId(userId).stream()
       .map(JobAnalysisResponse::from)
       .toList();
   }
 
   @QueryMapping
-  public JobAnalysisResponse analysis(@ContextValue(required = false) @Nullable final UserId userId,
+  @PreAuthorize("@authz.requireUser(authentication)")
+  public JobAnalysisResponse analysis(@AuthenticationPrincipal final UserId userId,
                                       @Argument final UUID id) {
-    Objects.requireNonNull(userId, "Authentication required");
     return useCase.findByIdForUser(userId, id)
       .map(JobAnalysisResponse::from)
       .orElseThrow(() -> new ResourceNotFoundException("Analysis not found"));

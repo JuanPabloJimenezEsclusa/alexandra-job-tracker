@@ -8,6 +8,7 @@ import dev.jpje.jobtracker.domain.event.UserRegistered;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
 import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
+import dev.jpje.jobtracker.domain.port.outbound.AuthenticateUserPort;
 import dev.jpje.jobtracker.domain.port.outbound.LoadUserPort;
 import dev.jpje.jobtracker.domain.port.outbound.PasswordEncoderPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
@@ -22,6 +23,7 @@ public class AuthenticationUseCase implements AuthenticationPort {
   private final LoadUserPort loadUserPort;
   private final TokenGeneratorPort tokenGenerator;
   private final PasswordEncoderPort passwordEncoder;
+  private final AuthenticateUserPort authenticateUserPort;
   private final Clock clock;
   private final EventPublisher eventPublisher;
 
@@ -29,12 +31,14 @@ public class AuthenticationUseCase implements AuthenticationPort {
                                final LoadUserPort loadUserPort,
                                final TokenGeneratorPort tokenGenerator,
                                final PasswordEncoderPort passwordEncoder,
+                               final AuthenticateUserPort authenticateUserPort,
                                final Clock clock,
                                final EventPublisher eventPublisher) {
     this.saveUserPort = saveUserPort;
     this.loadUserPort = loadUserPort;
     this.tokenGenerator = tokenGenerator;
     this.passwordEncoder = passwordEncoder;
+    this.authenticateUserPort = authenticateUserPort;
     this.clock = clock;
     this.eventPublisher = eventPublisher;
   }
@@ -52,11 +56,7 @@ public class AuthenticationUseCase implements AuthenticationPort {
 
   @Override
   public AuthPayload login(final Username username, final String password) {
-    final var user = loadUserPort.findByUsername(username.value())
-      .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
-    if (!passwordEncoder.matches(password, user.passwordHash())) {
-      throw new IllegalArgumentException("Invalid credentials");
-    }
+    final var user = authenticateUserPort.authenticate(username.value(), password);
     return new AuthPayload(tokenGenerator.generateToken(user.id(), user.role()), user);
   }
 

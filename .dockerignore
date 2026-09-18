@@ -5,6 +5,7 @@
 .idea
 .vscode
 .opencode
+.mimocode
 .tmp
 *.iml
 **/target
