@@ -13,7 +13,6 @@ import java.util.UUID;
 
 import dev.jpje.jobtracker.api.dto.JobAnalysisResponse;
 import dev.jpje.jobtracker.api.dto.JobPostingResponse;
-import dev.jpje.jobtracker.domain.exception.ForbiddenException;
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
 import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.port.inbound.AnalyzeJobPostingPort;
@@ -25,7 +24,6 @@ import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.Url;
 import dev.jpje.jobtracker.domain.vo.UserId;
-import dev.jpje.jobtracker.domain.vo.UserRole;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -99,37 +97,13 @@ class JobPostingMutationResolverTest {
   }
 
   @Test
-  void shouldDeleteAnalysisAsAdmin() {
+  void shouldDeleteAnalysis() {
     final var id = UUID.randomUUID();
-    final var userId = new UserId(UUID.randomUUID());
 
-    assertThat(resolver.deleteAnalysis(userId, UserRole.ADMIN, id)).as("deletion should succeed").isTrue();
+    assertThat(resolver.deleteAnalysis(id)).as("deletion should succeed").isTrue();
 
     verify(manageAnalysisUseCase, description("analysis deletion should be delegated")).delete(id);
     verifyNoInteractions(submitUseCase, analyzeUseCase);
-  }
-
-  @Test
-  void shouldRejectDeleteAnalysisWithoutAuth() {
-    final var id = UUID.randomUUID();
-
-    assertThatThrownBy(() -> resolver.deleteAnalysis(null, UserRole.ADMIN, id))
-      .as("delete without auth should fail")
-      .isInstanceOf(NullPointerException.class)
-      .hasMessage("Authentication required");
-    verifyNoInteractions(submitUseCase, analyzeUseCase, manageAnalysisUseCase);
-  }
-
-  @Test
-  void shouldRejectDeleteAnalysisForNonAdmin() {
-    final var id = UUID.randomUUID();
-    final var userId = new UserId(UUID.randomUUID());
-
-    assertThatThrownBy(() -> resolver.deleteAnalysis(userId, UserRole.USER, id))
-      .as("delete as non-admin should fail")
-      .isInstanceOf(ForbiddenException.class)
-      .hasMessage("Admin access required");
-    verifyNoInteractions(submitUseCase, analyzeUseCase, manageAnalysisUseCase);
   }
 
   @Test
@@ -143,7 +117,8 @@ class JobPostingMutationResolverTest {
       .set(field(JobPosting::company), CompanyName.of("company"))
       .set(field(JobPosting::description), "desc")
       .create();
-    final var input = new JobPostingMutationResolver.JobPostingInput("https://example.com/job", "title", "company", "desc", Source.LINKEDIN);
+    final var input = new JobPostingMutationResolver.JobPostingInput(
+      "https://example.com/job", "title", "company", "desc", Source.LINKEDIN);
 
     when(submitUseCase.submit(userId, Url.of("https://example.com/job"), JobTitle.of("title"),
       CompanyName.of("company"), "desc", Source.LINKEDIN)).thenReturn(posted);
@@ -154,7 +129,8 @@ class JobPostingMutationResolverTest {
       .extracting(JobPostingResponse::source, JobPostingResponse::title, JobPostingResponse::company)
       .containsExactly(Source.LINKEDIN, "title", "company");
 
-    verify(submitUseCase, description("posting should be submitted once")).submit(userId, Url.of("https://example.com/job"), JobTitle.of("title"),
+    verify(submitUseCase, description("posting should be submitted once")).submit(userId,
+      Url.of("https://example.com/job"), JobTitle.of("title"),
       CompanyName.of("company"), "desc", Source.LINKEDIN);
     verifyNoMoreInteractions(submitUseCase);
     verifyNoInteractions(analyzeUseCase, manageAnalysisUseCase);

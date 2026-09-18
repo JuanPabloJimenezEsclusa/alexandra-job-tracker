@@ -1,5 +1,5 @@
 /**
- * Auth adapters implementing token generation and password hashing ports.
+ * Auth adapters implementing the token generation, password hashing, and user authentication ports.
  */
 @NullMarked
 package dev.jpje.jobtracker.auth.adapter;

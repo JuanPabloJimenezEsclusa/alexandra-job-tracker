@@ -4,34 +4,38 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
-import java.util.Date;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.api.config.IntegrationTestConfig;
 import dev.jpje.jobtracker.server.JobTrackerServerApplication;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import tools.jackson.databind.JsonNode;
 
 @SpringBootTest(
   classes = JobTrackerServerApplication.class,
   webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Import(IntegrationTestConfig.class)
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class AuthIntegrationTest extends GraphQlIntegrationTestBase {
 
-  private static final String TEST_SECRET = "super-secret-signing-key-for-tests";
   private static final String AUTHENTICATION_REQUIRED = "Authentication required";
+
+  @Autowired
+  private JwtEncoder jwtEncoder;
 
   @Test
   void shouldRegister() {
@@ -137,7 +141,7 @@ class AuthIntegrationTest extends GraphQlIntegrationTestBase {
     assertThat(logout.findValue("logout").asBoolean()).as("logout result").isTrue();
   }
 
-  private static Stream<Arguments> invalidTokenScenarios() {
+  private Stream<Arguments> invalidTokenScenarios() {
     return Stream.of(
       arguments(named("expired token", expiredToken())),
       arguments(named("malformed token", "not-a-jwt"))
@@ -161,18 +165,12 @@ class AuthIntegrationTest extends GraphQlIntegrationTestBase {
       .isEqualTo(AUTHENTICATION_REQUIRED);
   }
 
-  private static String expiredToken() {
-    try {
-      final var key = Keys.hmacShaKeyFor(
-        MessageDigest.getInstance("SHA-512").digest(TEST_SECRET.getBytes(StandardCharsets.UTF_8)));
-      return Jwts.builder()
-        .subject(UUID.randomUUID().toString())
-        .claim("role", "USER")
-        .expiration(Date.from(Instant.EPOCH))
-        .signWith(key)
-        .compact();
-    } catch (final NoSuchAlgorithmException e) {
-      throw new IllegalStateException(e);
-    }
+  private String expiredToken() {
+    return jwtEncoder.encode(JwtEncoderParameters.from(
+      JwsHeader.with(MacAlgorithm.HS512).build(), JwtClaimsSet.builder()
+      .subject(UUID.randomUUID().toString())
+      .claim("role", "USER")
+      .expiresAt(Instant.EPOCH)
+      .build())).getTokenValue();
   }
 }

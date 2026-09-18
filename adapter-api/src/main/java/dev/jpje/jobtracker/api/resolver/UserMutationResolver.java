@@ -1,17 +1,12 @@
 package dev.jpje.jobtracker.api.resolver;
 
-import java.util.Objects;
-
 import dev.jpje.jobtracker.api.dto.AuthPayloadResponse;
-import dev.jpje.jobtracker.api.dto.Authorization;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
-import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.domain.vo.UserRole;
 import dev.jpje.jobtracker.domain.vo.Username;
-import org.jspecify.annotations.Nullable;
 import org.springframework.graphql.data.method.annotation.Argument;
-import org.springframework.graphql.data.method.annotation.ContextValue;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -23,13 +18,10 @@ public class UserMutationResolver {
   }
 
   @MutationMapping
-  public AuthPayloadResponse register(@ContextValue(required = false) @Nullable final UserId userId,
-                                      @ContextValue(required = false) @Nullable final UserRole userRole,
-                                      @Argument final String username,
+  @PreAuthorize("@authz.requireAdmin(authentication)")
+  public AuthPayloadResponse register(@Argument final String username,
                                       @Argument final String password,
                                       @Argument final UserRole role) {
-    Objects.requireNonNull(userId, "Authentication required");
-    Authorization.requireAdmin(userRole);
     return AuthPayloadResponse.from(authUseCase.register(Username.of(username), password, role));
   }
 

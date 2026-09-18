@@ -78,12 +78,13 @@ class HexagonalArchitectureTest {
     .that().resideInAPackage(ADAPTER_API)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
       concat(DOMAIN, ADAPTER_API,
-        "org.springframework.(stereotype|context|graphql|http|web)..",
+        "jakarta.servlet..",
+        "org.springframework.(stereotype|context|beans|graphql|http|web|security)..",
         "graphql..",
         "org.slf4j..",
         "reactor.core.."))
     .as("Adapter API module dependencies")
-    .because("GraphQL adapter translates HTTP to use case calls");
+    .because("GraphQL adapter translates HTTP to use case calls and enforces HTTP security");
 
   @ArchTest
   static final ArchRule ADAPTER_PERSISTENCE_DEPENDENCIES = classes()
@@ -102,13 +103,11 @@ class HexagonalArchitectureTest {
     .that().resideInAPackage(ADAPTER_AUTH)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
       concat(DOMAIN, ADAPTER_AUTH,
-        "io.jsonwebtoken..",
-        "jakarta.servlet..",
+        "com.nimbusds..",
         "javax.crypto..",
-        "org.mindrot.jbcrypt..",
-        "org.springframework.(aot|stereotype|context|beans|boot).."))
+        "org.springframework.(aot|stereotype|context|beans|boot|security).."))
     .as("Auth module dependencies")
-    .because("auth implements JWT token generation and GraphQL auth interceptor");
+    .because("auth implements JWT token generation, password hashing, and user authentication");
 
   @ArchTest
   static final ArchRule ADAPTER_AI_DEPENDENCIES = classes()

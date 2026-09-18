@@ -57,9 +57,15 @@ class UserQueryResolverTest {
 
     when(authUseCase.getCurrentUser(userId)).thenReturn(Optional.empty());
 
-    assertThat(resolver.me(userId)).as("me should return null when no user is logged in").isNull();
+    assertThat(resolver.me(userId))
+      .as("me should return null when no user is logged in").isNull();
 
     verify(authUseCase, description("current user should be fetched once")).getCurrentUser(userId);
     verifyNoMoreInteractions(authUseCase);
+  }
+
+  @Test
+  void shouldReturnNullWithoutAuthentication() {
+    assertThat(resolver.me(null)).as("me should return null without a user context").isNull();
   }
 }

@@ -74,10 +74,10 @@ for server-side operations and a Spring Shell CLI for terminal workflows, and it
 |----------------------|-----------|------------------------------------------------------------------|
 | `domain`             | Core      | Pure Java: domain models, value objects, ports, domain services |
 | `application`        | Core      | Use cases orchestrating domain logic through inbound ports       |
-| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs: Spring for GraphQL        |
+| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs, HTTP security: Spring for GraphQL + Spring Security |
 | `adapter-cli`        | Inbound   | Spring Shell commands, HTTP GraphQL client, session management   |
 | `adapter-persistence`| Outbound  | JPA entities, repositories, mappers, Flyway migrations           |
-| `adapter-auth`       | Outbound  | JWT provider, GraphQL auth interceptor, bcrypt password hashing  |
+| `adapter-auth`       | Outbound  | Spring Security auth primitives: Nimbus JWT, bcrypt, authentication manager |
 | `adapter-ai`         | Outbound  | Job analysis via Spring AI + skill-based prompts                 |
 | `adapter-cache`      | Outbound  | Caffeine cache with hexagonal `CachePort` decorators             |
 | `adapter-events`     | Both      | SQS/LWA receiver, Spring event listeners, Spring/SNS publishers  |
@@ -127,6 +127,13 @@ flowchart LR
   that communicates with the server exclusively over HTTP.
 - `adapter-events`: inbound SQS/LWA receiver and Spring event listeners, plus outbound
   Spring/SNS event publishers. Profile-selected (`aws` → SNS, otherwise Spring).
+- `adapter-auth`: driven Spring Security primitives — Nimbus JWT encoding/decoding
+  (HS512 over a SHA-512-derived key), bcrypt password hashing, a `UserDetailsService`
+  over the user load port, and an authentication manager behind an outbound port.
+- `adapter-api`: also hosts the inbound HTTP security — the stateless security filter
+  chain, the Bearer-token authentication filter, CORS, and method security. The caller's
+  identity is resolved once per request; protected operations declare their authorization
+  requirement.
 - `bootstrap-server`: composition root. Wires use cases, adapters, and domain services.
   Includes OpenTelemetry tracing via `TracingFilter`. The composition-root role is enforced
   by ArchUnit (core/adapters never depend on bootstrap; non-configuration bootstrap classes
@@ -172,7 +179,7 @@ flowchart LR
     subgraph outbound [Outbound Adapters]
         JPA["JPA Adapter"]
         AI["AI Adapter"]
-        JWT["JWT Provider"]
+        JWT["Spring Security"]
     end
 
     subgraph storage [Infrastructure]
@@ -244,7 +251,8 @@ java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost
 ## API Reference
 
 All operations are exposed via `POST /api/graphql`. Authentication uses JWT tokens
-passed in the `Authorization: Bearer <token>` header.
+passed in the `Authorization: Bearer <token>` header and is enforced centrally by
+Spring Security; protected operations declare their authorization requirement.
 
 | Operation                                        | Description                                   |
 |--------------------------------------------------|-----------------------------------------------|

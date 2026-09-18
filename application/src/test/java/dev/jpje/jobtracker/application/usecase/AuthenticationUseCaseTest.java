@@ -17,6 +17,7 @@ import dev.jpje.jobtracker.domain.event.EventPublisher;
 import dev.jpje.jobtracker.domain.event.UserRegistered;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
 import dev.jpje.jobtracker.domain.model.User;
+import dev.jpje.jobtracker.domain.port.outbound.AuthenticateUserPort;
 import dev.jpje.jobtracker.domain.port.outbound.LoadUserPort;
 import dev.jpje.jobtracker.domain.port.outbound.PasswordEncoderPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
@@ -48,6 +49,9 @@ class AuthenticationUseCaseTest {
 
   @Mock
   private PasswordEncoderPort passwordEncoderPort;
+
+  @Mock
+  private AuthenticateUserPort authenticateUserPort;
 
   @Mock
   private Clock clock;
@@ -102,8 +106,7 @@ class AuthenticationUseCaseTest {
   void shouldLogin() {
     // Given
     final var matchingUser = userWithUsername("alice");
-    when(loadUserPort.findByUsername("alice")).thenReturn(Optional.of(matchingUser));
-    when(passwordEncoderPort.matches("correct-password", matchingUser.passwordHash())).thenReturn(true);
+    when(authenticateUserPort.authenticate("alice", "correct-password")).thenReturn(matchingUser);
     when(tokenGeneratorPort.generateToken(any(UserId.class), any(UserRole.class))).thenReturn("jwt-token");
 
     // When
@@ -111,20 +114,20 @@ class AuthenticationUseCaseTest {
 
     // Then
     assertThat(payload.user().username().value()).isEqualTo("alice");
-    verify(passwordEncoderPort).matches("correct-password", matchingUser.passwordHash());
-    verifyNoMoreInteractions(passwordEncoderPort, tokenGeneratorPort);
+    assertThat(payload.token()).isEqualTo("jwt-token");
+    verify(authenticateUserPort).authenticate("alice", "correct-password");
+    verify(tokenGeneratorPort).generateToken(any(UserId.class), any(UserRole.class));
+    verifyNoMoreInteractions(authenticateUserPort, tokenGeneratorPort);
   }
 
   @Test
   void shouldRejectLoginWithWrongPassword() {
     // Given
-    final var matchingUser = userWithUsername("alice");
-    final var username = Username.of("alice");
-    when(loadUserPort.findByUsername("alice")).thenReturn(Optional.of(matchingUser));
-    when(passwordEncoderPort.matches("wrong-password", matchingUser.passwordHash())).thenReturn(false);
+    when(authenticateUserPort.authenticate("alice", "wrong-password"))
+      .thenThrow(new IllegalArgumentException("Invalid credentials"));
 
     // When, then
-    assertThatThrownBy(() -> useCase.login(username, "wrong-password"))
+    assertThatThrownBy(() -> useCase.login(Username.of("alice"), "wrong-password"))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Invalid credentials");
     verifyNoMoreInteractions(tokenGeneratorPort);
@@ -133,11 +136,11 @@ class AuthenticationUseCaseTest {
   @Test
   void shouldRejectLoginForUnknownUser() {
     // Given
-    final var username = Username.of("nonexistent");
-    when(loadUserPort.findByUsername("nonexistent")).thenReturn(Optional.empty());
+    when(authenticateUserPort.authenticate("nonexistent", "pass"))
+      .thenThrow(new IllegalArgumentException("Invalid credentials"));
 
     // When, then
-    assertThatThrownBy(() -> useCase.login(username, "pass"))
+    assertThatThrownBy(() -> useCase.login(Username.of("nonexistent"), "pass"))
       .isInstanceOf(IllegalArgumentException.class)
       .hasMessage("Invalid credentials");
     verifyNoMoreInteractions(tokenGeneratorPort);
