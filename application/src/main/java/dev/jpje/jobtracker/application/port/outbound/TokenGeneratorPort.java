@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.domain.port.outbound;
+package dev.jpje.jobtracker.application.port.outbound;
 
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.domain.vo.UserRole;

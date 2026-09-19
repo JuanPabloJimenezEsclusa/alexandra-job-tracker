@@ -2,7 +2,7 @@ package dev.jpje.jobtracker.application.service;
 
 import java.time.Clock;
 
-import dev.jpje.jobtracker.domain.event.EventPublisher;
+import dev.jpje.jobtracker.application.port.outbound.EventPublisher;
 import dev.jpje.jobtracker.domain.event.JobPostingCreated;
 import dev.jpje.jobtracker.domain.model.JobPosting;
 

@@ -2,7 +2,7 @@ package dev.jpje.jobtracker.auth.adapter;
 
 import java.util.Objects;
 
-import dev.jpje.jobtracker.domain.port.outbound.PasswordEncoderPort;
+import dev.jpje.jobtracker.application.port.outbound.PasswordEncoderPort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 

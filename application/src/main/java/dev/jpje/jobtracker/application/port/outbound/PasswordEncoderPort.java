@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.domain.port.outbound;
+package dev.jpje.jobtracker.application.port.outbound;
 
 public interface PasswordEncoderPort {
   String encode(String rawPassword);

@@ -1,7 +1,7 @@
 package dev.jpje.jobtracker.events.publisher;
 
+import dev.jpje.jobtracker.application.port.outbound.EventPublisher;
 import dev.jpje.jobtracker.domain.event.DomainEvent;
-import dev.jpje.jobtracker.domain.event.EventPublisher;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
