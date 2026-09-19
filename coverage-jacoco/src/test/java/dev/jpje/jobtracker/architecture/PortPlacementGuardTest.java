@@ -85,6 +85,13 @@ class PortPlacementGuardTest {
         "UserRegistered");
   }
 
+  @Test
+  void shouldPinThePasswordEncoderPortRoleSurface() throws ClassNotFoundException {
+    assertThat(Class.forName("dev.jpje.jobtracker.application.port.outbound.PasswordEncoderPort").getDeclaredMethods())
+      .extracting(Method::getName)
+      .containsExactly("encode");
+  }
+
   private static JavaClasses importPackage(final String packageName) {
     return new ClassFileImporter()
       .withImportOption(ImportOption.Predefined.DO_NOT_INCLUDE_PACKAGE_INFOS)

@@ -19,7 +19,6 @@ public class SpringPasswordEncoder implements PasswordEncoderPort {
     return Objects.requireNonNull(delegate.encode(rawPassword));
   }
 
-  @Override
   public boolean matches(final String rawPassword, final String encodedPassword) {
     return delegate.matches(rawPassword, encodedPassword);
   }
