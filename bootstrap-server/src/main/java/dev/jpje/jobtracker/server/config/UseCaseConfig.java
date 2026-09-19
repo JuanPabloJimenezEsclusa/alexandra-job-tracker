@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.application.service.JobPostingService;
 import dev.jpje.jobtracker.application.usecase.AnalyzeJobPostingUseCase;
 import dev.jpje.jobtracker.application.usecase.AuthenticationUseCase;
 import dev.jpje.jobtracker.application.usecase.GetAnalyticsUseCase;
@@ -36,7 +37,6 @@ import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
 import dev.jpje.jobtracker.domain.port.outbound.TokenGeneratorPort;
 import dev.jpje.jobtracker.domain.service.AnalyticsCalculator;
-import dev.jpje.jobtracker.domain.service.JobPostingService;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import dev.jpje.jobtracker.domain.vo.Notes;
 import dev.jpje.jobtracker.domain.vo.UserId;

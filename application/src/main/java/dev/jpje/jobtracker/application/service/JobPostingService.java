@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.domain.service;
+package dev.jpje.jobtracker.application.service;
 
 import java.time.Clock;
 

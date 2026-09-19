@@ -19,4 +19,15 @@ class PortPlacementGuardTest {
       .extracting(Method::getName)
       .containsExactlyInAnyOrder("get", "put", "evict", "clear");
   }
+
+  @Test
+  void shouldMoveJobPostingServiceIntoTheApplicationServicePackage() throws ClassNotFoundException {
+    assertThatThrownBy(() -> Class.forName("dev.jpje.jobtracker.domain.service.JobPostingService"))
+      .isInstanceOf(ClassNotFoundException.class);
+    final var service = Class.forName("dev.jpje.jobtracker.application.service.JobPostingService");
+    assertThat(service.isInterface()).as("relocated job posting service is a class").isFalse();
+    assertThat(service.getDeclaredMethods())
+      .extracting(Method::getName)
+      .contains("submit");
+  }
 }
