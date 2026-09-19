@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import dev.jpje.jobtracker.cache.port.CachePort;
 import dev.jpje.jobtracker.domain.model.JobApplication;
-import dev.jpje.jobtracker.domain.port.outbound.CachePort;
 import dev.jpje.jobtracker.domain.port.outbound.LoadJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
