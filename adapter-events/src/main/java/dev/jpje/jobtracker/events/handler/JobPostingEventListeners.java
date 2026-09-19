@@ -20,14 +20,14 @@ public class JobPostingEventListeners {
   }
 
   @Async
-  @TransactionalEventListener
+  @TransactionalEventListener(fallbackExecution = true)
   public void createTracking(final JobPostingCreated event) {
     log.debug("createTracking for posting {}", event);
     handlerFactory.get(JobPostingEventType.TRACKING).handle(event);
   }
 
   @Async
-  @TransactionalEventListener
+  @TransactionalEventListener(fallbackExecution = true)
   public void analyzePosting(final JobPostingCreated event) {
     log.debug("analyzePosting for posting {}", event);
     handlerFactory.get(JobPostingEventType.ANALYSIS).handle(event);
