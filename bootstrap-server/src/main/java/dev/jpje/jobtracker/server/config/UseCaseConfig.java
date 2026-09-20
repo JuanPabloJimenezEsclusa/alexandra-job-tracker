@@ -35,6 +35,7 @@ import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
 import dev.jpje.jobtracker.domain.service.AnalyticsCalculator;
 import dev.jpje.jobtracker.server.usecase.TransactionalAuthenticationPort;
+import dev.jpje.jobtracker.server.usecase.TransactionalSubmitJobPostingPort;
 import dev.jpje.jobtracker.server.usecase.TransactionalTrackJobApplicationPort;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
@@ -63,15 +64,8 @@ public class UseCaseConfig {
       final JobPostingService jobPostingService,
       final Timer submitDurationTimer,
       final TransactionTemplate transactionTemplate) {
-    final var impl = new SubmitJobPostingUseCase(savePostingPort, jobPostingService, clock);
-    return (userId, url, title, company, description, source) -> {
-      final var sample = Timer.start();
-      try {
-        return transactionTemplate.execute(_ -> impl.submit(userId, url, title, company, description, source));
-      } finally {
-        sample.stop(submitDurationTimer);
-      }
-    };
+    final var delegate = new SubmitJobPostingUseCase(savePostingPort, jobPostingService, clock);
+    return new TransactionalSubmitJobPostingPort(delegate, transactionTemplate, submitDurationTimer);
   }
 
   @Bean
