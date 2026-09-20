@@ -2,7 +2,7 @@ package dev.jpje.jobtracker.auth.adapter;
 
 import java.time.Clock;
 
-import dev.jpje.jobtracker.domain.port.outbound.TokenGeneratorPort;
+import dev.jpje.jobtracker.application.port.outbound.TokenGeneratorPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.domain.vo.UserRole;
 import org.springframework.beans.factory.annotation.Value;

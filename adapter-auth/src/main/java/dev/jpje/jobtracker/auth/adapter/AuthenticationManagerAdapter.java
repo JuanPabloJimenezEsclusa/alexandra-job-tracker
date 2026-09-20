@@ -2,9 +2,9 @@ package dev.jpje.jobtracker.auth.adapter;
 
 import java.util.Objects;
 
+import dev.jpje.jobtracker.application.port.outbound.AuthenticateUserPort;
 import dev.jpje.jobtracker.auth.userdetails.AuthUserDetails;
 import dev.jpje.jobtracker.domain.model.User;
-import dev.jpje.jobtracker.domain.port.outbound.AuthenticateUserPort;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;

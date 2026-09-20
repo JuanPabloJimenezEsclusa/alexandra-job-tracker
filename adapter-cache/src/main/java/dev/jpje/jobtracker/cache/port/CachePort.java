@@ -1,4 +1,4 @@
-package dev.jpje.jobtracker.domain.port.outbound;
+package dev.jpje.jobtracker.cache.port;
 
 import java.util.Optional;
 

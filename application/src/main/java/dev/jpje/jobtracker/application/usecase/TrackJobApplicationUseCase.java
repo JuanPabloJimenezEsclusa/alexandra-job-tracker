@@ -4,7 +4,7 @@ import java.time.Clock;
 import java.util.List;
 import java.util.UUID;
 
-import dev.jpje.jobtracker.domain.event.EventPublisher;
+import dev.jpje.jobtracker.application.port.outbound.EventPublisher;
 import dev.jpje.jobtracker.domain.event.JobApplicationStatusChanged;
 import dev.jpje.jobtracker.domain.exception.ResourceNotFoundException;
 import dev.jpje.jobtracker.domain.model.JobApplication;

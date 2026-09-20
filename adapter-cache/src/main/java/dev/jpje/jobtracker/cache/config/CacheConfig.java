@@ -3,7 +3,7 @@ package dev.jpje.jobtracker.cache.config;
 import java.time.Duration;
 
 import dev.jpje.jobtracker.cache.adapter.CaffeineCacheAdapter;
-import dev.jpje.jobtracker.domain.port.outbound.CachePort;
+import dev.jpje.jobtracker.cache.port.CachePort;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCacheManager;

@@ -12,9 +12,9 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.stream.Stream;
 
+import dev.jpje.jobtracker.application.service.JobPostingService;
 import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
-import dev.jpje.jobtracker.domain.service.JobPostingService;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
 import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Source;

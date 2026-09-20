@@ -3,6 +3,8 @@ package dev.jpje.jobtracker.architecture;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
+import com.tngtech.archunit.base.DescribedPredicate;
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
@@ -28,6 +30,16 @@ class HexagonalArchitectureTest {
     "org.jspecify.."
   };
 
+  private static final DescribedPredicate<JavaClass> APPLICATION_INTERNALS = new DescribedPredicate<>(
+    "reside in the application module outside application.port") {
+    @Override
+    public boolean test(final JavaClass javaClass) {
+      final var name = javaClass.getName();
+      return name.startsWith("dev.jpje.jobtracker.application.")
+        && !name.startsWith("dev.jpje.jobtracker.application.port.");
+    }
+  };
+
   // --- Critical hexagonal boundary rules ---
 
   @ArchTest
@@ -36,6 +48,13 @@ class HexagonalArchitectureTest {
     .should().dependOnClassesThat().resideInAnyPackage("org.springframework..")
     .as("Domain must not depend on Spring")
     .because("domain layer is pure Java with zero framework imports");
+
+  @ArchTest
+  static final ArchRule APPLICATION_MUST_NOT_DEPEND_ON_SPRING = noClasses()
+    .that().resideInAPackage(APPLICATION)
+    .should().dependOnClassesThat().resideInAnyPackage("org.springframework..")
+    .as("Application must not depend on Spring")
+    .because("transaction boundaries live in the composition root, never in the framework-free application layer");
 
   @ArchTest
   static final ArchRule APPLICATION_MUST_NOT_DEPEND_ON_ADAPTERS = noClasses()
@@ -102,7 +121,7 @@ class HexagonalArchitectureTest {
   static final ArchRule ADAPTER_AUTH_DEPENDENCIES = classes()
     .that().resideInAPackage(ADAPTER_AUTH)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
-      concat(DOMAIN, ADAPTER_AUTH,
+      concat(DOMAIN, APPLICATION, ADAPTER_AUTH,
         "com.nimbusds..",
         "javax.crypto..",
         "org.springframework.(aot|stereotype|context|beans|boot|security).."))
@@ -134,7 +153,7 @@ class HexagonalArchitectureTest {
   static final ArchRule ADAPTER_EVENTS_DEPENDENCIES = classes()
     .that().resideInAPackage(ADAPTER_EVENTS)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
-      concat(DOMAIN, ADAPTER_EVENTS,
+      concat(DOMAIN, APPLICATION, ADAPTER_EVENTS,
         "io.awspring.cloud.sns..",
         "software.amazon.awssdk.services..",
         "org.springframework.(aot|stereotype|context|http|web|transaction|scheduling|beans|boot)..",
@@ -220,10 +239,18 @@ class HexagonalArchitectureTest {
     .because("use-case implementations are assembled only in the bootstrap composition root");
 
   @ArchTest
+  static final ArchRule ADAPTERS_MUST_NOT_DEPEND_ON_APPLICATION_INTERNALS = noClasses()
+    .that().resideInAnyPackage(ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
+      ADAPTER_CACHE, ADAPTER_CLI, ADAPTER_EVENTS)
+    .should().dependOnClassesThat(APPLICATION_INTERNALS)
+    .as("Adapters must reach the application core only through application.port")
+    .because("non-port application classes are internal details assembled by the composition root");
+
+  @ArchTest
   static final ArchRule BOOTSTRAP_NON_CONFIG_MUST_NOT_DEPEND_ON_OUTBOUND_PORTS = noClasses()
     .that().resideInAnyPackage(BOOTSTRAP_SERVER, BOOTSTRAP_CLI)
     .and().areNotAnnotatedWith(Configuration.class)
-    .should().dependOnClassesThat().resideInAPackage("dev.jpje.jobtracker.domain.port.outbound..")
+    .should().dependOnClassesThat().resideInAPackage("dev.jpje.jobtracker.application.port.outbound..")
     .as("Composition root only wires outbound ports from @Configuration classes")
     .because("business orchestration belongs in the application layer, not in bootstrap");
 

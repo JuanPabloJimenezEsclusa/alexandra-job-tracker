@@ -2,7 +2,7 @@ package dev.jpje.jobtracker.auth.adapter;
 
 import java.util.Objects;
 
-import dev.jpje.jobtracker.domain.port.outbound.PasswordEncoderPort;
+import dev.jpje.jobtracker.application.port.outbound.PasswordEncoderPort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -17,10 +17,5 @@ public class SpringPasswordEncoder implements PasswordEncoderPort {
   @Override
   public String encode(final String rawPassword) {
     return Objects.requireNonNull(delegate.encode(rawPassword));
-  }
-
-  @Override
-  public boolean matches(final String rawPassword, final String encodedPassword) {
-    return delegate.matches(rawPassword, encodedPassword);
   }
 }
