@@ -5,65 +5,109 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
-**fix(bootstrap): wrap tracking creation and leave external calls unwrapped**
+**ci: add dependabot automerge and queue CI workflows**
 
+ * Add dependabot-automerge.yml workflow that auto-approves and auto-merges
+ * Dependabot PRs for minor/patch updates when CI passes green. Major updates
+ * remain open for manual review.
+ * Change all CI workflows concurrency to queue (cancel-in-progress: false)
+ * so runs execute one at a time per group instead of cancelling previous runs.
 
-[d8db7938b211943](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/d8db7938b211943) juan.pablo.jimenez.esclusa *2026-09-20 16:47:13*
-
-**fix(bootstrap): wrap analysis deletion in a composition-root transaction**
-
-
-[bee2f1416a0b09d](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/bee2f1416a0b09d) juan.pablo.jimenez.esclusa *2026-09-20 16:06:15*
-
-**refactor(bootstrap): move submit transaction wrapping into a named decorator**
-
-
-[6352b3e5984f0cf](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/6352b3e5984f0cf) juan.pablo.jimenez.esclusa *2026-09-20 16:04:04*
-
-**fix(bootstrap): make the application-status write path atomic**
-
-
-[41b742586641917](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/41b742586641917) juan.pablo.jimenez.esclusa *2026-09-20 15:25:37*
+[cef83f06aa32b20](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/cef83f06aa32b20) juan.pablo.jimenez.esclusa *2026-09-20 18:37:52*
 
 **chore(docs): add codegraph in ignore files, update changelog**
 
 
-[d72e50d6b02c384](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/d72e50d6b02c384) juan.pablo.jimenez.esclusa *2026-09-20 14:47:55*
+[fc0e69f7c0581dd](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/fc0e69f7c0581dd) juan.pablo.jimenez.esclusa *2026-09-20 18:36:04*
 
-**fix(bootstrap): establish the registration transaction in the composition root**
+**refactor(architecture): relocate outbound ports out of the domain (#83)**
+
+ * refactor(coverage): tighten architecture contract for relocated outbound ports
+ * refactor(adapter): move the cache contract into adapter-cache
+ * refactor(application): move JobPostingService into application.service
+ * refactor(application): relocate technical outbound ports and event publisher
+ * refactor(application): drop the unused matches operation from the password encoder port
+ * fix(bootstrap): establish the registration transaction in the composition root
+ * fix(adapter): dispatch transactional events without an active transaction
+ * chore(docs): add codegraph in ignore files, update changelog
+ * refactor(bootstrap): move submit transaction wrapping into a named decorator
+ * fix(bootstrap): make the application-status write path atomic
+ * fix(bootstrap): wrap analysis deletion in a composition-root transaction
+ * fix(bootstrap): wrap tracking creation and leave external calls unwrapped
+ * refactor(adapter): remove the unused password encoder matches method
+
+[41dee2949b02d60](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/41dee2949b02d60) Juan Pablo Jimenez Esclusa *2026-09-20 18:27:16*
+
+**build(deps): bump the infrastructure-dependencies group (#81)**
+
+ * Bumps the infrastructure-dependencies group in /deploy/compose with 3 updates: adminer, otel/opentelemetry-collector-contrib and grafana/grafana.
+ * Updates &#x60;adminer&#x60; from 5.3.0 to 5.5.0
+ * Updates &#x60;otel/opentelemetry-collector-contrib&#x60; from 0.160.0 to 0.161.0
+ * Updates &#x60;grafana/grafana&#x60; from 13.2.1 to 13.2.2
+ * ---
+ * updated-dependencies:
+ * - dependency-name: adminer
+ * dependency-version: 5.5.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: otel/opentelemetry-collector-contrib
+ * dependency-version: 0.161.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: infrastructure-dependencies
+ * - dependency-name: grafana/grafana
+ * dependency-version: 13.2.2
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[abc24a5ea7e6ec4](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/abc24a5ea7e6ec4) dependabot[bot] *2026-09-20 14:51:55*
+
+**build(deps): update hashicorp/aws requirement from ~> 6.64.0 to ~> 6.65.0 (#80)**
+
+ * Updates the requirements on [hashicorp/aws](https://github.com/hashicorp/terraform-provider-aws) to permit the latest version.
+ * Updates &#x60;hashicorp/aws&#x60; to 6.65.0
+ * - [Release notes](https://github.com/hashicorp/terraform-provider-aws/releases)
+ * - [Changelog](https://github.com/hashicorp/terraform-provider-aws/blob/main/CHANGELOG.md)
+ * - [Commits](https://github.com/hashicorp/terraform-provider-aws/compare/v6.64.0...v6.65.0)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: hashicorp/aws
+ * dependency-version: 6.65.0
+ * dependency-type: direct:production
+ * dependency-group: infrastructure-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[d30c0f4dcfc2be3](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/d30c0f4dcfc2be3) dependabot[bot] *2026-09-20 14:50:56*
+
+**build(deps): bump docker/build-push-action (#82)**
+
+ * Bumps the github-actions-dependencies group with 1 update: [docker/build-push-action](https://github.com/docker/build-push-action).
+ * Updates &#x60;docker/build-push-action&#x60; from 7.3.0 to 7.4.0
+ * - [Release notes](https://github.com/docker/build-push-action/releases)
+ * - [Commits](https://github.com/docker/build-push-action/compare/53b7df96c91f9c12dcc8a07bcb9ccacbed38856a...c3c9e263c25d99ce0380d002d59b67737d91b0dc)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: docker/build-push-action
+ * dependency-version: 7.4.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: github-actions-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[7e1395dcb06ad04](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/7e1395dcb06ad04) dependabot[bot] *2026-09-20 14:50:20*
 
 
-[7c6f63ee65d9b4b](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/7c6f63ee65d9b4b) juan.pablo.jimenez.esclusa *2026-09-20 14:45:10*
-
-**fix(adapter): dispatch transactional events without an active transaction**
-
-
-[23b74ed42ace0dc](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/23b74ed42ace0dc) juan.pablo.jimenez.esclusa *2026-09-19 19:32:14*
-
-**refactor(application): drop the unused matches operation from the password encoder port**
-
-
-[2372ad2a83e1e8e](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/2372ad2a83e1e8e) juan.pablo.jimenez.esclusa *2026-09-19 19:13:38*
-
-**refactor(application): relocate technical outbound ports and event publisher**
-
-
-[0009a6b4f3f2235](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/0009a6b4f3f2235) juan.pablo.jimenez.esclusa *2026-09-19 19:11:27*
-
-**refactor(application): move JobPostingService into application.service**
-
-
-[a692dd34b8773fd](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/a692dd34b8773fd) juan.pablo.jimenez.esclusa *2026-09-19 19:04:27*
-
-**refactor(adapter): move the cache contract into adapter-cache**
-
-
-[45f8f97042a803e](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/45f8f97042a803e) juan.pablo.jimenez.esclusa *2026-09-19 18:53:17*
-
-**refactor(coverage): tighten architecture contract for relocated outbound ports**
-
-
-[e79d0b87455c1fb](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/e79d0b87455c1fb) juan.pablo.jimenez.esclusa *2026-09-19 18:50:36*
+## tracker
+### No issue
 
 **refactor(adapter): migrate authentication from jjwt to spring security (#79)**
 

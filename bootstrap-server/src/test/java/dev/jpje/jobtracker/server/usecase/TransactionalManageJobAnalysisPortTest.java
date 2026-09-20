@@ -1,6 +1,5 @@
 package dev.jpje.jobtracker.server.usecase;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
 import static org.junit.jupiter.api.Named.named;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
@@ -59,8 +58,8 @@ class TransactionalManageJobAnalysisPortTest {
         named("findByIdForUser", "findByIdForUser"),
         (Consumer<TransactionalManageJobAnalysisPort>) port -> port.findByIdForUser(USER_ID, ANALYSIS_ID),
         (Consumer<ManageJobAnalysisPort>) given -> {
-          final var record = analysis();
-          when(given.findByIdForUser(USER_ID, ANALYSIS_ID)).thenReturn(Optional.of(record));
+          final var analysisRecord = analysis();
+          when(given.findByIdForUser(USER_ID, ANALYSIS_ID)).thenReturn(Optional.of(analysisRecord));
         },
         (Consumer<ManageJobAnalysisPort>) given ->
           verify(given, description("findByIdForUser delegated to the use case"))
