@@ -131,15 +131,14 @@ class MdcLoggingInterceptorTest {
   }
 
   @Test
-  void shouldSetTraceId() {
-    // Given
+  void shouldPreservePreExistingTraceId() {
+    final var traceId = "4bf92f3577b34da6a3ce929d0e0e4736";
+    MDC.put("traceId", traceId);
     final var captured = new AtomicReference<@Nullable String>();
 
-    // When
     interceptor.intercept(mockRequest(new HttpHeaders(), "{ me }"), capturingChain(captured, "traceId")).block();
 
-    // Then
-    assertThat(captured.get()).isNotBlank();
+    assertThat(captured.get()).isEqualTo(traceId);
   }
 
   private WebGraphQlRequest mockRequest(final HttpHeaders headers, final String document) {

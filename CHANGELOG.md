@@ -5,7 +5,13 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
-**ci: add dependabot automerge and queue CI workflows**
+**fix(bootstrap): source MDC traceId from the OTel span instead of a random UUID**
+
+ * TracingFilter now publishes the current span&#x27;s trace id into the MDC before invoking the chain and removes it in finally, so a reused servlet thread cannot leak a stale value. MdcLoggingInterceptor no longer fabricates a traceId, preserving the value sourced from the OpenTelemetry context.
+
+[f725a56b4d28662](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/f725a56b4d28662) juan.pablo.jimenez.esclusa *2026-09-20 23:41:51*
+
+**chore(ci): add dependabot automerge and queue ci workflows (#89)**
 
  * Add dependabot-automerge.yml workflow that auto-approves and auto-merges
  * Dependabot PRs for minor/patch updates when CI passes green. Major updates
@@ -13,12 +19,7 @@ Changelog of alexandra-job-tracker.
  * Change all CI workflows concurrency to queue (cancel-in-progress: false)
  * so runs execute one at a time per group instead of cancelling previous runs.
 
-[cef83f06aa32b20](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/cef83f06aa32b20) juan.pablo.jimenez.esclusa *2026-09-20 18:37:52*
-
-**chore(docs): add codegraph in ignore files, update changelog**
-
-
-[fc0e69f7c0581dd](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/fc0e69f7c0581dd) juan.pablo.jimenez.esclusa *2026-09-20 18:36:04*
+[353bc6fcb2a5849](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/353bc6fcb2a5849) Juan Pablo Jimenez Esclusa *2026-09-20 22:21:36*
 
 **refactor(architecture): relocate outbound ports out of the domain (#83)**
 
