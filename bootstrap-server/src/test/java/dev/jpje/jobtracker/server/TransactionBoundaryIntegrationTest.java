@@ -2,6 +2,7 @@ package dev.jpje.jobtracker.server;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.instancio.Select.field;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,10 +12,25 @@ import dev.jpje.jobtracker.api.config.IntegrationTestConfig;
 import dev.jpje.jobtracker.application.port.outbound.EventPublisher;
 import dev.jpje.jobtracker.domain.event.DomainEvent;
 import dev.jpje.jobtracker.domain.event.UserRegistered;
+import dev.jpje.jobtracker.domain.model.JobApplication;
+import dev.jpje.jobtracker.domain.model.JobPosting;
+import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
+import dev.jpje.jobtracker.domain.port.inbound.TrackJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.LoadJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.outbound.LoadUserPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
+import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
+import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
+import dev.jpje.jobtracker.domain.vo.CompanyName;
+import dev.jpje.jobtracker.domain.vo.JobTitle;
+import dev.jpje.jobtracker.domain.vo.Source;
+import dev.jpje.jobtracker.domain.vo.Url;
+import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.domain.vo.UserRole;
 import dev.jpje.jobtracker.domain.vo.Username;
+import org.instancio.Instancio;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +68,21 @@ class TransactionBoundaryIntegrationTest {
 
   @Autowired
   private UserRegisteredRecorder recorder;
+
+  @Autowired
+  private TrackJobApplicationPort trackJobApplicationUseCase;
+
+  @Autowired
+  private SaveUserPort saveUserPort;
+
+  @Autowired
+  private SaveJobPostingPort saveJobPostingPort;
+
+  @Autowired
+  private SaveJobApplicationPort saveJobApplicationPort;
+
+  @Autowired
+  private LoadJobApplicationPort loadJobApplicationPort;
 
   @BeforeEach
   void reset() {
@@ -104,6 +135,47 @@ class TransactionBoundaryIntegrationTest {
       .hasMessage(PUBLICATION_FAILURE);
     assertThat(loadUserPort.findByUsername(username.value()))
       .as("failed registration rolled back").isEmpty();
+  }
+
+  @Test
+  void shouldRunApplicationStatusUpdateInOneTransaction() {
+    // Given
+    final var user = Instancio.of(User.class)
+      .set(field(User::id), UserId.generate())
+      .set(field(User::username), Username.of("tx-status-update-user"))
+      .set(field(User::passwordHash), "hash")
+      .set(field(User::role), UserRole.USER)
+      .create();
+    saveUserPort.save(user);
+    final var posting = Instancio.of(JobPosting.class)
+      .set(field(JobPosting::userId), user.id())
+      .set(field(JobPosting::source), Source.LINKEDIN)
+      .set(field(JobPosting::url), Url.of("https://example.com/tx-status-job"))
+      .set(field(JobPosting::title), JobTitle.of("Engineer"))
+      .set(field(JobPosting::company), CompanyName.of("Acme"))
+      .set(field(JobPosting::description), "Software engineer role")
+      .create();
+    saveJobPostingPort.save(posting);
+    final var application = Instancio.of(JobApplication.class)
+      .set(field(JobApplication::userId), user.id())
+      .set(field(JobApplication::jobPostingId), posting.id())
+      .set(field(JobApplication::status), ApplicationStatus.SAVED)
+      .set(field(JobApplication::version), null)
+      .create();
+    saveJobApplicationPort.save(application);
+
+    // When
+    trackJobApplicationUseCase.updateStatus(user.id(), application.id(), ApplicationStatus.APPLIED, null);
+
+    // Then
+    assertThat(eventPublisher.transactionActiveAtPublish())
+      .as("status update loads, saves and publishes inside a single transaction")
+      .containsExactly(true);
+    assertThat(loadJobApplicationPort.findById(application.id()))
+      .as("updated status persisted")
+      .get()
+      .extracting(JobApplication::status)
+      .isEqualTo(ApplicationStatus.APPLIED);
   }
 
   @TestConfiguration

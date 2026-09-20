@@ -1,8 +1,6 @@
 package dev.jpje.jobtracker.server.config;
 
 import java.time.Clock;
-import java.util.List;
-import java.util.UUID;
 
 import dev.jpje.jobtracker.application.port.outbound.AuthenticateUserPort;
 import dev.jpje.jobtracker.application.port.outbound.EventPublisher;
@@ -18,7 +16,6 @@ import dev.jpje.jobtracker.application.usecase.ProcessJobPostingCreatedUseCase;
 import dev.jpje.jobtracker.application.usecase.SubmitJobPostingUseCase;
 import dev.jpje.jobtracker.application.usecase.TrackJobApplicationUseCase;
 import dev.jpje.jobtracker.domain.event.JobPostingCreated;
-import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.port.inbound.AnalyzeJobPostingPort;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
 import dev.jpje.jobtracker.domain.port.inbound.GetAnalyticsPort;
@@ -37,13 +34,10 @@ import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
 import dev.jpje.jobtracker.domain.service.AnalyticsCalculator;
-import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
-import dev.jpje.jobtracker.domain.vo.Notes;
-import dev.jpje.jobtracker.domain.vo.UserId;
 import dev.jpje.jobtracker.server.usecase.TransactionalAuthenticationPort;
+import dev.jpje.jobtracker.server.usecase.TransactionalTrackJobApplicationPort;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
-import org.jspecify.annotations.Nullable;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -128,37 +122,10 @@ public class UseCaseConfig {
       final LoadJobApplicationPort loadPort,
       final LoadJobPostingPort loadPostingPort,
       final EventPublisher eventPublisher,
-      final Counter applicationCreatedCounter) {
-    final var impl = new TrackJobApplicationUseCase(savePort, loadPort, loadPostingPort, clock, eventPublisher);
-    return new TrackJobApplicationPort() {
-      @Override
-      public JobApplication create(final UserId userId,
-                                   final UUID jobPostingId,
-                                   @Nullable final Notes notes) {
-        final var result = impl.create(userId, jobPostingId, notes);
-        applicationCreatedCounter.increment();
-        return result;
-      }
-
-      @Override
-      public JobApplication updateStatus(final UserId userId,
-                                         final UUID applicationId,
-                                         final ApplicationStatus newStatus,
-                                         @Nullable final Notes notes) {
-        return impl.updateStatus(userId, applicationId, newStatus, notes);
-      }
-
-      @Override
-      public List<JobApplication> list(final UserId userId,
-                                       @Nullable final ApplicationStatus status) {
-        return impl.list(userId, status);
-      }
-
-      @Override
-      public void delete(final UserId userId, final UUID applicationId) {
-        impl.delete(userId, applicationId);
-      }
-    };
+      final Counter applicationCreatedCounter,
+      final TransactionTemplate transactionTemplate) {
+    final var delegate = new TrackJobApplicationUseCase(savePort, loadPort, loadPostingPort, clock, eventPublisher);
+    return new TransactionalTrackJobApplicationPort(delegate, transactionTemplate, applicationCreatedCounter);
   }
 
   @Bean
