@@ -18,8 +18,4 @@ public class SpringPasswordEncoder implements PasswordEncoderPort {
   public String encode(final String rawPassword) {
     return Objects.requireNonNull(delegate.encode(rawPassword));
   }
-
-  public boolean matches(final String rawPassword, final String encodedPassword) {
-    return delegate.matches(rawPassword, encodedPassword);
-  }
 }
