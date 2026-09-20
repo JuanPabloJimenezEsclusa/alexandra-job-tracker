@@ -35,6 +35,7 @@ import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
 import dev.jpje.jobtracker.domain.service.AnalyticsCalculator;
 import dev.jpje.jobtracker.server.usecase.TransactionalAuthenticationPort;
+import dev.jpje.jobtracker.server.usecase.TransactionalManageJobAnalysisPort;
 import dev.jpje.jobtracker.server.usecase.TransactionalSubmitJobPostingPort;
 import dev.jpje.jobtracker.server.usecase.TransactionalTrackJobApplicationPort;
 import io.micrometer.core.instrument.Counter;
@@ -89,8 +90,10 @@ public class UseCaseConfig {
   @Bean
   ManageJobAnalysisPort manageJobAnalysisUseCase(
       final LoadJobAnalysisPort loadAnalysisPort,
-      final SaveJobAnalysisPort saveAnalysisPort) {
-    return new ManageJobAnalysisUseCase(loadAnalysisPort, saveAnalysisPort);
+      final SaveJobAnalysisPort saveAnalysisPort,
+      final TransactionTemplate transactionTemplate) {
+    final var delegate = new ManageJobAnalysisUseCase(loadAnalysisPort, saveAnalysisPort);
+    return new TransactionalManageJobAnalysisPort(delegate, transactionTemplate);
   }
 
   @Bean
