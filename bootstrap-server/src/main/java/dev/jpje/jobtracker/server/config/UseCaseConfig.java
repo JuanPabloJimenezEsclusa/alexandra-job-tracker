@@ -40,6 +40,7 @@ import dev.jpje.jobtracker.domain.service.AnalyticsCalculator;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import dev.jpje.jobtracker.domain.vo.Notes;
 import dev.jpje.jobtracker.domain.vo.UserId;
+import dev.jpje.jobtracker.server.usecase.TransactionalAuthenticationPort;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Timer;
 import org.jspecify.annotations.Nullable;
@@ -191,8 +192,10 @@ public class UseCaseConfig {
       final TokenGeneratorPort tokenGenerator,
       final PasswordEncoderPort passwordEncoder,
       final AuthenticateUserPort authenticateUserPort,
-      final EventPublisher eventPublisher) {
-    return new AuthenticationUseCase(saveUserPort, loadUserPort, tokenGenerator, passwordEncoder,
-      authenticateUserPort, clock, eventPublisher);
+      final EventPublisher eventPublisher,
+      final TransactionTemplate transactionTemplate) {
+    final var delegate = new AuthenticationUseCase(saveUserPort, loadUserPort, tokenGenerator,
+      passwordEncoder, authenticateUserPort, clock, eventPublisher);
+    return new TransactionalAuthenticationPort(delegate, transactionTemplate);
   }
 }
