@@ -5,20 +5,49 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
-**refactor(adapter): migrate authentication from jjwt to Spring Security**
+**fix(adapter): dispatch transactional events without an active transaction**
 
+
+[23b74ed42ace0dc](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/23b74ed42ace0dc) juan.pablo.jimenez.esclusa *2026-09-19 19:32:14*
+
+**refactor(application): drop the unused matches operation from the password encoder port**
+
+
+[2372ad2a83e1e8e](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/2372ad2a83e1e8e) juan.pablo.jimenez.esclusa *2026-09-19 19:13:38*
+
+**refactor(application): relocate technical outbound ports and event publisher**
+
+
+[0009a6b4f3f2235](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/0009a6b4f3f2235) juan.pablo.jimenez.esclusa *2026-09-19 19:11:27*
+
+**refactor(application): move JobPostingService into application.service**
+
+
+[a692dd34b8773fd](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/a692dd34b8773fd) juan.pablo.jimenez.esclusa *2026-09-19 19:04:27*
+
+**refactor(adapter): move the cache contract into adapter-cache**
+
+
+[45f8f97042a803e](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/45f8f97042a803e) juan.pablo.jimenez.esclusa *2026-09-19 18:53:17*
+
+**refactor(coverage): tighten architecture contract for relocated outbound ports**
+
+
+[e79d0b87455c1fb](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/e79d0b87455c1fb) juan.pablo.jimenez.esclusa *2026-09-19 18:50:36*
+
+**refactor(adapter): migrate authentication from jjwt to spring security (#79)**
+
+ * refactor(adapter): migrate authentication from jjwt to spring security
  * Replace hand-rolled JWT (jjwt) + bcrypt (jbcrypt) with Spring Security&#x27;s
  * filter chain, method security, Nimbus JWT, and BCryptPasswordEncoder.
- * - adapter-auth: AuthSecurityConfig, JwtProvider (NimbusJwtEncoder),
- * AuthenticationManagerAdapter, DbUserDetailsService, SpringPasswordEncoder,
- * JwtKeyMaterial, AuthUserDetails
- * - adapter-api: SecurityConfig, JwtAuthenticationFilter, Authz, remove
- * GraphQlAuthInterceptor
- * - application: AuthenticationUseCase delegates to AuthenticateUserPort
- * - domain: AuthenticateUserPort outbound port, remove TokenPayload/InvalidTokenException
- * - Remove JjwtRuntimeHints and AOT factory (no longer needed)
+ * feat(adapter): reduce token to 10 min, require auth on me, add mdc ids, use forbidden
+ * - Reduce JWT expiration from 30 min to 10 min
+ * - Require authentication on  query (returns FORBIDDEN instead of null)
+ * - Add userId and traceId to MDC logging context
+ * - Change unauthenticated error from BAD_REQUEST to FORBIDDEN (Authz, resolvers)
+ * - Update specs: identity, graphql-api, observability, architecture
 
-[582efc8253a937d](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/582efc8253a937d) juan.pablo.jimenez.esclusa *2026-09-18 09:56:31*
+[74495d155dccc5d](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/74495d155dccc5d) Juan Pablo Jimenez Esclusa *2026-09-18 13:50:45*
 
 **feat(domain): implement job tracker app**
 

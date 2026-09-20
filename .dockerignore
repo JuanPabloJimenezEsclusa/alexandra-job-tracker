@@ -6,6 +6,7 @@
 .vscode
 .opencode
 .mimocode
+.codegraph
 .tmp
 *.iml
 **/target
