@@ -3,6 +3,7 @@
 **/reports/zap-*/**
 .opencode/
 .mimocode/
+.codegraph/
 openspec/
 /.compliance.json
 
@@ -552,3 +553,5 @@ deploy/data/*
 !deploy/data/.gitkeep
 
 # End of https://www.toptal.com/developers/gitignore/api/java,linux,macos,maven,sonar,jmeter,eclipse,windows,database,intellij,sonarqube,terraform,intellij+all,intellij+iml,visualstudiocode,gradle,kate
+# Local Pi runtime state
+.atl/
