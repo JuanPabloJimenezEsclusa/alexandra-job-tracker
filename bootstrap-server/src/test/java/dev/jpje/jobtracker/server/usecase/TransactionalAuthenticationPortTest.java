@@ -31,6 +31,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @ExtendWith(MockitoExtension.class)
 class TransactionalAuthenticationPortTest {
 
+  private static final String USERNAME = "alice";
   private static final String PASSWORD = "pass";
   private static final String TOKEN = "jwt-token";
 
@@ -51,7 +52,7 @@ class TransactionalAuthenticationPortTest {
   @Test
   void shouldRunRegistrationInTransaction() {
     // Given
-    final var username = Username.of("alice");
+    final var username = Username.of(USERNAME);
     final var payload = payload(username);
     when(transactionManager.getTransaction(any())).thenReturn(new SimpleTransactionStatus());
     when(delegate.register(username, PASSWORD, UserRole.USER)).thenReturn(payload);
@@ -71,7 +72,7 @@ class TransactionalAuthenticationPortTest {
   @Test
   void shouldDelegateLoginWithoutTransaction() {
     // Given
-    final var username = Username.of("alice");
+    final var username = Username.of(USERNAME);
     final var payload = payload(username);
     when(delegate.login(username, PASSWORD)).thenReturn(payload);
 
@@ -89,7 +90,7 @@ class TransactionalAuthenticationPortTest {
   void shouldDelegateCurrentUserWithoutTransaction() {
     // Given
     final var userId = new UserId(UUID.randomUUID());
-    final var user = user(Username.of("alice"), userId);
+    final var user = user(Username.of(USERNAME), userId);
     when(delegate.getCurrentUser(userId)).thenReturn(Optional.of(user));
 
     // When

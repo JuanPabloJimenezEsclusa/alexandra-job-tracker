@@ -6,6 +6,7 @@ import static org.instancio.Select.field;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -67,13 +68,13 @@ class TransactionalSubmitJobPostingPortTest {
 
     // Then
     assertThat(result).isSameAs(posting);
+    assertThat(submitDurationTimer.count())
+      .as("submit duration recorded after the transaction")
+      .isEqualTo(1);
     verify(transactionManager, description("submit opens a transaction")).getTransaction(any());
     verify(transactionManager, description("submit commits the transaction")).commit(any());
     verify(delegate, description("submit delegated to the use case"))
       .submit(USER_ID, URL, TITLE, COMPANY, DESCRIPTION, Source.LINKEDIN);
-    assertThat(submitDurationTimer.count())
-      .as("submit duration recorded after the transaction")
-      .isEqualTo(1);
     verifyNoMoreInteractions(delegate, transactionManager);
   }
 
@@ -93,6 +94,9 @@ class TransactionalSubmitJobPostingPortTest {
       .as("duration recorded even when the delegate throws")
       .isEqualTo(1);
     verify(transactionManager, description("failed submit rolls back the transaction")).rollback(any());
+    verify(delegate, description("failed submit delegated to the use case"))
+      .submit(USER_ID, URL, TITLE, COMPANY, DESCRIPTION, Source.LINKEDIN);
+    verifyNoMoreInteractions(delegate, transactionManager);
   }
 
   private static JobPosting posting() {

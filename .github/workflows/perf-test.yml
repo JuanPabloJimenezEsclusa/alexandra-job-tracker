@@ -6,7 +6,7 @@ on:
 
 concurrency:
   group: perf-test
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 env:
   MAVEN_CLI_OPTS: "-B -ntp -e"

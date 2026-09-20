@@ -305,7 +305,7 @@ class TransactionBoundaryIntegrationTest {
     private final List<UserRegistered> events = Collections.synchronizedList(new ArrayList<>());
 
     @TransactionalEventListener
-    public void record(final UserRegistered event) {
+    public void userRecord(final UserRegistered event) {
       events.add(event);
     }
 
