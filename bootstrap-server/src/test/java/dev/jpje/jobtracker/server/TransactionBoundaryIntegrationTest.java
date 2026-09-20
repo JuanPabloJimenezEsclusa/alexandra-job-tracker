@@ -8,15 +8,16 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import dev.jpje.jobtracker.api.config.IntegrationTestConfig;
 import dev.jpje.jobtracker.application.port.outbound.EventPublisher;
 import dev.jpje.jobtracker.domain.event.DomainEvent;
 import dev.jpje.jobtracker.domain.event.UserRegistered;
 import dev.jpje.jobtracker.domain.model.JobApplication;
 import dev.jpje.jobtracker.domain.model.JobPosting;
 import dev.jpje.jobtracker.domain.model.User;
+import dev.jpje.jobtracker.domain.port.inbound.AnalyzeJobPostingPort;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
 import dev.jpje.jobtracker.domain.port.inbound.TrackJobApplicationPort;
+import dev.jpje.jobtracker.domain.port.outbound.JobAnalysisPort;
 import dev.jpje.jobtracker.domain.port.outbound.LoadJobApplicationPort;
 import dev.jpje.jobtracker.domain.port.outbound.LoadUserPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveJobApplicationPort;
@@ -24,6 +25,7 @@ import dev.jpje.jobtracker.domain.port.outbound.SaveJobPostingPort;
 import dev.jpje.jobtracker.domain.port.outbound.SaveUserPort;
 import dev.jpje.jobtracker.domain.vo.ApplicationStatus;
 import dev.jpje.jobtracker.domain.vo.CompanyName;
+import dev.jpje.jobtracker.domain.vo.JobAnalysis;
 import dev.jpje.jobtracker.domain.vo.JobTitle;
 import dev.jpje.jobtracker.domain.vo.Source;
 import dev.jpje.jobtracker.domain.vo.Url;
@@ -51,7 +53,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
   "jwt.secret=super-secret-signing-key-for-tests",
   "spring.application.admin.enabled=false"
 })
-@Import({IntegrationTestConfig.class, TransactionBoundaryIntegrationTest.TransactionRecordingConfig.class})
+@Import(TransactionBoundaryIntegrationTest.TransactionRecordingConfig.class)
 class TransactionBoundaryIntegrationTest {
 
   private static final String PASSWORD = "pass";
@@ -84,10 +86,17 @@ class TransactionBoundaryIntegrationTest {
   @Autowired
   private LoadJobApplicationPort loadJobApplicationPort;
 
+  @Autowired
+  private AnalyzeJobPostingPort analyzeJobPostingUseCase;
+
+  @Autowired
+  private RecordingJobAnalysisPort analysisPort;
+
   @BeforeEach
   void reset() {
     eventPublisher.reset();
     recorder.reset();
+    analysisPort.reset();
   }
 
   @Test
@@ -178,6 +187,35 @@ class TransactionBoundaryIntegrationTest {
       .isEqualTo(ApplicationStatus.APPLIED);
   }
 
+  @Test
+  void shouldNotHoldTransactionAcrossExternalCall() {
+    // Given
+    final var user = Instancio.of(User.class)
+      .set(field(User::id), UserId.generate())
+      .set(field(User::username), Username.of("tx-external-call-user"))
+      .set(field(User::passwordHash), "hash")
+      .set(field(User::role), UserRole.USER)
+      .create();
+    saveUserPort.save(user);
+    final var posting = Instancio.of(JobPosting.class)
+      .set(field(JobPosting::userId), user.id())
+      .set(field(JobPosting::source), Source.LINKEDIN)
+      .set(field(JobPosting::url), Url.of("https://example.com/tx-external-job"))
+      .set(field(JobPosting::title), JobTitle.of("Engineer"))
+      .set(field(JobPosting::company), CompanyName.of("Acme"))
+      .set(field(JobPosting::description), "Software engineer role")
+      .create();
+    saveJobPostingPort.save(posting);
+
+    // When
+    analyzeJobPostingUseCase.analyze(user.id(), posting.id());
+
+    // Then
+    assertThat(analysisPort.transactionActiveDuringCall())
+      .as("no transaction is held across the external analysis call")
+      .containsExactly(false);
+  }
+
   @TestConfiguration
   static class TransactionRecordingConfig {
 
@@ -190,6 +228,12 @@ class TransactionBoundaryIntegrationTest {
     @Bean
     UserRegisteredRecorder userRegisteredRecorder() {
       return new UserRegisteredRecorder();
+    }
+
+    @Bean
+    @Primary
+    RecordingJobAnalysisPort recordingJobAnalysisPort() {
+      return new RecordingJobAnalysisPort();
     }
   }
 
@@ -224,6 +268,35 @@ class TransactionBoundaryIntegrationTest {
     void reset() {
       transactionActiveAtPublish.clear();
       this.failOnPublish = false;
+    }
+  }
+
+  static final class RecordingJobAnalysisPort implements JobAnalysisPort {
+
+    private final List<Boolean> transactionActiveDuringCall =
+      Collections.synchronizedList(new ArrayList<>());
+
+    @Override
+    public JobAnalysis analyze(final String title, final String company, final String source,
+                               final String jobDescription) {
+      transactionActiveDuringCall.add(TransactionSynchronizationManager.isActualTransactionActive());
+      return Instancio.of(JobAnalysis.class)
+        .set(field(JobAnalysis::summary), "Mocked analysis")
+        .set(field(JobAnalysis::fitScore), 85.0)
+        .set(field(JobAnalysis::companyRating), 4.2)
+        .set(field(JobAnalysis::companyType), "enterprise")
+        .set(field(JobAnalysis::salaryMin), 90000.0)
+        .set(field(JobAnalysis::salaryMax), 130000.0)
+        .set(field(JobAnalysis::salaryCurrency), "USD")
+        .create();
+    }
+
+    List<Boolean> transactionActiveDuringCall() {
+      return List.copyOf(transactionActiveDuringCall);
+    }
+
+    void reset() {
+      transactionActiveDuringCall.clear();
     }
   }
 
