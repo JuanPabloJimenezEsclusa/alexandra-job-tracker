@@ -5,6 +5,36 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**fix(bootstrap): wrap tracking creation and leave external calls unwrapped**
+
+
+[d8db7938b211943](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/d8db7938b211943) juan.pablo.jimenez.esclusa *2026-09-20 16:47:13*
+
+**fix(bootstrap): wrap analysis deletion in a composition-root transaction**
+
+
+[bee2f1416a0b09d](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/bee2f1416a0b09d) juan.pablo.jimenez.esclusa *2026-09-20 16:06:15*
+
+**refactor(bootstrap): move submit transaction wrapping into a named decorator**
+
+
+[6352b3e5984f0cf](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/6352b3e5984f0cf) juan.pablo.jimenez.esclusa *2026-09-20 16:04:04*
+
+**fix(bootstrap): make the application-status write path atomic**
+
+
+[41b742586641917](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/41b742586641917) juan.pablo.jimenez.esclusa *2026-09-20 15:25:37*
+
+**chore(docs): add codegraph in ignore files, update changelog**
+
+
+[d72e50d6b02c384](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/d72e50d6b02c384) juan.pablo.jimenez.esclusa *2026-09-20 14:47:55*
+
+**fix(bootstrap): establish the registration transaction in the composition root**
+
+
+[7c6f63ee65d9b4b](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/7c6f63ee65d9b4b) juan.pablo.jimenez.esclusa *2026-09-20 14:45:10*
+
 **fix(adapter): dispatch transactional events without an active transaction**
 
 
