@@ -12,6 +12,7 @@ import java.io.IOException;
 import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.trace.SpanKind;
 import io.opentelemetry.api.trace.Tracer;
+import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +42,7 @@ public class TracingFilter implements Filter {
       .setAttribute("http.url", httpRequest.getRequestURL().toString())
       .setAttribute("http.path", path)
       .startSpan();
+    MDC.put("traceId", span.getSpanContext().getTraceId());
 
     try (final var _ = span.makeCurrent()) {
       chain.doFilter(request, response);
@@ -53,6 +55,7 @@ public class TracingFilter implements Filter {
       throw e;
     } finally {
       span.end();
+      MDC.remove("traceId");
     }
   }
 }

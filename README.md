@@ -72,16 +72,16 @@ for server-side operations and a Spring Shell CLI for terminal workflows, and it
 
 | Module               | Layer     | Description                                                      |
 |----------------------|-----------|------------------------------------------------------------------|
-| `domain`             | Core      | Pure Java: domain models, value objects, ports, domain services |
-| `application`        | Core      | Use cases orchestrating domain logic through inbound ports       |
+| `domain`             | Core      | Pure Java: domain models, value objects, inbound ports, business outbound ports, domain events |
+| `application`        | Core      | Use cases orchestrating domain logic, plus the technical outbound ports and `JobPostingService` |
 | `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs, HTTP security: Spring for GraphQL + Spring Security |
 | `adapter-cli`        | Inbound   | Spring Shell commands, HTTP GraphQL client, session management   |
 | `adapter-persistence`| Outbound  | JPA entities, repositories, mappers, Flyway migrations           |
 | `adapter-auth`       | Outbound  | Spring Security auth primitives: Nimbus JWT, bcrypt, authentication manager |
 | `adapter-ai`         | Outbound  | Job analysis via Spring AI + skill-based prompts                 |
-| `adapter-cache`      | Outbound  | Caffeine cache with hexagonal `CachePort` decorators             |
+| `adapter-cache`      | Outbound  | Caffeine decorators over the persistence load/save ports; `CachePort` stays inside the adapter |
 | `adapter-events`     | Both      | SQS/LWA receiver, Spring event listeners, Spring/SNS publishers  |
-| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API: wires use cases, adapters, domain services |
+| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API: wires use cases and adapters, hosts the per-write transaction decorators |
 | `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI: standalone HTTP client                   |
 | `coverage-jacoco`    | Testing   | JaCoCo aggregated coverage reports + ArchUnit architecture tests |
 | `testing-pentest`    | Testing   | k6 GraphQL security tests + OWASP ZAP active scan                |
@@ -117,18 +117,26 @@ flowchart LR
   adapter-cli -.-> |HTTP| adapter-api
   bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth & adapter-events
   adapter-api & adapter-persistence & adapter-ai & adapter-cache & adapter-auth & adapter-events --> domain
+  adapter-auth & adapter-events --> application
   bootstrap-cli --> adapter-cli
 ```
 
-- `domain`: zero framework imports. Contains entities, value objects, port interfaces,
-  domain services, and domain events. Enforced by ArchUnit.
-- `application`: implements inbound ports. Framework-free by design.
-- `adapter-*`: implement inbound/outbound ports. `adapter-cli` is a standalone delivery 
-  mechanism that communicates with the server exclusively over HTTP.
-- `bootstrap-server`: composition root. Wires use cases, adapters, and domain services.
-  Includes OpenTelemetry tracing via `TracingFilter`. The composition-root role is enforced
-  by ArchUnit (core/adapters never depend on bootstrap; non-configuration bootstrap classes
-  never depend on outbound ports).
+- `domain`: zero framework imports. Contains models, value objects, inbound ports, the
+  business outbound ports, domain events, and `AnalyticsCalculator`. Enforced by ArchUnit.
+- `application`: implements inbound ports. Owns the technical outbound ports
+  (`EventPublisher`, `AuthenticateUserPort`, `PasswordEncoderPort`, `TokenGeneratorPort`)
+  and `JobPostingService`. Framework-free by design.
+- `adapter-*`: implement inbound/outbound ports. May depend on `application.port`, never on
+  `application.usecase`; the composition root assembles the implementations. `adapter-cli`
+  is a standalone delivery mechanism that communicates with the server exclusively over HTTP.
+- `bootstrap-server`: composition root. Wires use cases, adapters, and domain services, and
+  establishes the per-write-operation transaction boundary with a set of `Transactional*`
+  decorators over the inbound ports. `AnalyzeJobPostingPort.analyze` and
+  `ProcessJobPostingCreatedPort.analyzePosting` are the two deliberate exclusions from that
+  wrapping. Includes OpenTelemetry tracing via `TracingFilter`. The composition-root role is
+  enforced by ArchUnit (core/adapters never depend on bootstrap; adapters reach the application
+  only through `application.port`, never `application.usecase`; non-configuration bootstrap
+  classes never depend on outbound ports in `application.port.outbound`).
 - `bootstrap-cli`: depends only on `adapter-cli`. The domain layer is never on its
   classpath.
 
@@ -163,7 +171,7 @@ flowchart LR
   end
 
   subgraph inbound [Inbound Adapters]
-    api[GraphQL Layer]
+    gql["GraphQL Layer"]
   end
 
   subgraph core [Core]
@@ -187,7 +195,7 @@ flowchart LR
   CLI --> |HTTP| QR & MR
   Ext --> |HTTP| QR & MR
   QR & MR --> UC --> Domain
-  Domain --> JPA & AI & Auth & Cache & Events
+  UC --> |outbound ports| JPA & AI & Auth & Cache & Events
   JPA --> DB
   AI --> LLM
 ```
@@ -400,8 +408,8 @@ Coverage reports are available at:
 
 ## Caching
 
-The `adapter-cache` module decorates persistence adapters with Caffeine caches via the
-`CachePort` abstraction:
+The `adapter-cache` module decorates persistence adapters with Caffeine caches. `CachePort`
+is an internal contract of this adapter, not a hexagonal port in the domain:
 
 - **JobApplication**: individual (`jobapp:<id>`) and per-user list
   (`jobapps:user:<id>`) caches, evicted on create, update, and delete.
@@ -410,8 +418,8 @@ The `adapter-cache` module decorates persistence adapters with Caffeine caches v
   persistence adapter entirely.
 
 The `CaffeineCacheAdapter` supports TTL-based expiration, maximum-size eviction,
-type-safe retrieval with automatic eviction on `ClassCastException`, and JMX
-exposure of cache statistics (`asMap()`).
+type-safe retrieval with automatic eviction on `ClassCastException`, and an `asMap()`
+view for inspecting cache contents.
 
 ---
 
@@ -423,7 +431,7 @@ exposure of cache statistics (`asMap()`).
 | `pages.yml`          | PR → `develop`    | `mvn site` → GitHub Pages                     |
 | `native-release.yml` | PR → `develop`    | Native compile → Docker push + release assets |
 | `pen-test.yml`       | Manual / schedule | k6 security + OWASP ZAP active scan           |
-| `perf-test.yml`      | PR → `develop`    | k6 load (20), spike (100), soak (10 min)      |
+| `perf-test.yml`      | Push → `develop`  | k6 load (20), spike (100), soak (10 min)      |
 
 ---
 

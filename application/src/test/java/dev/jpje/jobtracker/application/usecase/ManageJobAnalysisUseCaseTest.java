@@ -2,8 +2,6 @@ package dev.jpje.jobtracker.application.usecase;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.instancio.Select.field;
-import static org.junit.jupiter.api.Named.named;
-import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.Mockito.description;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -11,7 +9,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.model.JobAnalysisRecord;
 import dev.jpje.jobtracker.domain.port.outbound.LoadJobAnalysisPort;
@@ -21,9 +18,6 @@ import dev.jpje.jobtracker.domain.vo.UserId;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,13 +54,6 @@ class ManageJobAnalysisUseCaseTest {
       .create();
   }
 
-  private static Stream<Arguments> emptyScenarios() {
-    return Stream.of(
-      arguments(named("missing analysis", UUID.randomUUID())),
-      arguments(named("another user's analysis", UUID.randomUUID()))
-    );
-  }
-
   @Test
   void shouldReturnAnalysisOwnedByCaller() {
     // Given
@@ -83,10 +70,10 @@ class ManageJobAnalysisUseCaseTest {
     verifyNoMoreInteractions(loadPort, savePort);
   }
 
-  @ParameterizedTest(name = "{0} is indistinguishable from missing")
-  @MethodSource("emptyScenarios")
-  void shouldReturnEmptyWhenAnalysisNotAccessible(final UUID id) {
+  @Test
+  void shouldReturnEmptyWhenAnalysisNotAccessible() {
     // Given
+    final var id = UUID.randomUUID();
     final var userId = UserId.generate();
     when(loadPort.findByIdAndUser(id, userId)).thenReturn(Optional.empty());
 
