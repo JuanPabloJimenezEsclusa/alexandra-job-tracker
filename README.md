@@ -142,8 +142,11 @@ flowchart LR
 
 ### CQRS Resolver Pattern
 
-All GraphQL resolvers follow **Command Query Responsibility Segregation**: every
-endpoint is either a `QueryResolver` (read) or `MutationResolver` (write).
+The system keeps a **single domain model**. CQRS is applied at the resolver
+interface, not by splitting that model: every GraphQL endpoint is either a
+`QueryResolver` (read) or a `MutationResolver` (write), and both are served from
+the same model through the persistence ports and the `adapter-cache` decorators.
+There is no separate read model and no second source of truth.
 
 | Type     | Resolver                      | Endpoint               |
 |----------|-------------------------------|------------------------|
