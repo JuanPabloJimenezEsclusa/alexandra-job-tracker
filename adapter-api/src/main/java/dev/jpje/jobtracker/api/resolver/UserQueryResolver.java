@@ -1,7 +1,7 @@
 package dev.jpje.jobtracker.api.resolver;
 
 import dev.jpje.jobtracker.api.dto.UserResponse;
-import dev.jpje.jobtracker.domain.exception.ForbiddenException;
+import dev.jpje.jobtracker.api.error.ForbiddenException;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
 import org.jspecify.annotations.Nullable;

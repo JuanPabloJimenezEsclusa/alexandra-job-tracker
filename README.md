@@ -4,12 +4,12 @@
 ---
 
 <p align="center">
-  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=alert_status"/></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=coverage"/></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=sqale_rating"/></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=reliability_rating"/></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=security_rating"/></a>
-  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=ncloc"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=alert_status" alt="alert_status"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=coverage" alt="coverage"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=sqale_rating" alt="sqale_rating"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=reliability_rating" alt="reliability_rating"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=security_rating" alt="security_rating"/></a>
+  <a href="https://sonarcloud.io/summary/new_code?id=JuanPabloJimenezEsclusa_alexandra-job-tracker"><img src="https://sonarcloud.io/api/project_badges/measure?project=JuanPabloJimenezEsclusa_alexandra-job-tracker&metric=ncloc" alt="lines_code"/></a>
 </p>
 
 <p align="center">
@@ -21,13 +21,13 @@
 </p>
 
 <p align="center">
-  <a href="https://alistair.cockburn.us/hexagonal-architecture/"><img src="https://img.shields.io/badge/Architecture-Hexagonal-brightgreen?style=for-the-badge"/></a>
-  <a href="https://spring.io/projects/spring-boot"><img src="https://img.shields.io/badge/Spring%20Boot-4.1-brightgreen?style=for-the-badge"/></a>
-  <a href="https://www.graalvm.org/"><img src="https://img.shields.io/badge/GraalVM-Native-005571?style=for-the-badge"/></a>
-  <a href="https://graphql.org/"><img src="https://img.shields.io/badge/API-GraphQL-E10098?style=for-the-badge"/></a>
-  <a href="https://spring.io/projects/spring-shell"><img src="https://img.shields.io/badge/CLI-Spring%20Shell-6DB33F?style=for-the-badge"/></a>
-  <a href="https://spring.io/projects/spring-ai"><img src="https://img.shields.io/badge/AI-Spring%20AI-6DB33F?style=for-the-badge"/></a>
-  <a href="https://opentelemetry.io/"><img src="https://img.shields.io/badge/Observability-OpenTelemetry-5C4EE5?style=for-the-badge"/></a>
+  <a href="https://alistair.cockburn.us/hexagonal-architecture/"><img src="https://img.shields.io/badge/Architecture-Hexagonal-brightgreen?style=for-the-badge" alt="hexagonal-architecture"/></a>
+  <a href="https://spring.io/projects/spring-boot"><img src="https://img.shields.io/badge/Spring%20Boot-4.1-brightgreen?style=for-the-badge" alt="spring-boot"/></a>
+  <a href="https://www.graalvm.org/"><img src="https://img.shields.io/badge/GraalVM-Native-005571?style=for-the-badge" alt="graalvm"/></a>
+  <a href="https://graphql.org/"><img src="https://img.shields.io/badge/API-GraphQL-E10098?style=for-the-badge" alt="graphql"/></a>
+  <a href="https://spring.io/projects/spring-shell"><img src="https://img.shields.io/badge/CLI-Spring%20Shell-6DB33F?style=for-the-badge" alt="spring-shell"/></a>
+  <a href="https://spring.io/projects/spring-ai"><img src="https://img.shields.io/badge/AI-Spring%20AI-6DB33F?style=for-the-badge" alt="spring-ai"/></a>
+  <a href="https://opentelemetry.io/"><img src="https://img.shields.io/badge/Observability-OpenTelemetry-5C4EE5?style=for-the-badge" alt="opentelemetry"/></a>
 </p>
 
 ---
@@ -70,21 +70,21 @@ for server-side operations and a Spring Shell CLI for terminal workflows, and it
 
 ### Modules
 
-| Module               | Layer     | Description                                                      |
-|----------------------|-----------|------------------------------------------------------------------|
-| `domain`             | Core      | Pure Java: domain models, value objects, inbound ports, business outbound ports, domain events |
-| `application`        | Core      | Use cases orchestrating domain logic, plus the technical outbound ports and `JobPostingService` |
-| `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs, HTTP security: Spring for GraphQL + Spring Security |
-| `adapter-persistence`| Outbound  | JPA entities, repositories, mappers, Flyway migrations           |
-| `adapter-auth`       | Outbound  | Spring Security auth primitives: Nimbus JWT, bcrypt, authentication manager |
-| `adapter-ai`         | Outbound  | Job analysis via Spring AI + skill-based prompts                 |
-| `adapter-cache`      | Outbound  | Caffeine decorators over the persistence load/save ports; `CachePort` stays inside the adapter |
-| `adapter-events`     | Both      | SQS/LWA receiver, Spring event listeners, Spring/SNS publishers  |
-| `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API: wires use cases and adapters, hosts the per-write transaction decorators |
-| `cli-client`         | Inbound   | Spring Shell commands, HTTP GraphQL client, session management   |
-| `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI: standalone HTTP client                   |
-| `coverage-jacoco`    | Testing   | JaCoCo aggregated coverage reports + ArchUnit architecture tests |
-| `testing-pentest`    | Testing   | k6 GraphQL security tests + OWASP ZAP active scan                |
+| Module                | Layer     | Description                                                                                       |
+|-----------------------|-----------|---------------------------------------------------------------------------------------------------|
+| `domain`              | Core      | Pure Java: domain models, value objects, inbound ports, business outbound ports, domain events    |
+| `application`         | Core      | Use cases orchestrating domain logic, plus the technical outbound ports and `JobPostingService`   |
+| `adapter-api`         | Inbound   | GraphQL schema, CQRS resolvers, DTOs, HTTP security: Spring for GraphQL + Spring Security         |
+| `adapter-persistence` | Outbound  | JPA entities, repositories, mappers, Flyway migrations                                            |
+| `adapter-auth`        | Outbound  | Spring Security auth primitives: Nimbus JWT, bcrypt, authentication manager                       |
+| `adapter-ai`          | Outbound  | Job analysis via Spring AI + skill-based prompts                                                  |
+| `adapter-cache`       | Outbound  | Caffeine decorators over the persistence load/save ports; `CachePort` stays inside the adapter    |
+| `adapter-events`      | Both      | SQS/LWA receiver, Spring event listeners, Spring/SNS publishers                                   |
+| `bootstrap-server`    | Bootstrap | Spring Boot GraphQL API: wires use cases and adapters, hosts the per-write transaction decorators |
+| `cli-client`          | Inbound   | Spring Shell commands, HTTP GraphQL client, session management                                    |
+| `bootstrap-cli`       | Bootstrap | Spring Boot Shell CLI: standalone HTTP client                                                     |
+| `coverage-jacoco`     | Testing   | JaCoCo aggregated coverage reports + ArchUnit architecture tests                                  |
+| `testing-pentest`     | Testing   | k6 GraphQL security tests + OWASP ZAP active scan                                                 |
 
 > **browser-extension**: Chrome extension for capturing LinkedIn/Indeed job postings
 > (separate JavaScript project, not a Maven module).
@@ -103,13 +103,16 @@ flowchart LR
     application
   end
 
+  subgraph cli [Client]
+    cli-client
+  end
+
   subgraph adapters [Adapters]
     adapter-api
     adapter-auth
     adapter-persistence
     adapter-ai
     adapter-cache
-    cli-client
     adapter-events
   end
 
@@ -122,21 +125,14 @@ flowchart LR
 ```
 
 - `domain`: zero framework imports. Contains models, value objects, inbound ports, the
-  business outbound ports, domain events, and `AnalyticsCalculator`. Enforced by ArchUnit.
-- `application`: implements inbound ports. Owns the technical outbound ports
-  (`EventPublisher`, `AuthenticateUserPort`, `PasswordEncoderPort`, `TokenGeneratorPort`)
-  and `JobPostingService`. Framework-free by design.
+  business outbound ports, domain events, and domain services.
+- `application`: implements inbound ports.
 - `adapter-*`: implement inbound/outbound ports. May depend on `application.port`, never on
-  `application.usecase`; the composition root assembles the implementations. `cli-client`
-  is a standalone delivery mechanism that communicates with the server exclusively over HTTP.
+  `application.usecase`; the composition root assembles the implementations. 
 - `bootstrap-server`: composition root. Wires use cases, adapters, and domain services, and
   establishes the per-write-operation transaction boundary with a set of `Transactional*`
-  decorators over the inbound ports. `AnalyzeJobPostingPort.analyze` and
-  `ProcessJobPostingCreatedPort.analyzePosting` are the two deliberate exclusions from that
-  wrapping. Includes OpenTelemetry tracing via `TracingFilter`. The composition-root role is
-  enforced by ArchUnit (core/adapters never depend on bootstrap; adapters reach the application
-  only through `application.port`, never `application.usecase`; non-configuration bootstrap
-  classes never depend on outbound ports in `application.port.outbound`).
+  decorators over the inbound ports.
+- `cli-client` is a standalone delivery mechanism that communicates with the server exclusively over HTTP.
 - `bootstrap-cli`: depends only on `cli-client`. The domain layer is never on its
   classpath.
 
@@ -148,16 +144,16 @@ interface, not by splitting that model: every GraphQL endpoint is either a
 the same model through the persistence ports and the `adapter-cache` decorators.
 There is no separate read model and no second source of truth.
 
-| Type     | Resolver                      | Endpoint               |
-|----------|-------------------------------|------------------------|
-| Query    | `UserQueryResolver`           | `me`                   |
-| Query    | `ApplicationQueryResolver`    | `applications`         |
-| Query    | `JobPostingQueryResolver`     | `jobPostings`          |
-| Query    | `JobAnalysisQueryResolver`    | `analyses`, `analysis` |
-| Query    | `AnalyticsQueryResolver`      | `analytics`            |
-| Mutation | `UserMutationResolver`        | `register`, `login`, `logout` |
+| Type     | Resolver                      | Endpoint                                                            |
+|----------|-------------------------------|---------------------------------------------------------------------|
+| Query    | `UserQueryResolver`           | `me`                                                                |
+| Query    | `ApplicationQueryResolver`    | `applications`                                                      |
+| Query    | `JobPostingQueryResolver`     | `jobPostings`                                                       |
+| Query    | `JobAnalysisQueryResolver`    | `analyses`, `analysis`                                              |
+| Query    | `AnalyticsQueryResolver`      | `analytics`                                                         |
+| Mutation | `UserMutationResolver`        | `register`, `login`, `logout`                                       |
 | Mutation | `ApplicationMutationResolver` | `createApplication`, `updateApplicationStatus`, `deleteApplication` |
-| Mutation | `JobPostingMutationResolver`  | `submitJobPosting`, `analyzeJobPosting`, `deleteAnalysis` |
+| Mutation | `JobPostingMutationResolver`  | `submitJobPosting`, `analyzeJobPosting`, `deleteAnalysis`           |
 
 ### Data Flow
 
@@ -261,23 +257,23 @@ java -jar bootstrap-cli/target/bootstrap-cli-*.jar --server.url=http://localhost
 All operations are exposed via `POST /api/graphql`. Authentication uses JWT tokens
 passed in the `Authorization: Bearer <token>` header.
 
-| Operation                                        | Description                                   |
-|--------------------------------------------------|-----------------------------------------------|
-| `register(username, password, role)`             | Create account with role `USER`/`ADMIN` (admin only), returns JWT |
-| `login(username, password)`                      | Authenticate, returns JWT                     |
-| `logout`                                         | Invalidate current session                    |
-| `me`                                             | Current user info (id, username, role, createdAt) |
-| `applications(status)`                           | List job applications (company/role/source via `jobPostingId` join with `jobPostings`) |
-| `createApplication(jobPostingId, notes)`         | Track an application for an existing job posting |
-| `updateApplicationStatus(id, status)`            | Move through pipeline                         |
-| `deleteApplication(id)`                          | Remove an application                         |
-| `analytics(since)`                               | Per-status counts and conversion rate         |
-| `jobPostings(source)`                            | List submitted job postings                   |
-| `submitJobPosting(input)`                        | Submit a job posting from raw data            |
-| `analyzeJobPosting(jobPostingId)`                | AI analysis: summary, skills, fit score, company rating/type, salary range; persisted |
-| `analyses`                                       | List saved analyses for the current user      |
-| `analysis(id)`                                   | Fetch a single saved analysis                 |
-| `deleteAnalysis(id)`                             | Remove a saved analysis (admin only)          |
+| Operation                                | Description             --------------------                      |
+|------------------------------------------|-------------------------------------------------------------------|
+| `register(username, password, role)`     | Create account with role `USER`/`ADMIN` (admin only), returns JWT |
+| `login(username, password)`              | Authenticate, returns JWT                                         |
+| `logout`                                 | Invalidate current session                                        |
+| `me`                                     | Current user info (id, username, role, createdAt)                 |
+| `applications(status)`                   | List job applications                                             |
+| `createApplication(jobPostingId, notes)` | Track an application for an existing job posting                  |
+| `updateApplicationStatus(id, status)`    | Move through pipeline                                             |
+| `deleteApplication(id)`                  | Remove an application                                             |
+| `analytics(since)`                       | Per-status counts and conversion rate                             |
+| `jobPostings(source)`                    | List submitted job postings                                       |
+| `submitJobPosting(input)`                | Submit a job posting from raw data                                |
+| `analyzeJobPosting(jobPostingId)`        | AI analysis summary                                               |
+| `analyses`                               | List saved analyses for the current user                          |
+| `analysis(id)`                           | Fetch a single saved analysis                                     |
+| `deleteAnalysis(id)`                     | Remove a saved analysis (admin only)                              |
 
 ### Status Pipeline
 
@@ -303,22 +299,22 @@ flowchart LR
 The CLI connects to the GraphQL API over HTTP. An authenticated session is stored in
 the user's home directory.
 
-| Command         | Alias | Description                                |
-|-----------------|-------|--------------------------------------------|
-| `register`      | `reg` | Create account (admin only, `-r USER\|ADMIN`) |
-| `login`         | `li`  | Authenticate, stores session token         |
-| `logout`        | `lo`  | Invalidate session                         |
-| `whoami`        | `who` | Show current user                          |
-| `add`           | `a`   | Track an application for a job posting (`-i <posting-id>`) |
-| `list`          | `l`   | List job applications                      |
-| `update`        | `u`   | Update application status                  |
-| `delete`        | `d`   | Remove an application                      |
-| `analytics`     | `an`  | Per-status counts and conversion rate      |
-| `submit-job`    | `sj`  | Submit a job posting (URL or manual entry) |
-| `postings`      | `po`  | List submitted job postings                  |
-| `analyze`       | `anlz`| AI analysis of a job posting               |
-| `analyses`      | `al`  | List saved analyses                        |
-| `delete-analysis` | `dal`| Delete a saved analysis (admin only)     |
+| Command           | Alias  | Description                                                |
+|-------------------|--------|:-----------------------------------------------------------|
+| `register`        | `reg`  | Create account (admin only, `-r USER\|ADMIN`)              |
+| `login`           | `li`   | Authenticate, stores session token                         |
+| `logout`          | `lo`   | Invalidate session                                         |
+| `whoami`          | `who`  | Show current user                                          |
+| `add`             | `a`    | Track an application for a job posting (`-i <posting-id>`) |
+| `list`            | `l`    | List job applications                                      |
+| `update`          | `u`    | Update application status                                  |
+| `delete`          | `d`    | Remove an application                                      |
+| `analytics`       | `an`   | Per-status counts and conversion rate                      |
+| `submit-job`      | `sj`   | Submit a job posting (URL or manual entry)                 |
+| `postings`        | `po`   | List submitted job postings                                |
+| `analyze`         | `anlz` | AI analysis of a job posting                               |
+| `analyses`        | `al`   | List saved analyses                                        |
+| `delete-analysis` | `dal`  | Delete a saved analysis (admin only)                       |
 
 ```bash
 # Examples
@@ -369,16 +365,16 @@ Configure the server URL and log via the `Options` page:
 
 ## Testing
 
-| Type             | Tool                            | Command                                                   |
-|------------------|---------------------------------|-----------------------------------------------------------|
-| Unit             | JUnit 5 + Mockito               | `mvn test`                                                |
-| Architecture     | ArchUnit                        | `mvn test -pl coverage-jacoco -am`                        |
-| Mutation         | PIT                             | `mvn -Ppitest test`                                       |
-| Integration      | Spring Boot Test + RestTemplate | `mvn verify`                                              |
-| AOT compatibility| Spring AOT                      | `mvn -Pnative test -pl bootstrap-server -am`              |
-| Static analysis  | Checkstyle                      | `mvn validate`                                            |
-| Security         | k6 + OWASP ZAP                  | `mvn -Ppen-test verify -pl testing-pentest`               |
-| Performance      | k6                              | `mvn -Pperf-test verify -pl testing-pentest`              |
+| Type              | Tool                            | Command                                      |
+|-------------------|---------------------------------|----------------------------------------------|
+| Unit              | JUnit 5 + Mockito               | `mvn test`                                   |
+| Architecture      | ArchUnit                        | `mvn test -pl coverage-jacoco -am            |
+| Mutation          | PIT                             | `mvn -Ppitest test`                          |
+| Integration       | Spring Boot Test + RestTemplate | `mvn verify`                                 |
+| AOT compatibility | Spring AOT                      | `mvn -Pnative test -pl bootstrap-server -am` |
+| Static analysis   | Checkstyle                      | `mvn validate`                               |
+| Security          | k6 + OWASP ZAP                  | `mvn -Ppen-test verify -pl testing-pentest`  |
+| Performance       | k6                              | `mvn -Pperf-test verify -pl testing-pentest` |
 
 Coverage reports are available at:
 `coverage-jacoco/target/site/jacoco-aggregate/index.html`
