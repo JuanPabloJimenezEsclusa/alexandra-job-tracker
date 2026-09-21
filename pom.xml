@@ -63,8 +63,8 @@
     <module>adapter-ai</module>
     <module>adapter-events</module>
     <module>adapter-api</module>
-    <module>adapter-cli</module>
     <module>bootstrap-server</module>
+    <module>cli-client</module>
     <module>bootstrap-cli</module>
     <module>coverage-jacoco</module>
     <module>testing-pentest</module>

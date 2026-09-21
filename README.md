@@ -75,13 +75,13 @@ for server-side operations and a Spring Shell CLI for terminal workflows, and it
 | `domain`             | Core      | Pure Java: domain models, value objects, inbound ports, business outbound ports, domain events |
 | `application`        | Core      | Use cases orchestrating domain logic, plus the technical outbound ports and `JobPostingService` |
 | `adapter-api`        | Inbound   | GraphQL schema, CQRS resolvers, DTOs, HTTP security: Spring for GraphQL + Spring Security |
-| `adapter-cli`        | Inbound   | Spring Shell commands, HTTP GraphQL client, session management   |
 | `adapter-persistence`| Outbound  | JPA entities, repositories, mappers, Flyway migrations           |
 | `adapter-auth`       | Outbound  | Spring Security auth primitives: Nimbus JWT, bcrypt, authentication manager |
 | `adapter-ai`         | Outbound  | Job analysis via Spring AI + skill-based prompts                 |
 | `adapter-cache`      | Outbound  | Caffeine decorators over the persistence load/save ports; `CachePort` stays inside the adapter |
 | `adapter-events`     | Both      | SQS/LWA receiver, Spring event listeners, Spring/SNS publishers  |
 | `bootstrap-server`   | Bootstrap | Spring Boot GraphQL API: wires use cases and adapters, hosts the per-write transaction decorators |
+| `cli-client`         | Inbound   | Spring Shell commands, HTTP GraphQL client, session management   |
 | `bootstrap-cli`      | Bootstrap | Spring Boot Shell CLI: standalone HTTP client                   |
 | `coverage-jacoco`    | Testing   | JaCoCo aggregated coverage reports + ArchUnit architecture tests |
 | `testing-pentest`    | Testing   | k6 GraphQL security tests + OWASP ZAP active scan                |
@@ -109,16 +109,16 @@ flowchart LR
     adapter-persistence
     adapter-ai
     adapter-cache
-    adapter-cli
+    cli-client
     adapter-events
   end
 
   application --> domain
-  adapter-cli -.-> |HTTP| adapter-api
+  cli-client -.-> |HTTP| adapter-api
   bootstrap-server --> adapter-api & application & adapter-persistence & adapter-ai & adapter-cache & adapter-auth & adapter-events
   adapter-api & adapter-persistence & adapter-ai & adapter-cache & adapter-auth & adapter-events --> domain
   adapter-auth & adapter-events --> application
-  bootstrap-cli --> adapter-cli
+  bootstrap-cli --> cli-client
 ```
 
 - `domain`: zero framework imports. Contains models, value objects, inbound ports, the
@@ -127,7 +127,7 @@ flowchart LR
   (`EventPublisher`, `AuthenticateUserPort`, `PasswordEncoderPort`, `TokenGeneratorPort`)
   and `JobPostingService`. Framework-free by design.
 - `adapter-*`: implement inbound/outbound ports. May depend on `application.port`, never on
-  `application.usecase`; the composition root assembles the implementations. `adapter-cli`
+  `application.usecase`; the composition root assembles the implementations. `cli-client`
   is a standalone delivery mechanism that communicates with the server exclusively over HTTP.
 - `bootstrap-server`: composition root. Wires use cases, adapters, and domain services, and
   establishes the per-write-operation transaction boundary with a set of `Transactional*`
@@ -137,7 +137,7 @@ flowchart LR
   enforced by ArchUnit (core/adapters never depend on bootstrap; adapters reach the application
   only through `application.port`, never `application.usecase`; non-configuration bootstrap
   classes never depend on outbound ports in `application.port.outbound`).
-- `bootstrap-cli`: depends only on `adapter-cli`. The domain layer is never on its
+- `bootstrap-cli`: depends only on `cli-client`. The domain layer is never on its
   classpath.
 
 ### CQRS Resolver Pattern

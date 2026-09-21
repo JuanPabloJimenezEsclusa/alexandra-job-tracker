@@ -5,11 +5,40 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
-**fix(bootstrap): source MDC traceId from the OTel span instead of a random UUID**
+**fix(bootstrap): source mdc traceid from the otel span instead of a random uuid (#91)**
 
- * TracingFilter now publishes the current span&#x27;s trace id into the MDC before invoking the chain and removes it in finally, so a reused servlet thread cannot leak a stale value. MdcLoggingInterceptor no longer fabricates a traceId, preserving the value sourced from the OpenTelemetry context.
+ * TracingFilter now publishes the current span&#x27;s trace id into the MDC before invoking the chain and removes it in finally, so a reused servlet thread cannot leak a stale value.
+ * MdcLoggingInterceptor no fabricates a traceId, preserving value sourced from OpenTelemetry context.
 
-[f725a56b4d28662](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/f725a56b4d28662) juan.pablo.jimenez.esclusa *2026-09-20 23:41:51*
+[80214a98dd1b8ff](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/80214a98dd1b8ff) Juan Pablo Jimenez Esclusa *2026-09-21 19:39:11*
+
+**build(deps): bump the maven-dependencies group with 2 updates (#90)**
+
+ * Bumps the maven-dependencies group with 2 updates: [se.bjurr.gitchangelog:git-changelog-maven-plugin](https://github.com/tomasbjerre/git-changelog-maven-plugin) and [org.codehaus.mojo:exec-maven-plugin](https://github.com/mojohaus/exec-maven-plugin).
+ * Updates &#x60;se.bjurr.gitchangelog:git-changelog-maven-plugin&#x60; from 2.2.11 to 2.4.0
+ * - [Release notes](https://github.com/tomasbjerre/git-changelog-maven-plugin/releases)
+ * - [Changelog](https://github.com/tomasbjerre/git-changelog-maven-plugin/blob/master/CHANGELOG.md)
+ * - [Commits](https://github.com/tomasbjerre/git-changelog-maven-plugin/compare/2.2.11...2.4.0)
+ * Updates &#x60;org.codehaus.mojo:exec-maven-plugin&#x60; from 3.6.3 to 3.6.4
+ * - [Release notes](https://github.com/mojohaus/exec-maven-plugin/releases)
+ * - [Commits](https://github.com/mojohaus/exec-maven-plugin/compare/3.6.3...3.6.4)
+ * ---
+ * updated-dependencies:
+ * - dependency-name: se.bjurr.gitchangelog:git-changelog-maven-plugin
+ * dependency-version: 2.4.0
+ * dependency-type: direct:production
+ * update-type: version-update:semver-minor
+ * dependency-group: maven-dependencies
+ * - dependency-name: org.codehaus.mojo:exec-maven-plugin
+ * dependency-version: 3.6.4
+ * dependency-type: direct:production
+ * update-type: version-update:semver-patch
+ * dependency-group: maven-dependencies
+ * ...
+ * Signed-off-by: dependabot[bot] &lt;support@github.com&gt;
+ * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
+
+[89927544797137d](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/89927544797137d) dependabot[bot] *2026-09-21 09:49:20*
 
 **chore(ci): add dependabot automerge and queue ci workflows (#89)**
 
@@ -105,10 +134,6 @@ Changelog of alexandra-job-tracker.
  * Co-authored-by: dependabot[bot] &lt;49699333+dependabot[bot]@users.noreply.github.com&gt;
 
 [7e1395dcb06ad04](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/7e1395dcb06ad04) dependabot[bot] *2026-09-20 14:50:20*
-
-
-## tracker
-### No issue
 
 **refactor(adapter): migrate authentication from jjwt to spring security (#79)**
 

@@ -19,7 +19,7 @@
   <dependencies>
     <dependency>
       <groupId>dev.jpje.jobtracker</groupId>
-      <artifactId>adapter-cli</artifactId>
+      <artifactId>cli-client</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
