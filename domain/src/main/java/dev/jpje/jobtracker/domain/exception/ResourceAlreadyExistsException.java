@@ -9,4 +9,9 @@ public class ResourceAlreadyExistsException extends DomainException {
   public ResourceAlreadyExistsException(final String message, final Throwable cause) {
     super(message, cause);
   }
+
+  @Override
+  public ErrorCode errorCode() {
+    return ErrorCode.CONFLICT;
+  }
 }

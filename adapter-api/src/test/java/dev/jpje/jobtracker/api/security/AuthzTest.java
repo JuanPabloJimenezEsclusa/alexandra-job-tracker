@@ -8,7 +8,7 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import java.util.List;
 import java.util.stream.Stream;
 
-import dev.jpje.jobtracker.domain.exception.ForbiddenException;
+import dev.jpje.jobtracker.api.error.ForbiddenException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;

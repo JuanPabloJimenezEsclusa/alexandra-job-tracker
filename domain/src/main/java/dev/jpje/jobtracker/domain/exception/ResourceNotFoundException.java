@@ -5,4 +5,9 @@ public class ResourceNotFoundException extends DomainException {
   public ResourceNotFoundException(final String message) {
     super(message);
   }
+
+  @Override
+  public ErrorCode errorCode() {
+    return ErrorCode.NOT_FOUND;
+  }
 }

@@ -5,6 +5,39 @@ Changelog of alexandra-job-tracker.
 ## Unreleased
 ### No issue
 
+**refactor(adapter): make core error taxonomy declarative and move forbidden to api**
+
+ * Declare the stable error code and classification on the core error vocabulary so GraphQlExceptionResolver maps code, classification and ErrorType from the declaration. The ErrorType mapping is an exhaustive switch over ErrorCode, so a new core error type forces an adapter edit instead of silently degrading to INTERNAL_ERROR.
+ * Move ForbiddenException out of the domain into adapter-api, the only module that raises and maps it, keeping the FORBIDDEN code and DOMAIN classification so responses are unchanged.
+ * Add CoreErrorTaxonomyTest, which discovers every core error type and asserts it declares and resolves to its code, and CoreErrorVocabularyPlacementTest, which rejects an error type referenced by a single adapter in the core vocabulary.
+
+[4fb783beb242a12](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/4fb783beb242a12) juan.pablo.jimenez.esclusa *2026-09-22 11:22:07*
+
+**chore(adapter): rename adapter-cli module to cli-client (#94)**
+
+ * Rename the adapter-cli Maven module to cli-client, a name that states the
+ * module&#x27;s role (a CLI client of the server) instead of claiming an adapter
+ * identity it does not implement.
+ * Update every tracked referrer: the root pom modules list, the bootstrap-cli
+ * and coverage-jacoco dependencies, the ArchUnit per-module whitelist and
+ * isolation rules, the deploy Dockerfile, and the README module table,
+ * dependency graph, and prose. Remove the stale infrastructure-observability
+ * and adapter-observability IDE module registrations from .idea so the
+ * reactor, module directories, and IDE registrations agree.
+ * Verified with ./mvnw clean verify (all 14 reactor modules SUCCESS).
+
+[d1e04d9800c6904](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/d1e04d9800c6904) Juan Pablo Jimenez Esclusa *2026-09-22 11:14:12*
+
+**docs(architecture): state the read/write model policy over a single model (#93)**
+
+
+[261c27d7bf1c6e9](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/261c27d7bf1c6e9) Juan Pablo Jimenez Esclusa *2026-09-22 10:47:32*
+
+**fix(ci): report the real automerge outcome in the summary comment (#92)**
+
+
+[a972b0461d7459e](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/a972b0461d7459e) Juan Pablo Jimenez Esclusa *2026-09-21 22:46:58*
+
 **fix(bootstrap): source mdc traceid from the otel span instead of a random uuid (#91)**
 
  * TracingFilter now publishes the current span&#x27;s trace id into the MDC before invoking the chain and removes it in finally, so a reused servlet thread cannot leak a stale value.

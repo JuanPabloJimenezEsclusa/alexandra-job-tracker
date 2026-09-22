@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
-import dev.jpje.jobtracker.domain.exception.ForbiddenException;
 import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
 import dev.jpje.jobtracker.domain.exception.OptimisticLockException;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;

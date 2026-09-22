@@ -1,6 +1,6 @@
 package dev.jpje.jobtracker.api.security;
 
-import dev.jpje.jobtracker.domain.exception.ForbiddenException;
+import dev.jpje.jobtracker.api.error.ForbiddenException;
 import org.jspecify.annotations.Nullable;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;

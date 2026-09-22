@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.domain.exception.DomainException;
-import dev.jpje.jobtracker.domain.exception.ForbiddenException;
+import dev.jpje.jobtracker.domain.exception.ErrorCode;
 import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
 import dev.jpje.jobtracker.domain.exception.OptimisticLockException;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
@@ -13,6 +13,7 @@ import graphql.ErrorType;
 import graphql.GraphQLError;
 import graphql.GraphqlErrorBuilder;
 import graphql.schema.DataFetchingEnvironment;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
@@ -23,6 +24,8 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
 
   private static final Logger log = LoggerFactory.getLogger(GraphQlExceptionResolver.class);
   private static final String INTERNAL_ERROR_MESSAGE = "Internal server error";
+  private static final String INTERNAL_ERROR = "INTERNAL_ERROR";
+  private static final String UNEXPECTED = "UNEXPECTED";
 
   @Override
   protected GraphQLError resolveToSingleError(final Throwable ex, final DataFetchingEnvironment env) {
@@ -59,39 +62,51 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
   }
 
   private String resolveErrorCode(final Throwable ex) {
+    final var declared = declaredCode(ex);
+    if (declared != null) {
+      return declared.code();
+    }
     return switch (ex) {
-      case ResourceNotFoundException _ -> "NOT_FOUND";
-      case ResourceAlreadyExistsException _, OptimisticLockException _ -> "CONFLICT";
-      case InvalidStateTransitionException _ -> "INVALID_STATE";
-      case ForbiddenException _ -> "FORBIDDEN";
-      case IllegalArgumentException _ -> "BAD_REQUEST";
+      case ForbiddenException _ -> ForbiddenException.CODE;
+      case IllegalArgumentException _, NullPointerException _ -> "BAD_REQUEST";
       case IllegalStateException _ -> "INVALID_STATE";
-      case NullPointerException _ -> "BAD_REQUEST";
-      default -> "INTERNAL_ERROR";
+      default -> INTERNAL_ERROR;
     };
   }
 
   private ErrorType resolveErrorType(final Throwable ex) {
+    final var declared = declaredCode(ex);
+    if (declared != null) {
+      return errorTypeOf(declared);
+    }
     return switch (ex) {
-      case ResourceNotFoundException _,
-           ResourceAlreadyExistsException _,
-           OptimisticLockException _,
-           ForbiddenException _,
-           IllegalArgumentException _,
-           NullPointerException _ -> ErrorType.ValidationError;
-      case InvalidStateTransitionException _,
-           IllegalStateException _ -> ErrorType.InvalidSyntax;
+      case ForbiddenException _, IllegalArgumentException _, NullPointerException _ -> ErrorType.ValidationError;
+      case IllegalStateException _ -> ErrorType.InvalidSyntax;
       default -> ErrorType.DataFetchingException;
     };
   }
 
   private String resolveClassification(final Throwable ex) {
+    final var declared = declaredCode(ex);
+    if (declared != null) {
+      return declared.classification();
+    }
     return switch (ex) {
-      case DomainException _ -> "DOMAIN";
-      case IllegalArgumentException _ -> "VALIDATION";
+      case ForbiddenException _ -> ForbiddenException.CLASSIFICATION;
+      case IllegalArgumentException _, NullPointerException _ -> "VALIDATION";
       case IllegalStateException _ -> "STATE_ERROR";
-      case NullPointerException _ -> "VALIDATION";
-      default -> "UNEXPECTED";
+      default -> UNEXPECTED;
+    };
+  }
+
+  private static @Nullable ErrorCode declaredCode(final Throwable ex) {
+    return ex instanceof DomainException domain ? domain.errorCode() : null;
+  }
+
+  private static ErrorType errorTypeOf(final ErrorCode code) {
+    return switch (code) {
+      case NOT_FOUND, CONFLICT -> ErrorType.ValidationError;
+      case INVALID_STATE -> ErrorType.InvalidSyntax;
     };
   }
 }

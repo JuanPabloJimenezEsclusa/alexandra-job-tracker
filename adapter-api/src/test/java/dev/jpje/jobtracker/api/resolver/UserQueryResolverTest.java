@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import dev.jpje.jobtracker.api.dto.UserResponse;
-import dev.jpje.jobtracker.domain.exception.ForbiddenException;
+import dev.jpje.jobtracker.api.error.ForbiddenException;
 import dev.jpje.jobtracker.domain.model.User;
 import dev.jpje.jobtracker.domain.port.inbound.AuthenticationPort;
 import dev.jpje.jobtracker.domain.vo.UserId;
