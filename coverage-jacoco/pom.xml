@@ -49,17 +49,17 @@
     </dependency>
     <dependency>
       <groupId>dev.jpje.jobtracker</groupId>
-      <artifactId>adapter-cli</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>adapter-cache</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
       <groupId>dev.jpje.jobtracker</groupId>
       <artifactId>adapter-events</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>dev.jpje.jobtracker</groupId>
+      <artifactId>cli-client</artifactId>
       <version>${project.version}</version>
     </dependency>
 

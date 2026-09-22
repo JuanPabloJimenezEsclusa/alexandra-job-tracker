@@ -22,7 +22,7 @@ class HexagonalArchitectureTest {
   private static final String ADAPTER_CACHE = "dev.jpje.jobtracker.cache..";
   private static final String ADAPTER_EVENTS = "dev.jpje.jobtracker.events..";
   private static final String BOOTSTRAP_SERVER = "dev.jpje.jobtracker.server..";
-  private static final String ADAPTER_CLI = "dev.jpje.jobtracker.cli..";
+  private static final String CLI_CLIENT = "dev.jpje.jobtracker.cli..";
   private static final String BOOTSTRAP_CLI = "dev.jpje.jobtracker.bootstrap..";
 
   private static final String[] COMMON = {
@@ -60,7 +60,7 @@ class HexagonalArchitectureTest {
   static final ArchRule APPLICATION_MUST_NOT_DEPEND_ON_ADAPTERS = noClasses()
     .that().resideInAPackage(APPLICATION)
     .should().dependOnClassesThat().resideInAnyPackage(
-      "..ai..", "..api..", "..auth..", "..cache..", "..cli..", "..persistence..")
+      "..ai..", "..api..", "..auth..", "..cache..", "..persistence..", "..cli..")
     .allowEmptyShould(true)
     .as("Application must not depend on adapters, CLI, or API")
     .because("application implements use cases independently of delivery mechanisms");
@@ -69,7 +69,7 @@ class HexagonalArchitectureTest {
   static final ArchRule DOMAIN_MUST_NOT_DEPEND_ON_OUTER_LAYERS = noClasses()
     .that().resideInAPackage(DOMAIN)
     .should().dependOnClassesThat().resideInAnyPackage(
-      "..usecase..", "..ai..", "..api..", "..auth..", "..cache..", "..cli..", "..persistence..")
+      "..usecase..", "..ai..", "..api..", "..auth..", "..cache..", "..persistence..", "..cli..")
     .allowEmptyShould(true)
     .as("Domain must not depend on application, adapters, or infrastructure")
     .because("domain is the innermost layer with no outgoing dependencies to other layers");
@@ -164,14 +164,14 @@ class HexagonalArchitectureTest {
     .because("events adapter translates Spring/SQS events to ports and publishes via Spring/SNS");
 
   @ArchTest
-  static final ArchRule ADAPTER_CLI_DEPENDENCIES = classes()
-    .that().resideInAPackage(ADAPTER_CLI)
+  static final ArchRule CLI_CLIENT_DEPENDENCIES = classes()
+    .that().resideInAPackage(CLI_CLIENT)
     .should().onlyDependOnClassesThat().resideInAnyPackage(
-      concat(ADAPTER_CLI,
+      concat(CLI_CLIENT,
         "org.springframework.(stereotype|context|beans|core|boot|lang|shell)..",
         "com.fasterxml.jackson..",
         "net.thisptr.jackson.jq.."))
-    .as("Adapter CLI module dependencies")
+    .as("CLI client module dependencies")
     .because("CLI adapter is a standalone Spring Shell client");
 
   // --- Hexagonal best practices ---
@@ -179,36 +179,36 @@ class HexagonalArchitectureTest {
   @ArchTest
   static final ArchRule API_ADAPTER_ISOLATED = adapterIsolationRule(
     "API adapter", ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI, ADAPTER_CACHE,
-    ADAPTER_CLI, ADAPTER_EVENTS);
+    ADAPTER_EVENTS, CLI_CLIENT);
 
   @ArchTest
   static final ArchRule PERSISTENCE_ADAPTER_ISOLATED = adapterIsolationRule(
     "Persistence adapter", ADAPTER_PERSISTENCE, ADAPTER_API, ADAPTER_AUTH, ADAPTER_AI,
-    ADAPTER_CACHE, ADAPTER_CLI, ADAPTER_EVENTS);
+    ADAPTER_CACHE, ADAPTER_EVENTS, CLI_CLIENT);
 
   @ArchTest
   static final ArchRule AUTH_ADAPTER_ISOLATED = adapterIsolationRule(
     "Auth adapter", ADAPTER_AUTH, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AI, ADAPTER_CACHE,
-    ADAPTER_CLI, ADAPTER_EVENTS);
+    ADAPTER_EVENTS, CLI_CLIENT);
 
   @ArchTest
   static final ArchRule AI_ADAPTER_ISOLATED = adapterIsolationRule(
     "AI adapter", ADAPTER_AI, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_CACHE,
-    ADAPTER_CLI, ADAPTER_EVENTS);
+    ADAPTER_EVENTS, CLI_CLIENT);
 
   @ArchTest
   static final ArchRule CACHE_ADAPTER_ISOLATED = adapterIsolationRule(
     "Cache adapter", ADAPTER_CACHE, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
-    ADAPTER_CLI, ADAPTER_EVENTS);
+    ADAPTER_EVENTS, CLI_CLIENT);
 
   @ArchTest
   static final ArchRule EVENTS_ADAPTER_ISOLATED = adapterIsolationRule(
     "Events adapter", ADAPTER_EVENTS, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
-    ADAPTER_CACHE, ADAPTER_CLI);
+    ADAPTER_CACHE, CLI_CLIENT);
 
   @ArchTest
-  static final ArchRule CLI_ADAPTER_ISOLATED = adapterIsolationRule(
-    "CLI adapter", ADAPTER_CLI, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
+  static final ArchRule CLI_CLIENT_ISOLATED = adapterIsolationRule(
+    "CLI client", CLI_CLIENT, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
     ADAPTER_CACHE, ADAPTER_EVENTS);
 
   @ArchTest
@@ -225,7 +225,7 @@ class HexagonalArchitectureTest {
   @ArchTest
   static final ArchRule CORE_AND_ADAPTERS_MUST_NOT_DEPEND_ON_BOOTSTRAP = noClasses()
     .that().resideInAnyPackage(DOMAIN, APPLICATION, ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH,
-      ADAPTER_AI, ADAPTER_CACHE, ADAPTER_CLI, ADAPTER_EVENTS)
+      ADAPTER_AI, ADAPTER_CACHE, ADAPTER_EVENTS, CLI_CLIENT)
     .should().dependOnClassesThat().resideInAnyPackage(BOOTSTRAP_SERVER, BOOTSTRAP_CLI)
     .as("Core and adapters must not depend on bootstrap modules")
     .because("bootstrap is the composition root and dependencies point inward");
@@ -233,7 +233,7 @@ class HexagonalArchitectureTest {
   @ArchTest
   static final ArchRule ADAPTERS_MUST_NOT_DEPEND_ON_USE_CASE_IMPLEMENTATIONS = noClasses()
     .that().resideInAnyPackage(ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
-      ADAPTER_CACHE, ADAPTER_CLI, ADAPTER_EVENTS)
+      ADAPTER_CACHE, ADAPTER_EVENTS, CLI_CLIENT)
     .should().dependOnClassesThat().resideInAPackage("dev.jpje.jobtracker.application.usecase..")
     .as("Adapters must reach the application through inbound ports")
     .because("use-case implementations are assembled only in the bootstrap composition root");
@@ -241,7 +241,7 @@ class HexagonalArchitectureTest {
   @ArchTest
   static final ArchRule ADAPTERS_MUST_NOT_DEPEND_ON_APPLICATION_INTERNALS = noClasses()
     .that().resideInAnyPackage(ADAPTER_API, ADAPTER_PERSISTENCE, ADAPTER_AUTH, ADAPTER_AI,
-      ADAPTER_CACHE, ADAPTER_CLI, ADAPTER_EVENTS)
+      ADAPTER_CACHE, ADAPTER_EVENTS, CLI_CLIENT)
     .should().dependOnClassesThat(APPLICATION_INTERNALS)
     .as("Adapters must reach the application core only through application.port")
     .because("non-port application classes are internal details assembled by the composition root");
@@ -266,9 +266,9 @@ class HexagonalArchitectureTest {
   }
 
   private static String[] concat(String... rest) {
-    var result = new String[HexagonalArchitectureTest.COMMON.length + rest.length];
-    System.arraycopy(HexagonalArchitectureTest.COMMON, 0, result, 0, HexagonalArchitectureTest.COMMON.length);
-    System.arraycopy(rest, 0, result, HexagonalArchitectureTest.COMMON.length, rest.length);
+    var result = new String[COMMON.length + rest.length];
+    System.arraycopy(COMMON, 0, result, 0, COMMON.length);
+    System.arraycopy(rest, 0, result, COMMON.length, rest.length);
     return result;
   }
 }
