@@ -5,7 +5,7 @@ x-resources: &default-resources
       reservations: { cpus: "0.25", memory: "256M" }
 
 x-k6-base: &k6-base
-  image: grafana/k6:2.2.0
+  image: grafana/k6:2.3.0
   user: ${K6_UID:-12345}
   hostname: k6
   depends_on:
@@ -65,7 +65,7 @@ services:
       start_period: 30s
 
   postgres:
-    image: ${POSTGRES_IMAGE:-postgres:17-alpine}
+    image: ${POSTGRES_IMAGE:-postgres:18-alpine}
     container_name: alexandra-postgres
     hostname: postgres
     restart: unless-stopped
@@ -138,7 +138,7 @@ services:
     <<: *default-resources
 
   loki:
-    image: grafana/loki:3.7.7
+    image: grafana/loki:3.7.8
     container_name: alexandra-loki
     hostname: loki
     restart: unless-stopped
