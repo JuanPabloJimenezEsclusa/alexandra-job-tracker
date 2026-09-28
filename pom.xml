@@ -87,7 +87,7 @@
     <jspecify.version>1.0.1</jspecify.version>
     <checkstyle.version>14.1.0</checkstyle.version>
     <jackson-jq.version>1.6.5</jackson-jq.version>
-    <instancio.version>6.0.0</instancio.version>
+    <instancio.version>6.0.1</instancio.version>
 
     <!-- Cli testing -->
     <wiremock.version>3.13.2</wiremock.version>
