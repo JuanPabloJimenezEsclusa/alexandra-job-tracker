@@ -8,6 +8,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.stream.Stream;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import dev.jpje.jobtracker.domain.exception.InvalidStateTransitionException;
 import dev.jpje.jobtracker.domain.exception.OptimisticLockException;
 import dev.jpje.jobtracker.domain.exception.ResourceAlreadyExistsException;
@@ -20,9 +24,12 @@ import graphql.language.OperationDefinition;
 import graphql.language.SourceLocation;
 import graphql.schema.DataFetchingEnvironment;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.slf4j.LoggerFactory;
+import org.springframework.validation.BindException;
 
 class GraphQlExceptionResolverTest {
 
@@ -51,7 +58,9 @@ class GraphQlExceptionResolverTest {
       arguments(named("null pointer", new NullPointerException("Authentication required")),
         "Authentication required", ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION"),
       arguments(named("null message", new NullPointerException()),
-        "Invalid input", ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION")
+        "Invalid input", ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION"),
+      arguments(named("argument binding failure", new BindException(new Object(), "jobPostingId")),
+        "Invalid argument", ErrorType.ValidationError, "BAD_REQUEST", "VALIDATION")
     );
   }
 
@@ -89,5 +98,39 @@ class GraphQlExceptionResolverTest {
         e -> e.getExtensions().get("classification"),
         e -> e.getExtensions().containsKey("errorId"))
       .containsExactly(expectedMessage, expectedType, expectedCode, expectedClassification, true);
+  }
+
+  @Test
+  void shouldLogClientErrorsAtWarnWithoutStacktraceAndUnexpectedAtErrorWithStacktrace() {
+    // Given
+    final var logger = (Logger) LoggerFactory.getLogger(GraphQlExceptionResolver.class);
+    final var appender = new ListAppender<ILoggingEvent>();
+    appender.start();
+    logger.addAppender(appender);
+    try {
+      // When
+      resolver.resolveToSingleError(new BindException(new Object(), "jobPostingId"), env);
+
+      // Then
+      assertThat(appender.list).hasSize(1);
+      final var clientError = appender.list.getFirst();
+      assertThat(clientError.getLevel()).isEqualTo(Level.WARN);
+      assertThat(clientError.getThrowableProxy()).isNull();
+      assertThat(clientError.getFormattedMessage()).doesNotContain("BindException");
+
+      appender.list.clear();
+
+      // When
+      resolver.resolveToSingleError(new RuntimeException("Unexpected failure"), env);
+
+      // Then
+      assertThat(appender.list).hasSize(1);
+      final var unexpectedError = appender.list.getFirst();
+      assertThat(unexpectedError.getLevel()).isEqualTo(Level.ERROR);
+      assertThat(unexpectedError.getThrowableProxy()).isNotNull();
+    } finally {
+      logger.detachAppender(appender);
+      appender.stop();
+    }
   }
 }

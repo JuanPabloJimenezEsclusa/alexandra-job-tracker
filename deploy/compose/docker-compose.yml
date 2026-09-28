@@ -70,7 +70,6 @@ services:
     hostname: postgres
     restart: unless-stopped
     ports: [ "127.0.0.1:${POSTGRES_PORT:-5432}:5432" ]
-    volumes: [ "../data/postgres:/var/lib/postgresql/data" ]
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-jobtracker}
       POSTGRES_USER: ${POSTGRES_USER:-jobtracker}
