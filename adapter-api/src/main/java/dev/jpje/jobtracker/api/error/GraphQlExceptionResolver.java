@@ -18,6 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.graphql.execution.DataFetcherExceptionResolverAdapter;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BindException;
 
 @Component
 public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapter {
@@ -31,10 +32,17 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
   protected GraphQLError resolveToSingleError(final Throwable ex, final DataFetchingEnvironment env) {
     var errorId = UUID.randomUUID().toString();
     var errorCode = resolveErrorCode(ex);
+    var classification = resolveClassification(ex);
 
-    log.error("errorId={} operation={} path={} code={} message={}",
-      errorId, env.getOperationDefinition().getName(),
-      env.getExecutionStepInfo().getPath(), errorCode, ex.getMessage(), ex);
+    if (UNEXPECTED.equals(classification)) {
+      log.error("errorId={} operation={} path={} code={} message={}",
+        errorId, env.getOperationDefinition().getName(),
+        env.getExecutionStepInfo().getPath(), errorCode, ex.getMessage(), ex);
+    } else {
+      log.warn("errorId={} operation={} path={} code={} message={}",
+        errorId, env.getOperationDefinition().getName(),
+        env.getExecutionStepInfo().getPath(), errorCode, ex.getMessage());
+    }
 
     return GraphqlErrorBuilder.newError(env)
       .message(resolveMessage(ex))
@@ -42,7 +50,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
       .extensions(Map.of(
         "errorCode", errorCode,
         "errorId", errorId,
-        "classification", resolveClassification(ex)
+        "classification", classification
       ))
       .build();
   }
@@ -57,6 +65,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
       case IllegalArgumentException e -> e.getMessage() != null ? e.getMessage() : "Invalid input";
       case IllegalStateException e -> e.getMessage() != null ? e.getMessage() : "Invalid state";
       case NullPointerException e -> e.getMessage() != null ? e.getMessage() : "Invalid input";
+      case BindException _ -> "Invalid argument";
       default -> INTERNAL_ERROR_MESSAGE;
     };
   }
@@ -68,7 +77,7 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
     }
     return switch (ex) {
       case ForbiddenException _ -> ForbiddenException.CODE;
-      case IllegalArgumentException _, NullPointerException _ -> "BAD_REQUEST";
+      case IllegalArgumentException _, NullPointerException _, BindException _ -> "BAD_REQUEST";
       case IllegalStateException _ -> "INVALID_STATE";
       default -> INTERNAL_ERROR;
     };
@@ -80,7 +89,8 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
       return errorTypeOf(declared);
     }
     return switch (ex) {
-      case ForbiddenException _, IllegalArgumentException _, NullPointerException _ -> ErrorType.ValidationError;
+      case ForbiddenException _, IllegalArgumentException _, NullPointerException _, BindException _ ->
+        ErrorType.ValidationError;
       case IllegalStateException _ -> ErrorType.InvalidSyntax;
       default -> ErrorType.DataFetchingException;
     };
@@ -89,11 +99,11 @@ public class GraphQlExceptionResolver extends DataFetcherExceptionResolverAdapte
   private String resolveClassification(final Throwable ex) {
     final var declared = declaredCode(ex);
     if (declared != null) {
-      return declared.classification();
+      return "DOMAIN";
     }
     return switch (ex) {
       case ForbiddenException _ -> ForbiddenException.CLASSIFICATION;
-      case IllegalArgumentException _, NullPointerException _ -> "VALIDATION";
+      case IllegalArgumentException _, NullPointerException _, BindException _ -> "VALIDATION";
       case IllegalStateException _ -> "STATE_ERROR";
       default -> UNEXPECTED;
     };

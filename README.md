@@ -164,13 +164,9 @@ flowchart LR
     Ext["Chrome Extension"]
   end
 
-  subgraph api [API Adapter]
+  subgraph inbound [Inbound Adapters]
     QR["QueryResolver"]
     MR["MutationResolver"]
-  end
-
-  subgraph inbound [Inbound Adapters]
-    gql["GraphQL Layer"]
   end
 
   subgraph core [Core]
