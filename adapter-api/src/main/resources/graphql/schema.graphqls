@@ -1,4 +1,4 @@
-scalar Instant
+scalar DateTime
 
 enum ApplicationStatus { SAVED APPLIED INTERVIEWING OFFER ACCEPTED REJECTED WITHDRAWN }
 enum Source { LINKEDIN INDEED OTHER }
@@ -15,7 +15,7 @@ input SubmitJobInput {
 type Query {
   me: User!
   applications(status: ApplicationStatus): [JobApplication!]!
-  analytics(since: Instant): Analytics!
+  analytics(since: DateTime): Analytics!
   jobPostings(source: Source): [JobPosting!]!
   analyses: [JobAnalysis!]!
   analysis(id: ID!): JobAnalysis
@@ -34,9 +34,9 @@ type Mutation {
 }
 
 type AuthPayload { token: String! user: User! }
-type User { id: ID! username: String! role: Role! createdAt: Instant! }
-type JobApplication { id: ID! jobPostingId: ID! status: ApplicationStatus! dateApplied: Instant! lastUpdated: Instant! notes: String }
-type JobPosting { id: ID! url: String! source: Source! title: String! company: String! description: String postedAt: Instant }
-type JobAnalysis { id: ID! jobPostingId: ID! summary: String! seniority: String! softSkills: [String!]! technicalSkills: [String!]! fitScore: Float! companyRating: Float! companyType: String! salaryMin: Float! salaryMax: Float! salaryCurrency: String! createdAt: Instant! }
+type User { id: ID! username: String! role: Role! createdAt: DateTime! }
+type JobApplication { id: ID! jobPostingId: ID! status: ApplicationStatus! dateApplied: DateTime! lastUpdated: DateTime! notes: String }
+type JobPosting { id: ID! url: String! source: Source! title: String! company: String! description: String postedAt: DateTime }
+type JobAnalysis { id: ID! jobPostingId: ID! summary: String! seniority: String! softSkills: [String!]! technicalSkills: [String!]! fitScore: Float! companyRating: Float! companyType: String! salaryMin: Float! salaryMax: Float! salaryCurrency: String! createdAt: DateTime! }
 type Analytics { totalApplications: Int! perStatus: StatusCounts! conversionRate: Float! }
 type StatusCounts { saved: Int! applied: Int! interviewing: Int! offer: Int! accepted: Int! rejected: Int! withdrawn: Int! }
