@@ -47,9 +47,10 @@ Changelog of alexandra-job-tracker.
  * to handleSummary rather than pointing at output that has none either.
  * - harness-selftest.sh: new plain-bash self-test with a stubbed docker,
  * asserting teardown on every failure path including a usage error.
- * The known failing checks (introspection enabled, a valid aliases query expected
- * to be rejected, no 429 under burst load) are untouched: the harness now reports
- * them honestly instead of as PASS.
+ * The remaining known failing checks (introspection enabled, a valid aliases query expected
+ * to be rejected) are untouched: the harness now reports them honestly instead of as PASS.
+ * The rate-limit test was removed because the project's throttling lives solely in API Gateway
+ * (not in the application), so testing it against the compose stack was structurally impossible.
 
 [85428580aa78d0b](https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker/commit/85428580aa78d0b) juan.pablo.jimenez.esclusa *2026-09-28 14:07:21*
 
