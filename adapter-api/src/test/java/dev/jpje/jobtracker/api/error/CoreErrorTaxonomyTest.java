@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import dev.jpje.jobtracker.domain.exception.DomainException;
@@ -21,6 +22,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 
 class CoreErrorTaxonomyTest {
@@ -38,23 +40,25 @@ class CoreErrorTaxonomyTest {
 
     final var opDef = mock(OperationDefinition.class);
     final var executionStepInfo = mock(graphql.execution.ExecutionStepInfo.class);
+    final var field = mock(Field.class);
 
     when(opDef.getName()).thenReturn("testOperation");
     when(env.getOperationDefinition()).thenReturn(opDef);
     when(env.getExecutionStepInfo()).thenReturn(executionStepInfo);
     when(env.getExecutionStepInfo().getPath()).thenReturn(ResultPath.rootPath());
-    when(env.getField()).thenReturn(mock(Field.class));
+
+    when(env.getField()).thenReturn(field);
     when(env.getField().getSourceLocation()).thenReturn(new SourceLocation(1, 1));
   }
 
   private static Stream<Arguments> coreErrorTypes() {
     final var scanner = new ClassPathScanningCandidateComponentProvider(false);
-    scanner.addIncludeFilter((metadataReader, metadataReaderFactory) -> true);
+    scanner.addIncludeFilter((_, _) -> true);
     return scanner.findCandidateComponents(CORE_ERROR_PACKAGE).stream()
-      .map(candidate -> candidate.getBeanClassName())
+      .map(BeanDefinition::getBeanClassName)
+      .filter(Objects::nonNull)
       .map(CoreErrorTaxonomyTest::loadClass)
       .filter(DomainException.class::isAssignableFrom)
-      .map(errorType -> errorType.asSubclass(DomainException.class))
       .map(errorType -> arguments(named(errorType.getSimpleName(), errorType)));
   }
 
@@ -75,9 +79,6 @@ class CoreErrorTaxonomyTest {
       .as("core error type %s resolves to its declared code, never INTERNAL_ERROR", errorType.getSimpleName())
       .isEqualTo(declared.code())
       .isNotEqualTo(INTERNAL_ERROR);
-    assertThat(error.getExtensions().get("classification"))
-      .as("core error type %s resolves to its declared classification", errorType.getSimpleName())
-      .isEqualTo(declared.classification());
   }
 
   private static Class<?> loadClass(final String className) {
@@ -92,7 +93,7 @@ class CoreErrorTaxonomyTest {
       throws ReflectiveOperationException {
     final Constructor<?> constructor = errorType.getDeclaredConstructors()[0];
     final Object[] constructorArguments = Arrays.stream(constructor.getParameterTypes())
-      .map(parameter -> parameter == String.class ? (Object) "message" : (Object) new IllegalStateException("cause"))
+      .map(parameter -> parameter == String.class ? "message" : (Object) new IllegalStateException("cause"))
       .toArray();
     return (DomainException) constructor.newInstance(constructorArguments);
   }

@@ -98,7 +98,7 @@ class HexagonalArchitectureTest {
     .should().onlyDependOnClassesThat().resideInAnyPackage(
       concat(DOMAIN, ADAPTER_API,
         "jakarta.servlet..",
-        "org.springframework.(stereotype|context|beans|graphql|http|web|security)..",
+        "org.springframework.(stereotype|context|beans|graphql|http|validation|web|security)..",
         "graphql..",
         "org.slf4j..",
         "reactor.core.."))

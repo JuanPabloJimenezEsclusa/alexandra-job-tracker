@@ -31,6 +31,12 @@ spring:
       chat:
         model: ${LLM_CHAT_MODEL:}
   graphql:
+    schema:
+      introspection:
+        enabled: false
+    graphql:
+      graphiql:
+        enabled: false # default
     cors:
       allowed-origin-patterns: "${CORS_ALLOWED_ORIGINS:http://localhost:8880,chrome-extension://*}"
       allowed-methods:
@@ -109,6 +115,9 @@ spring:
       settings:
         web-allow-others: true
   graphql:
+    schema:
+      introspection:
+        enabled: true # default
     graphiql:
       enabled: true
 
@@ -130,6 +139,9 @@ spring:
   flyway:
     enabled: true
   graphql:
+    schema:
+      introspection:
+        enabled: true # default
     graphiql:
       enabled: true
 

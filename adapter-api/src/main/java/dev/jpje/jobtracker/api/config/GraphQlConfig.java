@@ -1,17 +1,10 @@
 package dev.jpje.jobtracker.api.config;
 
-import java.time.Instant;
-import java.util.Locale;
-import java.util.Objects;
-
-import graphql.GraphQLContext;
-import graphql.execution.CoercedVariables;
-import graphql.language.Value;
-import graphql.schema.Coercing;
-import graphql.schema.CoercingParseLiteralException;
-import graphql.schema.CoercingParseValueException;
-import graphql.schema.CoercingSerializeException;
-import graphql.schema.GraphQLScalarType;
+import graphql.analysis.FieldComplexityCalculator;
+import graphql.analysis.MaxQueryComplexityInstrumentation;
+import graphql.analysis.MaxQueryDepthInstrumentation;
+import graphql.execution.instrumentation.Instrumentation;
+import graphql.scalars.ExtendedScalars;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.graphql.execution.RuntimeWiringConfigurer;
@@ -19,45 +12,30 @@ import org.springframework.graphql.execution.RuntimeWiringConfigurer;
 @Configuration
 public class GraphQlConfig {
 
-  static final GraphQLScalarType INSTANT = GraphQLScalarType.newScalar()
-    .name("Instant")
-    .description("java.time.Instant as ISO-8601 string")
-    .coercing(new Coercing<Instant, String>() {
-      @Override
-      public String serialize(final Object dataFetcherResult, final GraphQLContext context, final Locale locale) {
-        if (dataFetcherResult instanceof Instant i) {
-          return i.toString();
-        }
-        throw new CoercingSerializeException("Expected Instant");
-      }
+  @Bean
+  public Instrumentation maxQueryDepthInstrumentation() {
+    return new MaxQueryDepthInstrumentation(4);
+  }
 
-      @Override
-      public Instant parseValue(final Object input, final GraphQLContext context, final Locale locale) {
-        if (input instanceof Number n) {
-          return Instant.ofEpochMilli(n.longValue());
-        }
-        if (input instanceof String s) {
-          return Instant.parse(s);
-        }
-        throw new CoercingParseValueException("Expected number or string");
-      }
+  @Bean
+  public Instrumentation maxQueryComplexityInstrumentation() {
+    final int MAX_ALIASES = 5;
+    final int ALIAS_PENALTY = 1000;
+    final int MAX_COMPLEXITY = MAX_ALIASES * ALIAS_PENALTY;
 
-      @Override
-      public Instant parseLiteral(final Value<?> input, final CoercedVariables variables,
-                                  final GraphQLContext context, final Locale locale) {
-        if (input instanceof graphql.language.IntValue n) {
-          return Instant.ofEpochMilli(n.getValue().longValue());
-        }
-        if (input instanceof graphql.language.StringValue sv) {
-          return Instant.parse(Objects.requireNonNull(sv.getValue()));
-        }
-        throw new CoercingParseLiteralException("Expected number or string");
+    final FieldComplexityCalculator aliasAwareCalculator = (environment, childComplexity) -> {
+      int currentFieldCost = 1;
+      if (environment.getField().getAlias() != null) {
+        currentFieldCost += ALIAS_PENALTY;
       }
-    })
-    .build();
+      return currentFieldCost + childComplexity;
+    };
+
+    return new MaxQueryComplexityInstrumentation(MAX_COMPLEXITY, aliasAwareCalculator);
+  }
 
   @Bean
   public RuntimeWiringConfigurer runtimeWiringConfigurer() {
-    return wiring -> wiring.scalar(INSTANT);
+    return wiring -> wiring.scalar(ExtendedScalars.DateTime);
   }
 }
