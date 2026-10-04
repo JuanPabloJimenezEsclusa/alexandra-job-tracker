@@ -25,7 +25,7 @@ COPY . .
 
 RUN --mount=type=cache,id=mvn-repo,target=/app/.m2-repo \
     mvn package -Dmaven.repo.local=/app/.m2-repo -pl bootstrap-server \
-    -am -DskipTests -B -ntp -e -q -Dmaven.gitcommitid.skip=true
+    -am -DskipTests -B -ntp -e -q -Dmaven.gitcommitid.skip=true -Dgit.changelog.skip=true
 
 # Download OpenTelemetry Java Agent for auto-instrumentation
 ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.28.1/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar
