@@ -77,17 +77,17 @@
 
     <spring-ai.version>2.0.1</spring-ai.version>
     <spring-ai-agent-utils.version>0.12.0</spring-ai-agent-utils.version>
-    <spring-cloud-aws.version>4.1.1</spring-cloud-aws.version>
-    <archunit.version>1.5.0</archunit.version>
+    <spring-cloud-aws.version>4.2.0</spring-cloud-aws.version>
+    <archunit.version>1.5.1</archunit.version>
     <spring-shell.version>4.0.3</spring-shell.version>
     <graphql-java-extended-scalars.version>24.0</graphql-java-extended-scalars.version>
     <opentelemetry.version>1.64.0</opentelemetry.version>
     <LatencyUtils.version>2.0.3</LatencyUtils.version>
     <caffeine.version>3.2.0</caffeine.version>
     <jspecify.version>1.0.1</jspecify.version>
-    <checkstyle.version>14.1.0</checkstyle.version>
+    <checkstyle.version>14.3.0</checkstyle.version>
     <jackson-jq.version>1.6.5</jackson-jq.version>
-    <instancio.version>6.0.1</instancio.version>
+    <instancio.version>6.1.0</instancio.version>
 
     <!-- Cli testing -->
     <wiremock.version>3.13.2</wiremock.version>
