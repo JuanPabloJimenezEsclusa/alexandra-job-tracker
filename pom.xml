@@ -76,7 +76,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
     <spring-ai.version>2.0.1</spring-ai.version>
-    <spring-ai-agent-utils.version>0.12.0</spring-ai-agent-utils.version>
+    <spring-ai-agent-utils.version>0.13.0</spring-ai-agent-utils.version>
     <spring-cloud-aws.version>4.2.0</spring-cloud-aws.version>
     <archunit.version>1.5.1</archunit.version>
     <spring-shell.version>4.0.3</spring-shell.version>
@@ -103,7 +103,7 @@
 
     <!-- plugin versions -->
     <git-commit-id-maven-plugin.version>10.0.1</git-commit-id-maven-plugin.version>
-    <git-changelog-maven-plugin.version>2.4.0</git-changelog-maven-plugin.version>
+    <git-changelog-maven-plugin.version>2.5.4</git-changelog-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
     <rewrite-maven-plugin.version>6.46.1</rewrite-maven-plugin.version>
     <pitest-maven.version>1.30.0</pitest-maven.version>
