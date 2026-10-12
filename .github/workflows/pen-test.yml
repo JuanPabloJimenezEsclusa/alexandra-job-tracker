@@ -45,4 +45,4 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: k6-security-reports
-          path: testing-pentest/src/test/k6/reports/k6-*.html
+          path: testing-pentest/src/test/k6/reports/k6-pen-*.html
