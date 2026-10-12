@@ -1,5 +1,5 @@
 # This Dockerfile uses a multi-stage build to create a lightweight image for the bootstrap server.
-FROM maven:3-eclipse-temurin-26 AS build
+FROM maven:3-eclipse-temurin-27 AS build
 
 WORKDIR /app
 
@@ -31,7 +31,7 @@ RUN --mount=type=cache,id=mvn-repo,target=/app/.m2-repo \
 ADD https://github.com/open-telemetry/opentelemetry-java-instrumentation/releases/download/v2.28.1/opentelemetry-javaagent.jar /app/opentelemetry-javaagent.jar
 
 # Use a lightweight JRE image for the runtime
-FROM eclipse-temurin:26-jre
+FROM eclipse-temurin:27-jre
 
 # Install gosu for running the application as a non-root user and create a non-root user for better security
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/* \
