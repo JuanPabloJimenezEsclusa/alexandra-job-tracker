@@ -98,7 +98,7 @@ services:
     <<: *default-resources
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.162.0
+    image: otel/opentelemetry-collector-contrib:0.162.0-386
     container_name: alexandra-otel-collector
     hostname: otel-collector
     restart: unless-stopped
@@ -162,7 +162,7 @@ services:
     <<: *default-resources
 
   grafana:
-    image: grafana/grafana:13.2.3
+    image: grafana/grafana:13.2.4
     container_name: alexandra-grafana
     hostname: grafana
     restart: unless-stopped
