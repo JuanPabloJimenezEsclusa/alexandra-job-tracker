@@ -84,7 +84,7 @@ services:
       start_period: 10s
 
   adminer:
-    image: adminer:6.1.1
+    image: adminer:6.1.2
     container_name: alexandra-adminer
     hostname: adminer
     restart: unless-stopped
@@ -98,7 +98,7 @@ services:
     <<: *default-resources
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.163.2
+    image: otel/opentelemetry-collector-contrib:0.164.0
     container_name: alexandra-otel-collector
     hostname: otel-collector
     restart: unless-stopped
@@ -162,7 +162,7 @@ services:
     <<: *default-resources
 
   grafana:
-    image: grafana/grafana:13.2.4
+    image: grafana/grafana:13.3.0
     container_name: alexandra-grafana
     hostname: grafana
     restart: unless-stopped
