@@ -232,7 +232,7 @@ services:
     networks: [ jobtracker ]
     deploy:
       resources:
-        limits: { cpus: "1", memory: "1024M" }
+        limits: { cpus: "1", memory: "2048M" }
         reservations: { cpus: "1", memory: "1024M" }
 
 networks:
