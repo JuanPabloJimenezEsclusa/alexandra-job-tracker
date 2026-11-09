@@ -4,11 +4,10 @@ on:
   pull_request:
     branches: [develop]
     types: [opened, synchronize, reopened, ready_for_review]
-    paths-ignore: [src, deploy, docs, browser-extension]
 
 concurrency:
-  group: ci
-  cancel-in-progress: false
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   MAVEN_OPTS: "-Xmx2048m"
