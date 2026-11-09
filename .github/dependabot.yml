@@ -2,7 +2,7 @@ version: 2
 updates:
   - package-ecosystem: maven
     directory: "/"
-    schedule: { interval: weekly, day: monday }
+    schedule: { interval: weekly, day: monday, time: "02:00" }
     open-pull-requests-limit: 10
     labels: [ dependencies, automated ]
     groups:
@@ -12,7 +12,7 @@ updates:
 
   - package-ecosystem: docker
     directory: "/deploy/compose"
-    schedule: { interval: weekly }
+    schedule: { interval: weekly, time: "05:00" }
     labels: [ infrastructure, automated ]
     groups:
       infrastructure-dependencies:
@@ -21,7 +21,7 @@ updates:
 
   - package-ecosystem: docker
     directory: "/deploy/aws"
-    schedule: { interval: weekly }
+    schedule: { interval: weekly, time: "08:00" }
     labels: [ infrastructure, automated ]
     groups:
       infrastructure-dependencies:
@@ -30,7 +30,7 @@ updates:
 
   - package-ecosystem: docker-compose
     directory: "/deploy/compose"
-    schedule: { interval: weekly }
+    schedule: { interval: weekly, time: "11:00" }
     labels: [ infrastructure, automated ]
     groups:
       infrastructure-dependencies:
@@ -39,7 +39,7 @@ updates:
 
   - package-ecosystem: "terraform"
     directory: "/deploy/aws/terraform/templates"
-    schedule: { interval: weekly }
+    schedule: { interval: weekly, time: "14:00" }
     labels: [ infrastructure, automated ]
     groups:
       infrastructure-dependencies:
@@ -48,7 +48,7 @@ updates:
 
   - package-ecosystem: github-actions
     directory: "/"
-    schedule: { interval: weekly }
+    schedule: { interval: weekly, time: "17:00" }
     labels: [ ci, automated ]
     groups:
       github-actions-dependencies:
