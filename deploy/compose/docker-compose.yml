@@ -84,7 +84,7 @@ services:
       start_period: 10s
 
   adminer:
-    image: adminer:6.1.2
+    image: adminer:6.2.0
     container_name: alexandra-adminer
     hostname: adminer
     restart: unless-stopped
@@ -98,7 +98,7 @@ services:
     <<: *default-resources
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.164.0
+    image: otel/opentelemetry-collector-contrib:0.164.0-386
     container_name: alexandra-otel-collector
     hostname: otel-collector
     restart: unless-stopped
@@ -109,7 +109,7 @@ services:
     <<: *default-resources
 
   prometheus:
-    image: prom/prometheus:v3.15.1
+    image: prom/prometheus:v3.16.0
     container_name: alexandra-prometheus
     hostname: prometheus
     restart: unless-stopped
@@ -232,7 +232,7 @@ services:
     networks: [ jobtracker ]
     deploy:
       resources:
-        limits: { cpus: "1", memory: "1024M" }
+        limits: { cpus: "1", memory: "2048M" }
         reservations: { cpus: "1", memory: "1024M" }
 
 networks:
