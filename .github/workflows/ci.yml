@@ -4,6 +4,7 @@ on:
   pull_request:
     branches: [develop]
     types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore: [src, deploy, docs, browser-extension]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
