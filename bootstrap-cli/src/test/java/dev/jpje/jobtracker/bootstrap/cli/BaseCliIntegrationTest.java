@@ -48,6 +48,7 @@ abstract class BaseCliIntegrationTest {
 
   @BeforeEach
   void setUpBase() {
+    wireMockServer.resetAll();
     WireMock.configureFor("localhost", wireMockServer.port());
   }
 
