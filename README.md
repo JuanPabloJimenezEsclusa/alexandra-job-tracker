@@ -38,7 +38,7 @@
 for server-side operations and a Spring Shell CLI for terminal workflows, and it follows
 [hexagonal architecture](https://alistair.cockburn.us/hexagonal-architecture/) with ports and adapters.
 
-**Stack:** Java 25 · Spring Boot 4.1 · Maven multi-module · GraalVM native · OpenTelemetry
+**Stack:** Java 25+ · Spring Boot 4.1+ · Maven multi-module 3.10+ · GraalVM native · OpenTelemetry
 
 ---
 
@@ -199,7 +199,7 @@ flowchart LR
 
 ## Getting Started
 
-**Prerequisites:** JDK 25, Maven 3.9+, Git
+**Prerequisites:** JDK 25+, Maven 3.10+, Git
 
 ```bash
 git clone https://github.com/JuanPabloJimenezEsclusa/alexandra-job-tracker.git
